@@ -715,11 +715,15 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
             CSV
           </button>
         </div>
-        <div class="card import-section" style="padding:16px 18px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div class="card-title" style="margin:0">📥 Excel-Import</div>
-            <button class="btn-outline" style="font-size:10px;padding:4px 10px" onclick="openModal('import-help-modal')">Wie geht das?</button>
+        <div class="card import-section" style="padding:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;user-select:none" onclick="toggleContentImport()" id="content-import-header">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg id="content-import-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;transform:rotate(-90deg)"><path d="M2 4l4 4 4-4"/></svg>
+              <div class="card-title" style="margin:0">📥 Excel-Import</div>
+            </div>
+            <button class="btn-outline" style="font-size:10px;padding:4px 10px" onclick="event.stopPropagation();openModal('import-help-modal')">Wie geht das?</button>
           </div>
+          <div id="content-import-body" style="display:none;padding:0 18px 16px">
           <div class="paste-zone" id="paste-zone">
             <textarea class="paste-zone-input" id="paste-input" placeholder="" onpaste="handlePaste(event)" oninput="handleTextInput(event)"></textarea>
             <div class="paste-zone-hint">
@@ -743,6 +747,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
                 <span id="paste-status" style="font-size:10px;color:var(--text3);margin-left:4px"></span>
               </div>
             </div>
+          </div>
           </div>
         </div>
         <div class="tbl-outer">
@@ -1207,6 +1212,14 @@ function handleTextInput(event){var text=event.target.value;if(text.includes('\t
 function processPastedText(text){var rows=parsePastedText(text);if(!rows||!rows.length){alert('Keine Tabellendaten gefunden.');return;}PASTE_DATA=rows;var firstRow=rows[0];var looksLikeHeader=firstRow.some(function(c){return isNaN(Date.parse(c))&&!/^\d/.test(c.trim())&&c.trim().length>0&&c.trim().length<30;});if(looksLikeHeader){PASTE_HEADERS=firstRow.map(function(h){return h.trim();});PASTE_DATA=rows.slice(1);}else{PASTE_HEADERS=firstRow.map(function(_,i){return'Spalte '+String.fromCharCode(65+i);});}PASTE_FIELD_MAP={};PASTE_HEADERS.forEach(function(h,i){PASTE_FIELD_MAP[i]=autoDetectField(h);});renderPastePreview();var pi=document.getElementById('paste-input');if(pi){pi.style.pointerEvents='none';pi.style.zIndex='-1';}}
 function renderPastePreview(){var preview=document.getElementById('paste-preview');if(!preview)return;preview.style.display='block';document.getElementById('paste-row-count').textContent=PASTE_DATA.length;var colMap=document.getElementById('col-map');var mapH='';PASTE_HEADERS.forEach(function(h,i){var curField=PASTE_FIELD_MAP[i]||'ignore';mapH+='<div class="col-map-item"><div class="col-map-lbl">'+escHtml(h)+'</div><select class="col-map-sel" data-col="'+i+'" onchange="PASTE_FIELD_MAP['+i+']=this.value">';FIELD_OPTS.forEach(function(fo){mapH+='<option value="'+fo.key+'"'+(fo.key===curField?' selected':'')+'>'+fo.label+'</option>';});mapH+='</select></div>';});colMap.innerHTML=mapH;var thead=document.getElementById('paste-thead');var tbody=document.getElementById('paste-tbody');thead.innerHTML='<tr>'+PASTE_HEADERS.map(function(h){return'<th>'+escHtml(h)+'</th>';}).join('')+'</tr>';var tbH='';PASTE_DATA.slice(0,5).forEach(function(row){tbH+='<tr>'+PASTE_HEADERS.map(function(_,i){return'<td>'+escHtml(row[i]||'')+'</td>';}).join('')+'</tr>';});if(PASTE_DATA.length>5)tbH+='<tr><td colspan="'+PASTE_HEADERS.length+'" style="color:var(--text3);font-style:italic;padding:6px 8px">... und '+(PASTE_DATA.length-5)+' weitere Zeilen</td></tr>';tbody.innerHTML=tbH;}
 function importPastedData(){if(!PASTE_DATA.length){clearPaste();return;}var imported=0;PASTE_DATA.forEach(function(row){var newRow={date:'',name:'',link:'',art:ART_OPTS[0],spez:SPEZ_OPTS[0],caption:''};var hasData=false;PASTE_HEADERS.forEach(function(_,i){var field=PASTE_FIELD_MAP[i];if(!field||field==='ignore')return;var val=(row[i]||'').trim();if(!val)return;hasData=true;if(field==='date'){newRow.date=normalizeDate(val)||val;}else if(field==='art'){var v=val.toLowerCase();if(v.includes('reach'))newRow.art='Reach-Content';else if(v.includes('trust'))newRow.art='Trust-Content';else if(v.includes('werbe')||v.includes('ad')||v.includes('anzeige'))newRow.art='Werbeanzeige';else newRow.art=val;}else if(field==='spez'){var v2=val.toLowerCase();var matched=SPEZ_OPTS.find(function(s){return s.toLowerCase().includes(v2)||v2.includes(s.toLowerCase());});newRow.spez=matched||SPEZ_OPTS[0];}else{newRow[field]=val;}});if(hasData){cd().rows.push(newRow);imported++;}});cd().rows=sortRows(cd().rows);scheduleSave();clearPaste();renderContentTable();buildCalendar();showToast(imported+' Zeilen erfolgreich importiert!');}
+function toggleContentImport(){
+  var body=document.getElementById('content-import-body');
+  var arrow=document.getElementById('content-import-arrow');
+  if(!body)return;
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(arrow)arrow.style.transform=open?'rotate(-90deg)':'rotate(0deg)';
+}
 function clearPaste(){PASTE_DATA=[];PASTE_HEADERS=[];PASTE_FIELD_MAP={};var preview=document.getElementById('paste-preview');if(preview)preview.style.display='none';var inp=document.getElementById('paste-input');if(inp){inp.value='';inp.style.pointerEvents='';inp.style.zIndex='2';}}
 
 // ── ONBOARDING ──
