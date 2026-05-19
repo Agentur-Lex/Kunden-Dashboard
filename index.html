@@ -327,13 +327,6 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3){grid-column:2!important;grid-row:2!important;padding-top:0!important;display:flex;align-items:flex-end}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
-  .shoot-expand-btn{background:none;border:none;cursor:pointer;padding:3px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;opacity:.5;transition:color .15s,opacity .15s}
-  .shoot-expand-btn:hover{color:#FF8585;opacity:1}
-  #sfm-overlay{display:none;position:fixed;inset:0;z-index:10500;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px}
-  #sfm-overlay.sfm-open{display:flex}
-  #sfm-box{background:var(--surface);border-radius:14px;width:100%;max-width:860px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
-  #sfm-head{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
-  #sfm-scroll{overflow-y:auto;flex:1;padding:16px 20px 20px}
   .shoot-meta-row{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
   .shoot-pill{width:100%!important;height:26px!important;font-size:10px!important;padding:3px 10px!important;box-sizing:border-box}
   .shoot-pill input{font-size:10px!important;width:100%!important}
@@ -1369,83 +1362,6 @@ function startClientSession(k){
   renderCustomerView();
 }
 function setRole(r,el){}
-var SFM_IDX = -1;
-function sfmOpen(idx){
-  SFM_IDX = idx;
-  var s = cd().shoots[idx];
-  if(!s) return;
-  var overlay = document.getElementById('sfm-overlay');
-  if(!overlay) return;
-  document.getElementById('sfm-title').textContent = s.title || 'Drehtermin';
-  document.getElementById('sfm-meta').textContent = fmtISO(normalizeDate(s.date)) + (s.time ? ' · ' + s.time + ' Uhr' : '') + (s.location ? ' · ' + s.location : '');
-  sfmRender();
-  overlay.classList.add('sfm-open');
-  document.body.style.overflow = 'hidden';
-}
-function sfmClose(){
-  SFM_IDX = -1;
-  var overlay = document.getElementById('sfm-overlay');
-  if(overlay) overlay.classList.remove('sfm-open');
-  document.body.style.overflow = '';
-}
-function sfmRender(){
-  if(SFM_IDX < 0) return;
-  var s = cd().shoots[SFM_IDX];
-  if(!s) return;
-  var scroll = document.getElementById('sfm-scroll');
-  if(!scroll) return;
-  var ideas = s.ideas || [];
-  var isAg = ROLE === 'agency';
-  var h = '<table style="width:100%;border-collapse:collapse;font-size:12px">'
-    + '<thead><tr>'
-    + '<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.05em">CONTENT-THEMA</th>'
-    + '<th style="width:80px;text-align:center;padding:8px 6px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.05em">ERLEDIGT</th>'
-    + '<th style="width:120px;text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.05em">SPEZ.</th>'
-    + (isAg ? '<th style="width:36px;border-bottom:1px solid var(--border)"></th>' : '')
-    + '</tr></thead><tbody>';
-  if(!ideas.length){
-    h += '<tr><td colspan="' + (isAg?4:3) + '" style="padding:24px;text-align:center;color:var(--text3);font-size:11px">Noch keine Content-Pieces.</td></tr>';
-  } else {
-    ideas.forEach(function(idea, ri){
-      h += '<tr style="border-bottom:1px solid var(--border2)">'
-        + '<td style="padding:6px 10px"><input type="text" value="' + escHtml(idea.thema||'') + '"'
-        + (isAg ? '' : ' disabled')
-        + ' onchange="sfmIdeaChange(' + SFM_IDX + ',' + ri + ',\'thema\',this.value)"'
-        + ' style="width:100%;border:none;background:transparent;font-size:12px;color:var(--text);font-family:inherit;padding:0;outline:none" placeholder="Thema eingeben..."></td>'
-        + '<td style="text-align:center;padding:6px">' + chk(idea.done, 'sfmIdeaChange(' + SFM_IDX + ',' + ri + ',\'done\',!cd().shoots[' + SFM_IDX + '].ideas[' + ri + '].done)') + '</td>'
-        + '<td style="padding:6px 10px"><select onchange="sfmIdeaChange(' + SFM_IDX + ',' + ri + ',\'spez\',this.value)"' + (isAg ? '' : ' disabled') + ' style="font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;background:var(--surface2);color:var(--text);font-family:inherit">'
-        + SPEZ_OPTS.map(function(o){ return '<option' + (idea.spez===o?' selected':'') + '>' + o + '</option>'; }).join('')
-        + '</select></td>'
-        + (isAg ? '<td style="text-align:center;padding:4px"><button class="btn-icon del" onclick="sfmIdeaDel(' + SFM_IDX + ',' + ri + ')" title="Löschen" style="font-size:11px">🗑</button></td>' : '')
-        + '</tr>';
-    });
-  }
-  h += '</tbody></table>';
-  if(isAg){
-    h += '<div style="margin-top:14px"><button class="btn-outline" onclick="sfmIdeaAdd(' + SFM_IDX + ')" style="font-size:11px;padding:6px 14px">+ Content-Piece hinzufügen</button></div>';
-  }
-  scroll.innerHTML = h;
-}
-function sfmIdeaChange(shootIdx, ri, key, val){
-  var s = cd().shoots[shootIdx];
-  if(s && s.ideas && s.ideas[ri] !== undefined){
-    s.ideas[ri][key] = val;
-    scheduleSave();
-    sfmRender();
-  }
-}
-function sfmIdeaAdd(shootIdx){
-  var s = cd().shoots[shootIdx];
-  if(!s){ return; }
-  if(!s.ideas) s.ideas = [];
-  s.ideas.push({thema:'', done:false, spez:SPEZ_OPTS[0], desc:'', addedBy:ROLE});
-  scheduleSave();
-  sfmRender();
-}
-function sfmIdeaDel(shootIdx, ri){
-  var s = cd().shoots[shootIdx];
-  if(s && s.ideas){ s.ideas.splice(ri,1); scheduleSave(); sfmRender(); }
-}
 function resetAllEditStates(){
   if(typeof ANALYTICS_EDIT_MODE!=='undefined'){ANALYTICS_EDIT_MODE=false;}
   var aeb=document.getElementById('analytics-edit-btn');
@@ -2044,15 +1960,6 @@ function renderShootsList(){
     })(collapseBtn,i);
     header.appendChild(collapseBtn);
 
-    // Vollbild-Button
-    (function(shootIdx){
-      var eb = document.createElement('button');
-      eb.className = 'shoot-expand-btn';
-      eb.title = 'Vollbildansicht';
-      eb.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="3" y2="21"/></svg>';
-      eb.onclick = function(e){ e.stopPropagation(); sfmOpen(shootIdx); };
-      header.appendChild(eb);
-    })(i);
 
     // Delete button (agency only)
     if(ROLE==='agency'){
@@ -4474,17 +4381,5 @@ async function doChangePasswordSB(){
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});});}
 </script>
 
-<div id="sfm-overlay">
-  <div id="sfm-box">
-    <div id="sfm-head">
-      <div style="flex:1;min-width:0">
-        <div id="sfm-title" style="font-size:14px;font-weight:700;color:var(--text)"></div>
-        <div id="sfm-meta" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
-      </div>
-      <button id="sfm-close" onclick="sfmClose()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:4px 8px;border-radius:6px;line-height:1">&#x2715;</button>
-    </div>
-    <div id="sfm-scroll"></div>
-  </div>
-</div>
 </body>
 </html>
