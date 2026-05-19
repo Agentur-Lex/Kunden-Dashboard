@@ -1369,13 +1369,14 @@ function startClientSession(k){
 }
 function setRole(r,el){}
 function openShootFullscreen(idx){
+  if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;
   var s=cd().shoots[idx];
   if(!s)return;
   var modal=document.getElementById('shoot-fullscreen-modal');
   var title=document.getElementById('sfm-title');
   var meta=document.getElementById('sfm-meta');
   var body=document.getElementById('shoot-fullscreen-body');
-  if(!modal||!body)return;
+  if(!modal||!title||!meta||!body)return;
   title.textContent=s.title||'Drehtermin';
   meta.textContent=fmtISO(normalizeDate(s.date))+(s.time?' · '+s.time+' Uhr':'')+(s.location?' · '+s.location:'');
   // Content-Pieces Tabelle rendern
@@ -2044,7 +2045,7 @@ function renderShootsList(){
     var expandBtn=document.createElement('button');
     expandBtn.className='shoot-expand-btn';
     expandBtn.title='Vollbildansicht';
-    expandBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/></svg>';
+    expandBtn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>';
     (function(shootIdx){
       expandBtn.onclick=function(e){
         e.stopPropagation();
