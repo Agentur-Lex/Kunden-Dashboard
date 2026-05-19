@@ -327,13 +327,13 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3){grid-column:2!important;grid-row:2!important;padding-top:0!important;display:flex;align-items:flex-end}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
-  .shoot-expand-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;transition:color .15s,opacity .15s;opacity:.55;box-shadow:none!important;outline:none!important}
+  .shoot-expand-btn{background:none;border:none;cursor:pointer;padding:3px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;opacity:.5;transition:color .15s,opacity .15s}
   .shoot-expand-btn:hover{color:#FF8585;opacity:1}
-  #shoot-fullscreen-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
-  #shoot-fullscreen-modal.is-open{display:flex}
-  #shoot-fullscreen-inner{background:var(--surface);border-radius:16px;width:100%;max-width:900px;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.22);display:flex;flex-direction:column}
-  #shoot-fullscreen-head{display:flex;align-items:center;gap:10px;padding:18px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:16px 16px 0 0}
-  #shoot-fullscreen-body{padding:16px 20px 24px;flex:1}
+  #sfm-overlay{display:none;position:fixed;inset:0;z-index:10500;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px}
+  #sfm-overlay.sfm-open{display:flex}
+  #sfm-box{background:var(--surface);border-radius:14px;width:100%;max-width:860px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+  #sfm-head{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);gap:12px;flex-shrink:0}
+  #sfm-scroll{overflow-y:auto;flex:1;padding:16px 20px 20px}
   .shoot-meta-row{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
   .shoot-pill{width:100%!important;height:26px!important;font-size:10px!important;padding:3px 10px!important;box-sizing:border-box}
   .shoot-pill input{font-size:10px!important;width:100%!important}
@@ -1369,82 +1369,82 @@ function startClientSession(k){
   renderCustomerView();
 }
 function setRole(r,el){}
-function openShootFullscreen(idx){
-  if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;
-  var s=cd().shoots[idx];
-  if(!s)return;
-  var modal=document.getElementById('shoot-fullscreen-modal');
-  var title=document.getElementById('sfm-title');
-  var meta=document.getElementById('sfm-meta');
-  var body=document.getElementById('shoot-fullscreen-body');
-  if(!modal||!title||!meta||!body)return;
-  title.textContent=s.title||'Drehtermin';
-  meta.textContent=fmtISO(normalizeDate(s.date))+(s.time?' · '+s.time+' Uhr':'')+(s.location?' · '+s.location:'');
-  // Content-Pieces Tabelle rendern
-  var ideas=s.ideas||[];
-  var isAg=ROLE==='agency';
-  var html='<table style="width:100%;border-collapse:collapse;font-size:12px">'
-    +'<thead><tr>'
-    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.06em">CONTENT-THEMA</th>'
-    +'<th style="text-align:center;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.06em;width:90px">ERLEDIGT</th>'
-    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.06em;width:130px">SPEZ.</th>'
-    +(isAg?'<th style="width:40px;border-bottom:1px solid var(--border)"></th>':'')
-    +'</tr></thead><tbody id="sfm-tbody">';
+var SFM_IDX = -1;
+function sfmOpen(idx){
+  SFM_IDX = idx;
+  var s = cd().shoots[idx];
+  if(!s) return;
+  var overlay = document.getElementById('sfm-overlay');
+  if(!overlay) return;
+  document.getElementById('sfm-title').textContent = s.title || 'Drehtermin';
+  document.getElementById('sfm-meta').textContent = fmtISO(normalizeDate(s.date)) + (s.time ? ' · ' + s.time + ' Uhr' : '') + (s.location ? ' · ' + s.location : '');
+  sfmRender();
+  overlay.classList.add('sfm-open');
+  document.body.style.overflow = 'hidden';
+}
+function sfmClose(){
+  SFM_IDX = -1;
+  var overlay = document.getElementById('sfm-overlay');
+  if(overlay) overlay.classList.remove('sfm-open');
+  document.body.style.overflow = '';
+}
+function sfmRender(){
+  if(SFM_IDX < 0) return;
+  var s = cd().shoots[SFM_IDX];
+  if(!s) return;
+  var scroll = document.getElementById('sfm-scroll');
+  if(!scroll) return;
+  var ideas = s.ideas || [];
+  var isAg = ROLE === 'agency';
+  var h = '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    + '<thead><tr>'
+    + '<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.05em">CONTENT-THEMA</th>'
+    + '<th style="width:80px;text-align:center;padding:8px 6px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.05em">ERLEDIGT</th>'
+    + '<th style="width:120px;text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.05em">SPEZ.</th>'
+    + (isAg ? '<th style="width:36px;border-bottom:1px solid var(--border)"></th>' : '')
+    + '</tr></thead><tbody>';
   if(!ideas.length){
-    html+='<tr><td colspan="'+(isAg?4:3)+'" style="text-align:center;padding:24px;color:var(--text3);font-size:11px">Noch keine Content-Pieces.</td></tr>';
+    h += '<tr><td colspan="' + (isAg?4:3) + '" style="padding:24px;text-align:center;color:var(--text3);font-size:11px">Noch keine Content-Pieces.</td></tr>';
   } else {
-    ideas.forEach(function(idea,ri){
-      html+='<tr style="border-bottom:1px solid var(--border2)">'
-        +'<td style="padding:8px 10px"><input type="text" value="'+escHtml(idea.thema||'')+'" '
-        +(isAg?'':'disabled ')
-        +'onchange="sfmUpdateIdea('+idx+','+ri+',\'thema\',this.value)" '
-        +'style="width:100%;border:none;background:transparent;font-size:12px;color:var(--text);font-family:inherit;padding:0;outline:none'+(isAg?';cursor:text':'')+'" placeholder="Content-Thema..."></td>'
-        +'<td style="text-align:center;padding:8px 10px">'+chk(idea.done,'sfmUpdateIdea('+idx+','+ri+',\'done\',!cd().shoots['+idx+'].ideas['+ri+'].done);openShootFullscreen('+idx+')')+'</td>'
-        +'<td style="padding:8px 10px"><select onchange="sfmUpdateIdea('+idx+','+ri+',\'spez\',this.value)" '+(isAg?'':'disabled')+' style="font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;background:var(--surface2);color:var(--text);font-family:inherit">'
-        +SPEZ_OPTS.map(function(o){return'<option'+(idea.spez===o?' selected':'')+'>'+o+'</option>';}).join('')
-        +'</select></td>'
-        +(isAg?'<td style="text-align:center;padding:8px 4px"><button class="btn-icon del" onclick="sfmDeleteIdea('+idx+','+ri+')" title="Löschen"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></td>':'')
-        +'</tr>';
+    ideas.forEach(function(idea, ri){
+      h += '<tr style="border-bottom:1px solid var(--border2)">'
+        + '<td style="padding:6px 10px"><input type="text" value="' + escHtml(idea.thema||'') + '"'
+        + (isAg ? '' : ' disabled')
+        + ' onchange="sfmIdeaChange(' + SFM_IDX + ',' + ri + ',\'thema\',this.value)"'
+        + ' style="width:100%;border:none;background:transparent;font-size:12px;color:var(--text);font-family:inherit;padding:0;outline:none" placeholder="Thema eingeben..."></td>'
+        + '<td style="text-align:center;padding:6px">' + chk(idea.done, 'sfmIdeaChange(' + SFM_IDX + ',' + ri + ',\'done\',!cd().shoots[' + SFM_IDX + '].ideas[' + ri + '].done)') + '</td>'
+        + '<td style="padding:6px 10px"><select onchange="sfmIdeaChange(' + SFM_IDX + ',' + ri + ',\'spez\',this.value)"' + (isAg ? '' : ' disabled') + ' style="font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;background:var(--surface2);color:var(--text);font-family:inherit">'
+        + SPEZ_OPTS.map(function(o){ return '<option' + (idea.spez===o?' selected':'') + '>' + o + '</option>'; }).join('')
+        + '</select></td>'
+        + (isAg ? '<td style="text-align:center;padding:4px"><button class="btn-icon del" onclick="sfmIdeaDel(' + SFM_IDX + ',' + ri + ')" title="Löschen" style="font-size:11px">🗑</button></td>' : '')
+        + '</tr>';
     });
   }
-  html+='</tbody></table>';
+  h += '</tbody></table>';
   if(isAg){
-    html+='<div style="margin-top:12px"><button class="btn-outline" onclick="sfmAddIdea('+idx+')" style="font-size:11px;padding:6px 14px">+ Content-Piece hinzufügen</button></div>';
+    h += '<div style="margin-top:14px"><button class="btn-outline" onclick="sfmIdeaAdd(' + SFM_IDX + ')" style="font-size:11px;padding:6px 14px">+ Content-Piece hinzufügen</button></div>';
   }
-  body.innerHTML=html;
-  SHOOT_FULLSCREEN_OPEN=true;
-  modal.classList.add('is-open');
-  document.body.style.overflow='hidden';
+  scroll.innerHTML = h;
 }
-function closeShootFullscreen(){
-  SHOOT_FULLSCREEN_OPEN=false;
-  var modal=document.getElementById('shoot-fullscreen-modal');
-  if(modal)modal.classList.remove('is-open');
-  document.body.style.overflow='';
-  renderShootsList();
-}
-function sfmUpdateIdea(shootIdx,ideaIdx,key,val){
-  var s=cd().shoots[shootIdx];
-  if(s&&s.ideas&&s.ideas[ideaIdx]!==undefined){
-    s.ideas[ideaIdx][key]=val;
+function sfmIdeaChange(shootIdx, ri, key, val){
+  var s = cd().shoots[shootIdx];
+  if(s && s.ideas && s.ideas[ri] !== undefined){
+    s.ideas[ri][key] = val;
     scheduleSave();
+    sfmRender();
   }
 }
-function sfmAddIdea(shootIdx){
-  var s=cd().shoots[shootIdx];
-  if(!s)return;
-  if(!s.ideas)s.ideas=[];
-  s.ideas.push({thema:'',done:false,spez:SPEZ_OPTS[0],desc:'',addedBy:ROLE});
+function sfmIdeaAdd(shootIdx){
+  var s = cd().shoots[shootIdx];
+  if(!s){ return; }
+  if(!s.ideas) s.ideas = [];
+  s.ideas.push({thema:'', done:false, spez:SPEZ_OPTS[0], desc:'', addedBy:ROLE});
   scheduleSave();
-  openShootFullscreen(shootIdx);
+  sfmRender();
 }
-function sfmDeleteIdea(shootIdx,ideaIdx){
-  var s=cd().shoots[shootIdx];
-  if(s&&s.ideas){
-    s.ideas.splice(ideaIdx,1);
-    scheduleSave();
-    openShootFullscreen(shootIdx);
-  }
+function sfmIdeaDel(shootIdx, ri){
+  var s = cd().shoots[shootIdx];
+  if(s && s.ideas){ s.ideas.splice(ri,1); scheduleSave(); sfmRender(); }
 }
 function resetAllEditStates(){
   if(typeof ANALYTICS_EDIT_MODE!=='undefined'){ANALYTICS_EDIT_MODE=false;}
@@ -1480,7 +1480,6 @@ function closeModal(id){var e=document.getElementById(id);if(e)e.style.display='
 
 // ── AGENCY OVERVIEW ──
 var SHOW_DONE_CUSTOMERS=false;
-var SHOOT_FULLSCREEN_OPEN=false;
 function toggleDoneCustomers(){SHOW_DONE_CUSTOMERS=!SHOW_DONE_CUSTOMERS;renderAgencyOverview();}
 async function setCustomerStatus(k,status){
   DATA[k]._status=status;
@@ -2046,21 +2045,14 @@ function renderShootsList(){
     header.appendChild(collapseBtn);
 
     // Vollbild-Button
-    var expandBtn=document.createElement('button');
-    expandBtn.className='shoot-expand-btn';expandBtn.style.cssText='background:none;border:none;box-shadow:none;outline:none;cursor:pointer;padding:4px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;opacity:.55;transition:color .15s,opacity .15s';
-    expandBtn.addEventListener('mouseenter',function(){this.style.color='#FF8585';this.style.opacity='1';});
-    expandBtn.addEventListener('mouseleave',function(){this.style.color='var(--text3)';this.style.opacity='.55';});
-    expandBtn.title='Vollbildansicht';
-    expandBtn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="3" y2="21"/></svg>';
     (function(shootIdx){
-      expandBtn.onclick=function(e){
-        e.stopPropagation();
-        e.preventDefault();
-        var idx2=shootIdx;
-        setTimeout(function(){openShootFullscreen(idx2);},0);
-      };
+      var eb = document.createElement('button');
+      eb.className = 'shoot-expand-btn';
+      eb.title = 'Vollbildansicht';
+      eb.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="3" y2="21"/></svg>';
+      eb.onclick = function(e){ e.stopPropagation(); sfmOpen(shootIdx); };
+      header.appendChild(eb);
     })(i);
-    header.appendChild(expandBtn);
 
     // Delete button (agency only)
     if(ROLE==='agency'){
@@ -4479,19 +4471,19 @@ async function doChangePasswordSB(){
 
 </script>
 <script>
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});}
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});});}
 </script>
 
-<div id="shoot-fullscreen-modal" onclick="if(event.target===this)closeShootFullscreen()">
-  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:900px;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.22);display:flex;flex-direction:column">
-    <div id="shoot-fullscreen-head" style="display:flex;align-items:center;gap:10px;padding:18px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:16px 16px 0 0">
+<div id="sfm-overlay">
+  <div id="sfm-box">
+    <div id="sfm-head">
       <div style="flex:1;min-width:0">
-        <div id="sfm-title" style="font-size:15px;font-weight:700;color:var(--text)"></div>
+        <div id="sfm-title" style="font-size:14px;font-weight:700;color:var(--text)"></div>
         <div id="sfm-meta" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
       </div>
-      <button onclick="closeShootFullscreen()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:22px;line-height:1;padding:4px 10px;border-radius:6px;font-family:inherit">&#x2715;</button>
+      <button id="sfm-close" onclick="sfmClose()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:4px 8px;border-radius:6px;line-height:1">&#x2715;</button>
     </div>
-    <div id="shoot-fullscreen-body" style="padding:16px 20px 24px;flex:1"></div>
+    <div id="sfm-scroll"></div>
   </div>
 </div>
 </body>
