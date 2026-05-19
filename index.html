@@ -98,7 +98,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden}
 .stag{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:500;color:var(--text2);margin:3px 3px 3px 0}
 /* CONTENT TABLE */
 .tbl-outer{overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}
-.tbl-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+.tbl-wrap{overflow-x:auto;max-height:660px;overflow-y:auto}
 .tbl-wrap::-webkit-scrollbar{width:4px;height:4px}
 .tbl-wrap::-webkit-scrollbar-thumb{background:#CBD0E0;border-radius:2px}
 .smart-tbl{width:100%;border-collapse:collapse;font-size:9px;table-layout:fixed}
@@ -1571,7 +1571,7 @@ function renderCustomerView(){if(!ACTIVE_CUSTOMER)return;var d=cd();var an=d.ana
 
 // ── AGENCY ONBOARDING PAGE ──
 function renderAgencyOnboardingPage(){
-  if(!ACTIVE_CUSTOMER)return;
+  if(!ACTIVE_CUSTOMER||ROLE!=='agency')return;
   ensureFixedSteps();
   var d=cd();
   var ob=d.obSteps||[];
