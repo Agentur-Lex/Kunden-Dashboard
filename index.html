@@ -327,8 +327,8 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3){grid-column:2!important;grid-row:2!important;padding-top:0!important;display:flex;align-items:flex-end}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
-  .shoot-expand-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;transition:opacity .15s;opacity:.55;box-shadow:none!important;outline:none!important}
-  .shoot-expand-btn:hover{opacity:.9}
+  .shoot-expand-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;transition:color .15s,opacity .15s;opacity:.55;box-shadow:none!important;outline:none!important}
+  .shoot-expand-btn:hover{color:#FF8585;opacity:1}
   #shoot-fullscreen-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;padding:16px}
   #shoot-fullscreen-inner{background:var(--surface);border-radius:16px;width:100%;max-width:900px;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.22);display:flex;flex-direction:column}
   #shoot-fullscreen-head{display:flex;align-items:center;gap:10px;padding:18px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:16px 16px 0 0}
@@ -2049,7 +2049,9 @@ function renderShootsList(){
     (function(shootIdx){
       expandBtn.onclick=function(e){
         e.stopPropagation();
-        openShootFullscreen(shootIdx);
+        e.preventDefault();
+        var idx2=shootIdx;
+        setTimeout(function(){openShootFullscreen(idx2);},0);
       };
     })(i);
     header.appendChild(expandBtn);
