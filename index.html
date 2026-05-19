@@ -2892,6 +2892,7 @@ function addObStep(){
 function deleteObStep(stepId){
   var d=cd();
   d.obSteps=(d.obSteps||[]).filter(function(s){return s.id!==stepId;});
+  scheduleSave();
   renderAgencyOnboardingPage();updateOnboardingBars();renderTodos();
 }
 
@@ -4178,6 +4179,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   base.questions=(ob&&ob.questions)||DEFAULT_QUESTIONS.slice();
   base.answers=(ob&&ob.answers)||{};
   base.socialCreds=(ob&&ob.social_creds)||{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}};
+  if(ob&&ob.ob_steps&&ob.ob_steps.length)base.obSteps=ob.ob_steps;
   base.name=cust.name;base._custId=cust.id;base._slug=cust.slug;base._status=cust.status||'active';
   return base;
 }
@@ -4211,8 +4213,8 @@ async function sbSaveCustomer(){
   if(stRes.data&&stRes.data.length){await sb.from('strategy').update({data:d.strategy}).eq('customer_id',cId);}
   else{await sb.from('strategy').insert({customer_id:cId,data:d.strategy});}
   var obRes=await sb.from('onboarding').select('customer_id').eq('customer_id',cId).limit(1);
-  if(obRes.data&&obRes.data.length){await sb.from('onboarding').update({questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{}}).eq('customer_id',cId);}
-  else{await sb.from('onboarding').insert({customer_id:cId,questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{}});}
+  if(obRes.data&&obRes.data.length){await sb.from('onboarding').update({questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{},ob_steps:d.obSteps||[]}).eq('customer_id',cId);}
+  else{await sb.from('onboarding').insert({customer_id:cId,questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{},ob_steps:d.obSteps||[]});}
 }
 async function sbSaveAllTodos(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
