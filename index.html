@@ -327,6 +327,12 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3){grid-column:2!important;grid-row:2!important;padding-top:0!important;display:flex;align-items:flex-end}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
+  .shoot-expand-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--accent);display:flex;align-items:center;flex-shrink:0;transition:opacity .15s;opacity:.7}
+  .shoot-expand-btn:hover{opacity:1}
+  #shoot-fullscreen-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;display:none;align-items:center;justify-content:center;padding:16px}
+  #shoot-fullscreen-inner{background:var(--surface);border-radius:16px;width:100%;max-width:900px;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.22);display:flex;flex-direction:column}
+  #shoot-fullscreen-head{display:flex;align-items:center;gap:10px;padding:18px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;border-radius:16px 16px 0 0}
+  #shoot-fullscreen-body{padding:16px 20px 24px;flex:1}
   .shoot-meta-row{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
   .shoot-pill{width:100%!important;height:26px!important;font-size:10px!important;padding:3px 10px!important;box-sizing:border-box}
   .shoot-pill input{font-size:10px!important;width:100%!important}
@@ -1117,7 +1123,7 @@ function exportMonthlyReport(){
 
   body += '</div>'; // page-wrap
 
-  var fullHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Monatsreport '+escHtml(d.name)+'</title><style>'+css+'</style></head><body>'+body+'<div class="no-print" style="position:fixed;bottom:24px;right:24px"><button onclick="window.print()" style="background:#FF5757;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,87,87,.4)">Als PDF speichern</button></div></body></html>';
+  var fullHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Monatsreport '+escHtml(d.name)+'</title><style>'+css+'</style></head><body>'+body+'<div class="no-print" style="position:fixed;bottom:24px;right:24px"><button onclick="window.print()" style="background:#FF5757;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,87,87,.4)">Als PDF speichern</button></div></html>';
   var blob=new Blob([fullHtml],{type:'text/html'});
   var url=URL.createObjectURL(blob);
   var win=window.open(url,'_blank');
@@ -1337,8 +1343,105 @@ function startClientSession(k){
     showScreen('screen-firstlogin');
     return;
   }
-  showScreen('main-app');document.getElementById('agency-tb').style.display='none';document.getElementById('client-tb').style.display='flex';document.getElementById('agency-chip').style.display='none';document.getElementById('client-chip').style.display='flex';var c=CREDS[k];var av=document.getElementById('client-chip-av');var lb=document.getElementById('client-chip-name');if(av)av.textContent=c.label.charAt(0);if(lb)lb.textContent=c.label;var ucard=document.getElementById('sidebar-user-card');var uav=document.getElementById('sidebar-avatar');var un=document.getElementById('sidebar-name');if(ucard)ucard.style.display='flex';if(uav)uav.textContent=c.label.charAt(0);if(un)un.textContent=c.label;document.getElementById('sidebar-agency-overview').style.display='none';ROLE='client';ACTIVE_CUSTOMER=k;document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='none';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='';});showPage('overview',document.getElementById('nav-overview'));renderCustomerView();}
+  showScreen('main-app');
+  document.getElementById('agency-tb').style.display='none';
+  document.getElementById('client-tb').style.display='flex';
+  document.getElementById('agency-chip').style.display='none';
+  document.getElementById('client-chip').style.display='flex';
+  var c=CREDS[k]||{label:(DATA[k]&&DATA[k].name)||'Kunde',tempPw:'',pwChanged:true};
+  var av=document.getElementById('client-chip-av');
+  var lb=document.getElementById('client-chip-name');
+  if(av)av.textContent=(c.label||'K').charAt(0);
+  if(lb)lb.textContent=c.label||'Kunde';
+  var ucard=document.getElementById('sidebar-user-card');
+  var uav=document.getElementById('sidebar-avatar');
+  var un=document.getElementById('sidebar-name');
+  if(ucard)ucard.style.display='flex';
+  if(uav)uav.textContent=(c.label||'K').charAt(0);
+  if(un)un.textContent=c.label||'Kunde';
+  var sao=document.getElementById('sidebar-agency-overview');
+  if(sao)sao.style.display='none';
+  ROLE='client';ACTIVE_CUSTOMER=k;
+  document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='none';});
+  document.querySelectorAll('.client-only').forEach(function(el){el.style.display='';});
+  showPage('overview',document.getElementById('nav-overview'));
+  renderCustomerView();
+}
 function setRole(r,el){}
+function openShootFullscreen(idx){
+  var s=cd().shoots[idx];
+  if(!s)return;
+  var modal=document.getElementById('shoot-fullscreen-modal');
+  var title=document.getElementById('sfm-title');
+  var meta=document.getElementById('sfm-meta');
+  var body=document.getElementById('shoot-fullscreen-body');
+  if(!modal||!body)return;
+  title.textContent=s.title||'Drehtermin';
+  meta.textContent=fmtISO(normalizeDate(s.date))+(s.time?' · '+s.time+' Uhr':'')+(s.location?' · '+s.location:'');
+  // Content-Pieces Tabelle rendern
+  var ideas=s.ideas||[];
+  var isAg=ROLE==='agency';
+  var html='<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead><tr>'
+    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.06em">CONTENT-THEMA</th>'
+    +'<th style="text-align:center;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.06em;width:90px">ERLEDIGT</th>'
+    +'<th style="text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.06em;width:130px">SPEZ.</th>'
+    +(isAg?'<th style="width:40px;border-bottom:1px solid var(--border)"></th>':'')
+    +'</tr></thead><tbody id="sfm-tbody">';
+  if(!ideas.length){
+    html+='<tr><td colspan="'+(isAg?4:3)+'" style="text-align:center;padding:24px;color:var(--text3);font-size:11px">Noch keine Content-Pieces.</td></tr>';
+  } else {
+    ideas.forEach(function(idea,ri){
+      html+='<tr style="border-bottom:1px solid var(--border2)">'
+        +'<td style="padding:8px 10px"><input type="text" value="'+escHtml(idea.thema||'')+'" '
+        +(isAg?'':'disabled ')
+        +'onchange="sfmUpdateIdea('+idx+','+ri+',\'thema\',this.value)" '
+        +'style="width:100%;border:none;background:transparent;font-size:12px;color:var(--text);font-family:inherit;padding:0;outline:none'+(isAg?';cursor:text':'')+'" placeholder="Content-Thema..."></td>'
+        +'<td style="text-align:center;padding:8px 10px">'+chk(idea.done,'sfmUpdateIdea('+idx+','+ri+',\'done\',!cd().shoots['+idx+'].ideas['+ri+'].done);openShootFullscreen('+idx+')')+'</td>'
+        +'<td style="padding:8px 10px"><select onchange="sfmUpdateIdea('+idx+','+ri+',\'spez\',this.value)" '+(isAg?'':'disabled')+' style="font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;background:var(--surface2);color:var(--text);font-family:inherit">'
+        +SPEZ_OPTS.map(function(o){return'<option'+(idea.spez===o?' selected':'')+'>'+o+'</option>';}).join('')
+        +'</select></td>'
+        +(isAg?'<td style="text-align:center;padding:8px 4px"><button class="btn-icon del" onclick="sfmDeleteIdea('+idx+','+ri+')" title="Löschen"><svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></td>':'')
+        +'</tr>';
+    });
+  }
+  html+='</tbody></table>';
+  if(isAg){
+    html+='<div style="margin-top:12px"><button class="btn-outline" onclick="sfmAddIdea('+idx+')" style="font-size:11px;padding:6px 14px">+ Content-Piece hinzufügen</button></div>';
+  }
+  body.innerHTML=html;
+  modal.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeShootFullscreen(){
+  var modal=document.getElementById('shoot-fullscreen-modal');
+  if(modal)modal.style.display='none';
+  document.body.style.overflow='';
+  renderShootsList();
+}
+function sfmUpdateIdea(shootIdx,ideaIdx,key,val){
+  var s=cd().shoots[shootIdx];
+  if(s&&s.ideas&&s.ideas[ideaIdx]!==undefined){
+    s.ideas[ideaIdx][key]=val;
+    scheduleSave();
+  }
+}
+function sfmAddIdea(shootIdx){
+  var s=cd().shoots[shootIdx];
+  if(!s)return;
+  if(!s.ideas)s.ideas=[];
+  s.ideas.push({thema:'',done:false,spez:SPEZ_OPTS[0],desc:'',addedBy:ROLE});
+  scheduleSave();
+  openShootFullscreen(shootIdx);
+}
+function sfmDeleteIdea(shootIdx,ideaIdx){
+  var s=cd().shoots[shootIdx];
+  if(s&&s.ideas){
+    s.ideas.splice(ideaIdx,1);
+    scheduleSave();
+    openShootFullscreen(shootIdx);
+  }
+}
 function resetAllEditStates(){
   if(typeof ANALYTICS_EDIT_MODE!=='undefined'){ANALYTICS_EDIT_MODE=false;}
   var aeb=document.getElementById('analytics-edit-btn');
@@ -1937,6 +2040,19 @@ function renderShootsList(){
     })(collapseBtn,i);
     header.appendChild(collapseBtn);
 
+    // Vollbild-Button
+    var expandBtn=document.createElement('button');
+    expandBtn.className='shoot-expand-btn';
+    expandBtn.title='Vollbildansicht';
+    expandBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/></svg>';
+    (function(shootIdx){
+      expandBtn.onclick=function(e){
+        e.stopPropagation();
+        openShootFullscreen(shootIdx);
+      };
+    })(i);
+    header.appendChild(expandBtn);
+
     // Delete button (agency only)
     if(ROLE==='agency'){
       var delShootBtn=document.createElement('button');
@@ -2531,7 +2647,7 @@ function exportOnboardingPDF() {
 
   html2 += '</div>'; // wrap
 
-  var fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Onboarding '+escHtml(d.name)+'</title><style>'+css+'</style></head><body>'+html2+'<div class="no-print" style="position:fixed;bottom:24px;right:24px"><button onclick="window.print()" style="background:#FF5757;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,87,87,.4)">Als PDF speichern</button></div></body></html>';
+  var fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Onboarding '+escHtml(d.name)+'</title><style>'+css+'</style></head><body>'+html2+'<div class="no-print" style="position:fixed;bottom:24px;right:24px"><button onclick="window.print()" style="background:#FF5757;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,87,87,.4)">Als PDF speichern</button></div></html>';
   var blob = new Blob([fullHtml], {type:'text/html'});
   var url = URL.createObjectURL(blob);
   var win = window.open(url, '_blank');
@@ -4190,7 +4306,8 @@ async function loadAllCustomers(){
 }
 async function loadCustomerData(custId,custObj){
   var sb=getSB();var cust=custObj;
-  if(!cust){var cr=await sb.from('customers').select('*').eq('id',custId).maybeSingle();if(cr.error)return;cust=cr.data;}
+  if(!cust){var cr=await sb.from('customers').select('*').eq('id',custId).maybeSingle();if(cr.error||!cr.data)return;cust=cr.data;}
+  if(!cust){console.error('loadCustomerData: cust nicht gefunden fuer',custId);return;}
   var r=await Promise.all([
     sb.from('todos').select('*').eq('customer_id',custId),
     sb.from('shoots').select('*').eq('customer_id',custId).order('date'),
@@ -4201,8 +4318,17 @@ async function loadCustomerData(custId,custObj){
     sb.from('customer_creds').select('*').eq('customer_id',custId).maybeSingle()
   ]);
   DATA[custId]=sbRowToData(cust,r[0].data||[],r[1].data||[],r[2].data||[],r[3].data||[],r[4].data||{},r[5].data||{});
-  ACTIVE_CUSTOMER=custId;var cred=r[6].data||{};
-  CREDS[custId]={username:cust.slug,label:cust.name,tempPw:cred.temp_pw||'',password:cred.temp_pw||'set',setAt:null,resetPending:false,pwChanged:cred.pw_changed!==false};
+  ACTIVE_CUSTOMER=custId;
+  var cred=r[6].data||{};
+  CREDS[custId]={
+    username:cust.slug||'',
+    label:cust.name||'Kunde',
+    tempPw:cred.temp_pw||'',
+    password:cred.temp_pw||'set',
+    setAt:null,
+    resetPending:false,
+    pwChanged:cred.pw_changed!==false
+  };
 }
 async function sbSaveCustomer(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var d=cd();var cId=ACTIVE_CUSTOMER;
@@ -4346,4 +4472,17 @@ async function doChangePasswordSB(){
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});}
 </script>
+
+<div id="shoot-fullscreen-modal" onclick="if(event.target===this)closeShootFullscreen()">
+  <div id="shoot-fullscreen-inner">
+    <div id="shoot-fullscreen-head">
+      <div style="flex:1;min-width:0">
+        <div id="sfm-title" style="font-size:15px;font-weight:700;color:var(--text)"></div>
+        <div id="sfm-meta" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
+      </div>
+      <button onclick="closeShootFullscreen()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:4px 8px;border-radius:6px">&#x2715;</button>
+    </div>
+    <div id="shoot-fullscreen-body"></div>
+  </div>
+</div>
 </html>
