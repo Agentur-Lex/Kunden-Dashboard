@@ -614,11 +614,13 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
             </select>
           </div>
           <div id="analytics-stand-display" class="client-only" style="font-size:11px;color:var(--text3);margin-left:4px"></div>
-          <button id="analytics-report-btn" class="btn-outline" onclick="exportMonthlyReport()" style="margin-left:auto;font-size:11px;padding:5px 11px;display:flex;align-items:center;gap:5px">
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M3 15v2h14v-2"/></svg>
-            Monatsreport
-          </button>
-          <button id="analytics-edit-btn" class="btn-outline agency-only" onclick="toggleAnalyticsEdit()" style="font-size:11px;padding:5px 12px;margin-left:auto">✎ Bearbeiten</button>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+            <button id="analytics-report-btn" class="btn-outline" onclick="exportMonthlyReport()" style="font-size:11px;padding:5px 11px;display:flex;align-items:center;gap:5px">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M3 15v2h14v-2"/></svg>
+              Monatsreport
+            </button>
+            <button id="analytics-edit-btn" class="btn-outline agency-only" onclick="toggleAnalyticsEdit()" style="font-size:11px;padding:5px 12px">✎ Bearbeiten</button>
+          </div>
         </div>
         <!-- Dynamic analytics blocks rendered by renderAnalyticsPage() -->
         <div id="analytics-import-panel" class="card agency-only" style="display:none;margin-bottom:14px">
@@ -4181,11 +4183,31 @@ async function sbSaveCustomer(){
 }
 async function sbSaveAllTodos(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
-  await sb.from('todos').delete().eq('customer_id',cId);
-  if(!todos.length)return;
-  var rows=todos.map(function(t){return{customer_id:cId,text:t.text,due:t.due||null,prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,created_at:t.createdAt||Date.now(),completed_at:t.completedAt||null,shoot_ref:t.shootRef!==undefined?t.shootRef:null,is_reset:t.isReset||false,is_brainstorm:t.isBrainstorm||false,bs_category:t.bsCategory||null};});
-  var res=await sb.from('todos').insert(rows).select();
-  if(res.data)res.data.forEach(function(r,i){if(todos[i])todos[i]._id=r.id;});
+  // Einzelne Todos upserten statt delete+insert (RLS-sicher für Kunden)
+  for(var i=0;i<todos.length;i++){
+    var t=todos[i];
+    var row={customer_id:cId,text:t.text,due:t.due||null,prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,created_at:t.createdAt||Date.now(),completed_at:t.completedAt||null,shoot_ref:t.shootRef!==undefined?t.shootRef:null,is_reset:t.isReset||false,is_brainstorm:t.isBrainstorm||false,bs_category:t.bsCategory||null};
+    if(t._id){
+      // Update bestehenden Eintrag
+      await sb.from('todos').update(row).eq('id',t._id);
+    } else {
+      // Neuen Eintrag anlegen
+      var res=await sb.from('todos').insert(row).select().maybeSingle();
+      if(res.data)t._id=res.data.id;
+    }
+  }
+  // Gelöschte Todos entfernen (nur IDs die in DB sind aber nicht mehr lokal)
+  var localIds=todos.filter(function(t){return t._id;}).map(function(t){return t._id;});
+  if(ROLE==='agency'&&localIds.length){
+    // Agentur darf löschen: alle Todos holen und nicht-lokale entfernen
+    var dbRes=await sb.from('todos').select('id').eq('customer_id',cId);
+    if(dbRes.data){
+      var toDelete=dbRes.data.map(function(r){return r.id;}).filter(function(id){return localIds.indexOf(id)===-1;});
+      if(toDelete.length)await sb.from('todos').delete().in('id',toDelete);
+    }
+  } else if(ROLE==='agency'){
+    await sb.from('todos').delete().eq('customer_id',cId);
+  }
 }
 async function sbSaveAllShoots(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var shoots=cd().shoots||[];var cId=ACTIVE_CUSTOMER;
