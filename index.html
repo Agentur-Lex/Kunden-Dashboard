@@ -1276,7 +1276,7 @@ async function doLogin(){
       if(allC.data&&allC.data.length){var uid=res.data.user.id;for(var ci=0;ci<allC.data.length;ci++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[ci].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
       await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
     }else{
-      var cr=await sb.from('user_customer').select('customer_id').eq('user_id',res.data.user.id).limit(1);
+      var cr=await sb.from('user_customer').select('customer_id').eq('user_id',res.data.user.id).eq('role','client').limit(1);
       if(!cr.data||!cr.data.length){hideLoading();err.textContent='Kein Kundenkonto gefunden.';err.style.display='block';return;}
       var custId=cr.data[0].customer_id;await loadCustomerData(custId);
       hideLoading();SESSION={type:'client',key:custId};startClientSession(custId);
@@ -4210,7 +4210,8 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   if(an&&Object.keys(an).length)Object.assign(base.analytics,an);
   if(strat&&strat.data&&Object.keys(strat.data).length)Object.assign(base.strategy,strat.data);
   base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id};});
-  base.shoots=(shoots||[]).map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:s.ideas||[],_id:s.id};});
+  var shootArr=Array.isArray(shoots)?shoots:(shoots&&shoots.data?shoots.data:[]);
+  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:s.ideas||[],_id:s.id};});
   base.shoots.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
   base.rows=(content||[]).map(function(r){return{date:r.date||'',name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',_id:r.id};});
   base.questions=(ob&&ob.questions)||DEFAULT_QUESTIONS.slice();
@@ -4231,7 +4232,7 @@ async function loadCustomerData(custId,custObj){
   if(!cust){console.error('loadCustomerData: cust nicht gefunden fuer',custId);return;}
   var r=await Promise.all([
     sb.from('todos').select('*').eq('customer_id',custId),
-    sb.from('shoots').select('*').eq('customer_id',custId).order('date'),
+    sb.from('shoots').select('*').eq('customer_id',custId).order('date').then(function(r){if(r.error)console.error('shoots load error:',r.error);return r;}),
     sb.from('analytics').select('*').eq('customer_id',custId).limit(1),
     sb.from('content_rows').select('*').eq('customer_id',custId).order('date'),
     sb.from('onboarding').select('*').eq('customer_id',custId).maybeSingle(),
@@ -4397,7 +4398,7 @@ async function doChangePasswordSB(){
         if(allC.data&&allC.data.length){for(var i2=0;i2<allC.data.length;i2++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[i2].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
         await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
       }else{
-        var cr2=await sb.from('user_customer').select('customer_id').eq('user_id',uid).limit(1);
+        var cr2=await sb.from('user_customer').select('customer_id').eq('user_id',uid).eq('role','client').limit(1);
         if(cr2.data&&cr2.data.length){var cId2=cr2.data[0].customer_id;await loadCustomerData(cId2);hideLoading();SESSION={type:'client',key:cId2};startClientSession(cId2);}
         else{hideLoading();}
       }
