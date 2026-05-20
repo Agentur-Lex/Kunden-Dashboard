@@ -1,9 +1,5 @@
-// Service Worker for Social-Media-Lex Dashboard
-const CACHE_NAME = 'sm-lex-v3';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html'
-];
+const CACHE_NAME = 'sm-lex-v4';
+const STATIC_ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -27,9 +23,7 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  if(event.request.url.includes('supabase.co')) {
-    return;
-  }
+  if(event.request.url.includes('supabase.co')) return;
   event.respondWith(
     fetch(event.request).catch(function() {
       return caches.match(event.request);
