@@ -283,6 +283,7 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── MOBILE ── */
 @media (max-width:768px){
+  .cp-counter{display:none!important}
   /* ── Layout ── */
   .app{flex-direction:column;height:auto;min-height:100vh}
   html,body{overflow:auto}
@@ -329,7 +330,7 @@ textarea{resize:vertical;line-height:1.5}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
   .page-info-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:10px;font-weight:700;cursor:default;margin-left:8px;position:relative;vertical-align:middle;flex-shrink:0}
   .page-info-icon:hover .page-info-tooltip{display:block}
-  .page-info-tooltip{display:none;position:absolute;left:20px;top:-4px;background:var(--text);color:#fff;font-size:10px;font-weight:400;line-height:1.6;padding:8px 12px;border-radius:8px;width:260px;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.15);white-space:normal}
+  .page-info-tooltip{display:none;position:absolute;left:50%;transform:translateX(-50%);top:24px;background:#f3f4f6;color:#374151;font-size:10px;font-weight:400;line-height:1.6;padding:10px 14px;border-radius:8px;width:280px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:normal;border:1px solid #e5e7eb}
   .shoot-meta-row{flex-direction:column!important;align-items:flex-start!important;gap:4px!important}
   .shoot-pill{width:100%!important;height:26px!important;font-size:10px!important;padding:3px 10px!important;box-sizing:border-box}
   .shoot-pill input{font-size:10px!important;width:100%!important}
@@ -1928,6 +1929,30 @@ function renderShootsList(){
     }
     header.appendChild(info);
 
+    // Content-Pieces Zähler – nach info, nur Agentur Desktop
+    if(ROLE==='agency'){
+      (function(shootIdx){
+        var cpWrap=document.createElement('div');
+        cpWrap.className='cp-counter';
+        cpWrap.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);flex-shrink:0;margin-left:8px';
+        var ideas=d.shoots[shootIdx].ideas||[];
+        var countSpan=document.createElement('span');
+        countSpan.style.cssText='font-weight:600;color:var(--text)';
+        countSpan.textContent=ideas.length;
+        cpWrap.appendChild(countSpan);
+        cpWrap.appendChild(document.createTextNode(' / '));
+        var targetInp=document.createElement('input');
+        targetInp.type='number';targetInp.min='0';targetInp.max='99';
+        targetInp.value=d.shoots[shootIdx].targetPieces||0;
+        targetInp.style.cssText='width:34px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
+        targetInp.title='Geplante Anzahl Content-Pieces';
+        targetInp.addEventListener('click',function(e){e.stopPropagation();});
+        (function(idx2){targetInp.addEventListener('change',function(){cd().shoots[idx2].targetPieces=parseInt(this.value)||0;scheduleSave();});})(shootIdx);
+        cpWrap.appendChild(targetInp);
+        header.appendChild(cpWrap);
+      })(i);
+    }
+
     // Status badge
     var badge=document.createElement('span');
     badge.className='shoot-badge shoot-status-badge '+(s.status==='ok'?'sb-ok':'sb-plan');
@@ -2001,29 +2026,6 @@ function renderShootsList(){
       };
     })(collapseBtn,i);
     header.appendChild(collapseBtn);
-
-    // Content-Pieces Zähler (nur Agentur, nur Desktop)
-    if(ROLE==='agency'){
-      (function(shootIdx){
-        var cpWrap=document.createElement('div');
-        cpWrap.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);flex-shrink:0;margin-left:2px';
-        var ideas=d.shoots[shootIdx].ideas||[];
-        var countSpan=document.createElement('span');
-        countSpan.style.cssText='font-weight:600;color:var(--text)';
-        countSpan.textContent=ideas.length;
-        cpWrap.appendChild(countSpan);
-        cpWrap.appendChild(document.createTextNode(' / '));
-        var targetInp=document.createElement('input');
-        targetInp.type='number';targetInp.min='0';targetInp.max='99';
-        targetInp.value=d.shoots[shootIdx].targetPieces||0;
-        targetInp.style.cssText='width:34px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
-        targetInp.title='Geplante Anzahl Content-Pieces';
-        targetInp.addEventListener('click',function(e){e.stopPropagation();});
-        (function(idx2){targetInp.addEventListener('change',function(){cd().shoots[idx2].targetPieces=parseInt(this.value)||0;scheduleSave();});})(shootIdx);
-        cpWrap.appendChild(targetInp);
-        header.appendChild(cpWrap);
-      })(i);
-    }
 
     // Delete button (agency only)
     if(ROLE==='agency'){
