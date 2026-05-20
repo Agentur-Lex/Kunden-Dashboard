@@ -356,6 +356,8 @@ textarea{resize:vertical;line-height:1.5}
   #agency-ov-grid{grid-template-columns:1fr!important}
   #nav-contentlist{display:none!important}
   .kacheln-grid{grid-template-columns:repeat(2,1fr)!important}
+  .kachel .kachel-del{position:absolute;top:10px;right:10px}
+  .kachel-name{padding-right:24px}
   #q-add-form{flex-wrap:wrap!important}
   #new-q-input{width:100%!important;flex:none!important}
   #new-ob-step-input{width:180px!important}
@@ -379,6 +381,7 @@ textarea{resize:vertical;line-height:1.5}
   
   .shoot-done-mobile{display:flex!important;font-size:9px!important;align-items:center;gap:4px}
   /* .shoot-done-wrap ist auf Desktop sichtbar */
+  .shoot-done-wrap{margin-top:2px}
   .shoot-del-btn{margin-left:8px;flex-shrink:0}
   
   .cal-grid{grid-auto-rows:60px!important}
@@ -1970,7 +1973,7 @@ function renderShootsList(){
     })(i,s);
     doneWrap.appendChild(doneChk);
     doneWrap.appendChild(document.createTextNode('Abgeschlossen'));
-    header.appendChild(doneWrap);
+    if(ROLE==='agency')subWrap.appendChild(doneWrap);else header.appendChild(doneWrap);
     // doneWrapClone entfernt – original doneWrap ist auf Desktop sichtbar
 
 
