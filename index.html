@@ -1971,26 +1971,7 @@ function renderShootsList(){
     doneWrap.appendChild(doneChk);
     doneWrap.appendChild(document.createTextNode('Abgeschlossen'));
     header.appendChild(doneWrap);
-    var doneWrapClone=doneWrap.cloneNode(true);
-    doneWrapClone.className='shoot-done-mobile';
-    doneWrapClone.style.cssText='display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);cursor:'+(ROLE==="agency"?'pointer':'default');
-        (function(s3,i3,shootTitle){doneWrapClone.querySelector('input').addEventListener('change',function(){
-          var d=cd();
-          if(!d.shoots[i3])return;
-          var wasDone=d.shoots[i3].status==='done';
-          d.shoots[i3].status=this.checked?'done':(wasDone?'plan':d.shoots[i3].status);
-          if(this.checked&&!wasDone){
-            var todoText='Drehtermin abgeschlossen: '+shootTitle+' – Bitte Content-Pieces prüfen.';
-            var newTodo={text:todoText,due:'',prio:'high',assign:'client',done:false,shootRef:i3,createdAt:Date.now()};
-            d.todos.unshift(newTodo);
-            getSB().from('todos').insert({customer_id:ACTIVE_CUSTOMER,text:todoText,due:null,prio:'high',assign:'client',done:false,created_at:newTodo.createdAt,shoot_ref:i3,is_reset:false,is_brainstorm:false}).select().maybeSingle().then(function(r){if(r&&r.data)newTodo._id=r.data.id;});
-            showToast('To-Do für Kunden erstellt!');
-          } else if(!this.checked&&wasDone){
-            d.todos=d.todos.filter(function(t){return!(t.shootRef===i3&&!t.done);});
-          }
-          scheduleSave();renderShootsList();renderTodos();
-        });})( s,i,s.title);
-    if(locRow)locRow.appendChild(doneWrapClone);
+    // doneWrapClone entfernt – original doneWrap ist auf Desktop sichtbar
 
 
     // Collapse toggle button
