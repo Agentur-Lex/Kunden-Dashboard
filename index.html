@@ -329,9 +329,11 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
   .page-info-icon{display:none}
+  .page-desc-text{font-size:11px;color:var(--text3);margin:-8px 0 14px;line-height:1.6}
   .page-info-tooltip{display:block;position:static;transform:none;background:none;color:var(--text3);font-size:11px;font-weight:400;line-height:1.6;padding:0;border-radius:0;width:auto;box-shadow:none;white-space:normal;border:none;margin-top:2px}
   @media(max-width:768px){
-    .page-info-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:10px;font-weight:700;cursor:default;margin-left:8px;position:relative;vertical-align:middle;flex-shrink:0}
+    .page-desc-text{display:none!important}
+    .page-info-icon{display:inline-flex!important;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:10px;font-weight:700;cursor:default;margin-left:8px;position:relative;vertical-align:middle;flex-shrink:0}
     .page-info-icon .page-info-tooltip{display:none;position:absolute;left:50%;transform:translateX(-50%);top:24px;background:#f3f4f6;color:#374151;font-size:10px;font-weight:400;line-height:1.6;padding:10px 14px;border-radius:8px;width:260px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:normal;border:1px solid #e5e7eb}
     .page-info-icon:hover .page-info-tooltip{display:block}
   }
@@ -677,7 +679,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
 
       <!-- DREHTERMINE -->
       <div class="page" id="page-shoots">
-        <div class="page-title" style="justify-content:space-between"><span style="display:flex;align-items:center">Drehterminplanung<span class="page-info-icon client-only">?</span><span class="page-info-tooltip client-only" style="display:block;font-size:11px;color:var(--text3);font-weight:400;margin-top:2px;line-height:1.6">Hier findest du die Übersicht über kommende Drehtermine und was dort geplant ist. Du kannst eigene Ideen hinzufügen oder vorhandene bearbeiten.</span></span><button class="btn-primary agency-only" onclick="toggleShootAddForm()" style="font-size:11px;padding:7px 14px">+ Drehtermin</button></div>
+        <div class="page-title" style="justify-content:space-between;align-items:center;flex-direction:row">Drehterminplanung<button class="btn-primary agency-only" onclick="toggleShootAddForm()" style="font-size:11px;padding:7px 14px">+ Drehtermin</button></div><p class="client-only page-desc-text">Hier findest du die Übersicht über kommende Drehtermine und was dort geplant ist. Du kannst eigene Ideen hinzufügen oder vorhandene bearbeiten.</p><span class="page-info-icon client-only" style="display:none">?<span class="page-info-tooltip">Hier findest du die Übersicht über kommende Drehtermine und was dort geplant ist. Du kannst eigene Ideen hinzufügen oder vorhandene bearbeiten.</span></span>
         <!-- Inline Drehtermin-Formular -->
         <div id="shoot-add-form" class="card agency-only" style="display:none;margin-bottom:14px">
           <div class="card-title">Neuer Drehtermin</div>
@@ -709,7 +711,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
 
       <!-- TO-DOS -->
       <div class="page" id="page-todos">
-        <div class="page-title">To-Dos<span class="page-info-icon client-only">?</span><span class="page-info-tooltip client-only" style="display:block;font-size:11px;color:var(--text3);font-weight:400;margin-top:2px;line-height:1.6">Hier findest du offene To-Dos, die du je nach Priorität zeitnah bearbeiten solltest, damit unsere Zusammenarbeit reibungslos ablaufen kann.</span></div>
+        <div class="page-title" style="flex-direction:row;align-items:center">To-Dos</div><p class="client-only page-desc-text">Hier findest du offene To-Dos, die du je nach Priorität zeitnah bearbeiten solltest, damit unsere Zusammenarbeit reibungslos ablaufen kann.</p><span class="page-info-icon client-only" style="display:none">?<span class="page-info-tooltip">Hier findest du offene To-Dos, die du je nach Priorität zeitnah bearbeiten solltest, damit unsere Zusammenarbeit reibungslos ablaufen kann.</span></span>
         <div class="card agency-only"><div class="card-title">Neue Aufgabe</div>
           <div class="form-row"><div><span class="flbl">Aufgabe</span><input type="text" id="new-todo-text" style="margin:0"></div><div><span class="flbl">Fällig am</span><input type="date" id="new-todo-date" style="margin:0"></div></div>
           <div class="form-row" style="margin-top:8px"><div><span class="flbl">Priorität</span><select id="new-todo-prio" style="margin:0"><option value="high">Hoch</option><option value="med" selected>Mittel</option><option value="low">Niedrig</option></select></div><div><span class="flbl">Zugewiesen an</span><select id="new-todo-assign" style="margin:0"><option value="agency">Agentur</option><option value="client">Kunde</option><option value="both">Beide</option></select></div></div>
@@ -776,7 +778,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
 
       <!-- KALENDER -->
       <div class="page" id="page-calendar">
-        <div class="page-title">Content-Kalender<span class="page-info-icon client-only">?</span><span class="page-info-tooltip client-only" style="display:block;font-size:11px;color:var(--text3);font-weight:400;margin-top:2px;line-height:1.6">Hier findest du eine Auflistung der kommenden Posts auf den ausgewählten Social-Media-Plattformen. Du kannst das Datum oder die Caption von einzelnen Posts verändern, wenn du das möchtest. Änderungen an Posts der nächsten 14 Tage können leider nicht mehr berücksichtigt werden.</span></div>
+        <div class="page-title" style="flex-direction:row;align-items:center">Content-Kalender</div><p class="client-only page-desc-text">Hier findest du eine Auflistung der kommenden Posts auf den ausgewählten Social-Media-Plattformen. Du kannst das Datum oder die Caption von einzelnen Posts verändern, wenn du das möchtest. Änderungen an Posts der nächsten 14 Tage können leider nicht mehr berücksichtigt werden.</p><span class="page-info-icon client-only" style="display:none">?<span class="page-info-tooltip">Hier findest du eine Auflistung der kommenden Posts auf den ausgewählten Social-Media-Plattformen. Du kannst das Datum oder die Caption von einzelnen Posts verändern, wenn du das möchtest. Änderungen an Posts der nächsten 14 Tage können leider nicht mehr berücksichtigt werden.</span></span>
         <div class="card">
           <div class="cal-nav"><button class="cal-nav-btn" onclick="calPrev()">← zurück</button><span class="cal-nav-title" id="cal-month-label"></span><button class="cal-nav-btn" onclick="calNext()">weiter →</button></div>
           <div class="legend"><span style="font-size:10px;font-weight:500;color:var(--text3)">Legende:</span><div class="legend-item"><div class="legend-dot ev-reach"></div>Reach</div><div class="legend-item"><div class="legend-dot ev-trust"></div>Trust</div><div class="legend-item"><div class="legend-dot ev-ad"></div>Werbeanzeige</div><div class="legend-item"><div class="legend-dot ev-shoot"></div>Drehtermin</div></div>
