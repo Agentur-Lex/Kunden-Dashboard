@@ -1458,7 +1458,7 @@ function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kach
       +(SHOW_DONE_CUSTOMERS?'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:8px">'+doneKeys.map(kachelHtml).join('')+'</div>':'')
       +'</div>';
   }
-  if(SHOW_ADD_FORM){h+='<div class="kachel-form"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Neuen Kunden anlegen</div><span class="flbl">Firmenname</span><input type="text" id="new-cust-name" placeholder="z.B. Mustermann GmbH"><span class="flbl">Benutzername</span><input type="text" id="new-cust-user" placeholder="z.B. mustermann"><span class="flbl">Temporäres Passwort</span><input type="text" id="new-cust-pw" placeholder="z.B. temp123" style="margin-bottom:14px"><div style="display:flex;gap:8px"><button class="btn-primary" onclick="addCustomer()">Anlegen</button><button class="btn-outline" onclick="hideAddForm()">Abbrechen</button></div></div>';}else{h+='<div class="kachel-add" onclick="showAddForm()"><div style="font-size:24px;color:var(--accent);margin-bottom:6px">＋</div><div style="font-size:11px;font-weight:600;color:var(--accent)">Kunden hinzufuegen</div></div>';}kacheln.innerHTML=h;
+  if(SHOW_ADD_FORM){h+='<div class="kachel-form"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Neuen Kunden anlegen</div><span class="flbl">Firmenname</span><input type="text" id="new-cust-name" placeholder="z.B. Mustermann GmbH"><span class="flbl">Benutzername</span><input type="text" id="new-cust-user" placeholder="z.B. mustermann"><span class="flbl">Temporäres Passwort</span><input type="text" id="new-cust-pw" placeholder="z.B. temp123" style="margin-bottom:14px"><div style="display:flex;gap:8px"><button class="btn-primary" onclick="addCustomer()">Anlegen</button><button class="btn-outline" onclick="hideAddForm()">Abbrechen</button></div></div>';}else{h+='<div class="kachel-add" onclick="showAddForm()"><div style="font-size:24px;color:var(--accent);margin-bottom:6px">＋</div><div style="font-size:11px;font-weight:600;color:var(--accent)">Kunden hinzufügen</div></div>';}kacheln.innerHTML=h;
   var atEl=document.getElementById('agency-todos-all');var atEmpty=document.getElementById('agency-todos-empty');var all=[];Object.keys(DATA).forEach(function(k){DATA[k].todos.filter(function(t){return!t.done&&(t.assign==='agency'||t.assign==='both');}).forEach(function(t){all.push({t:t,cname:DATA[k].name});});});all.sort(function(a,b){return({high:0,med:1,low:2})[a.t.prio]-({high:0,med:1,low:2})[b.t.prio];});if(!all.length){atEl.innerHTML='';if(atEmpty)atEmpty.style.display='block';}else{if(atEmpty)atEmpty.style.display='none';atEl.innerHTML=all.map(function(e){return'<div class="agency-todo-row"><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:var(--text)">'+e.t.text+'</div><div style="font-size:10px;color:var(--text3)">'+e.cname+(e.t.due?' · '+fmtISO(e.t.due):'')+'</div></div><span class="priority-pill '+pCls(e.t.prio)+'">'+pLbl(e.t.prio)+'</span></div>';}).join('');}
   var postsEl=document.getElementById('upcoming-posts-all');var postsEmpty=document.getElementById('upcoming-posts-empty');var ap=[];Object.keys(DATA).forEach(function(k){DATA[k].rows.filter(function(c){return normalizeDate(c.date)>=today&&c.art==='Werbeanzeige';}).forEach(function(c){ap.push({c:c,cname:DATA[k].name});});});ap.sort(function(a,b){return normalizeDate(a.c.date).localeCompare(normalizeDate(b.c.date));});ap=ap.slice(0,8);if(!ap.length){postsEl.innerHTML='';if(postsEmpty)postsEmpty.style.display='block';}else{if(postsEmpty)postsEmpty.style.display='none';postsEl.innerHTML=ap.map(function(e){return'<div class="post-row"><span style="font-size:10px;color:var(--text3);width:72px;flex-shrink:0;font-family:\'DM Mono\',monospace">'+fmtDisp(e.c.date)+'</span><span style="flex:1;font-size:11px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.c.name+'</span><span style="font-size:10px;color:var(--text3);margin-right:6px">'+e.cname+'</span></div>';}).join('');}}
 function showAddForm(){SHOW_ADD_FORM=true;renderAgencyOverview();}function hideAddForm(){SHOW_ADD_FORM=false;renderAgencyOverview();}
@@ -1939,11 +1939,28 @@ function renderShootsList(){
         shoot.status=this.checked?'done':'plan';
         // Add/remove client todo
         if(this.checked&&!wasDone){
-          var todoText='Drehtermin freigeben: '+shoot.title;
-          cd().todos.unshift({text:todoText,due:'',prio:'high',assign:'client',done:false,shootRef:shootIdx,createdAt:Date.now()});
+          var todoText='Drehtermin abgeschlossen: '+shoot.title+' – Bitte Content-Pieces prüfen.';
+          var newTodo={text:todoText,due:'',prio:'high',assign:'client',done:false,shootRef:shootIdx,createdAt:Date.now()};
+          cd().todos.unshift(newTodo);
+          // Direkt in Supabase speichern
+          (function(custId,todo){
+            getSB().from('todos').insert({
+              customer_id:custId,
+              text:todo.text,
+              due:null,
+              prio:'high',
+              assign:'client',
+              done:false,
+              created_at:todo.createdAt,
+              shoot_ref:todo.shootRef,
+              is_reset:false,
+              is_brainstorm:false
+            }).select().maybeSingle().then(function(r){
+              if(r.data)todo._id=r.data.id;
+            });
+          })(ACTIVE_CUSTOMER,newTodo);
           showToast('To-Do für Kunden erstellt!');
         } else if(!this.checked&&wasDone){
-          // Remove matching todo if still open
           cd().todos=cd().todos.filter(function(t){return !(t.shootRef===shootIdx&&!t.done);});
         }
         scheduleSave();
