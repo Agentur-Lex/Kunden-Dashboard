@@ -1444,11 +1444,11 @@ function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kach
       +'<option value="paused"'+(st==='paused'?' selected':'')+'>Pausiert</option>'
       +'<option value="done"'+(st==='done'?' selected':'')+'>Abgeschlossen</option>'
       +'</select>'
-      +'<button class="kachel-del" onclick="deleteCustomer(&quot;'+k+'&quot;)" title="Loeschen">🗑</button>'
+      +'<button class="kachel-del" onclick="deleteCustomer(&quot;'+k+'&quot;)" title="Löschen">🗑</button>'
       +'</div>'
       +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+d.analytics.reach+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Offene To-Dos</span><span class="kachel-val" style="color:'+tc+'">'+open+'</span></div>'
-      +'<div class="kachel-row"><span class="kachel-key">Naechster Post</span><span class="kachel-val">'+next+'</span></div>'
+      +'<div class="kachel-row"><span class="kachel-key">Nächster Post</span><span class="kachel-val">'+next+'</span></div>'
       +'</div>';
   }
   activeKeys.forEach(function(k){h+=kachelHtml(k);});
@@ -1458,7 +1458,7 @@ function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kach
       +(SHOW_DONE_CUSTOMERS?'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:8px">'+doneKeys.map(kachelHtml).join('')+'</div>':'')
       +'</div>';
   }
-  if(SHOW_ADD_FORM){h+='<div class="kachel-form"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Neuen Kunden anlegen</div><span class="flbl">Firmenname</span><input type="text" id="new-cust-name" placeholder="z.B. Mustermann GmbH"><span class="flbl">Benutzername</span><input type="text" id="new-cust-user" placeholder="z.B. mustermann"><span class="flbl">Temporaeres Passwort</span><input type="text" id="new-cust-pw" placeholder="z.B. temp123" style="margin-bottom:14px"><div style="display:flex;gap:8px"><button class="btn-primary" onclick="addCustomer()">Anlegen</button><button class="btn-outline" onclick="hideAddForm()">Abbrechen</button></div></div>';}else{h+='<div class="kachel-add" onclick="showAddForm()"><div style="font-size:24px;color:var(--accent);margin-bottom:6px">＋</div><div style="font-size:11px;font-weight:600;color:var(--accent)">Kunden hinzufuegen</div></div>';}kacheln.innerHTML=h;
+  if(SHOW_ADD_FORM){h+='<div class="kachel-form"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Neuen Kunden anlegen</div><span class="flbl">Firmenname</span><input type="text" id="new-cust-name" placeholder="z.B. Mustermann GmbH"><span class="flbl">Benutzername</span><input type="text" id="new-cust-user" placeholder="z.B. mustermann"><span class="flbl">Temporäres Passwort</span><input type="text" id="new-cust-pw" placeholder="z.B. temp123" style="margin-bottom:14px"><div style="display:flex;gap:8px"><button class="btn-primary" onclick="addCustomer()">Anlegen</button><button class="btn-outline" onclick="hideAddForm()">Abbrechen</button></div></div>';}else{h+='<div class="kachel-add" onclick="showAddForm()"><div style="font-size:24px;color:var(--accent);margin-bottom:6px">＋</div><div style="font-size:11px;font-weight:600;color:var(--accent)">Kunden hinzufuegen</div></div>';}kacheln.innerHTML=h;
   var atEl=document.getElementById('agency-todos-all');var atEmpty=document.getElementById('agency-todos-empty');var all=[];Object.keys(DATA).forEach(function(k){DATA[k].todos.filter(function(t){return!t.done&&(t.assign==='agency'||t.assign==='both');}).forEach(function(t){all.push({t:t,cname:DATA[k].name});});});all.sort(function(a,b){return({high:0,med:1,low:2})[a.t.prio]-({high:0,med:1,low:2})[b.t.prio];});if(!all.length){atEl.innerHTML='';if(atEmpty)atEmpty.style.display='block';}else{if(atEmpty)atEmpty.style.display='none';atEl.innerHTML=all.map(function(e){return'<div class="agency-todo-row"><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:var(--text)">'+e.t.text+'</div><div style="font-size:10px;color:var(--text3)">'+e.cname+(e.t.due?' · '+fmtISO(e.t.due):'')+'</div></div><span class="priority-pill '+pCls(e.t.prio)+'">'+pLbl(e.t.prio)+'</span></div>';}).join('');}
   var postsEl=document.getElementById('upcoming-posts-all');var postsEmpty=document.getElementById('upcoming-posts-empty');var ap=[];Object.keys(DATA).forEach(function(k){DATA[k].rows.filter(function(c){return normalizeDate(c.date)>=today&&c.art==='Werbeanzeige';}).forEach(function(c){ap.push({c:c,cname:DATA[k].name});});});ap.sort(function(a,b){return normalizeDate(a.c.date).localeCompare(normalizeDate(b.c.date));});ap=ap.slice(0,8);if(!ap.length){postsEl.innerHTML='';if(postsEmpty)postsEmpty.style.display='block';}else{if(postsEmpty)postsEmpty.style.display='none';postsEl.innerHTML=ap.map(function(e){return'<div class="post-row"><span style="font-size:10px;color:var(--text3);width:72px;flex-shrink:0;font-family:\'DM Mono\',monospace">'+fmtDisp(e.c.date)+'</span><span style="flex:1;font-size:11px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.c.name+'</span><span style="font-size:10px;color:var(--text3);margin-right:6px">'+e.cname+'</span></div>';}).join('');}}
 function showAddForm(){SHOW_ADD_FORM=true;renderAgencyOverview();}function hideAddForm(){SHOW_ADD_FORM=false;renderAgencyOverview();}
@@ -1500,15 +1500,15 @@ async function addCustomer(){
 
 async function deleteCustomer(key){
   var custName=DATA[key].name;
-  if(!confirm('Kunden "'+custName+'" wirklich loeschen? Alle Daten werden unwiderruflich geloescht.'))return;
-  showLoading('Loeschen...');
+  if(!confirm('Kunden "'+custName+'" wirklich löschen? Alle Daten werden unwiderruflich gelöscht.'))return;
+  showLoading('Löschen...');
   var sb=getSB();
   try {
     // 1. Auth-User-ID ermitteln (role: client)
     var ucRes=await sb.from('user_customer').select('user_id').eq('customer_id',key).eq('role','client').maybeSingle();
     var authUserId=ucRes.data?ucRes.data.user_id:null;
 
-    // 2. Alle abhaengigen Tabellen loeschen
+    // 2. Alle abhaengigen Tabellen löschen
     await sb.from('todos').delete().eq('customer_id',key);
     await sb.from('shoots').delete().eq('customer_id',key);
     await sb.from('content_rows').delete().eq('customer_id',key);
@@ -1518,7 +1518,7 @@ async function deleteCustomer(key){
     await sb.from('customer_creds').delete().eq('customer_id',key);
     await sb.from('user_customer').delete().eq('customer_id',key);
 
-    // 3. customers-Eintrag loeschen
+    // 3. customers-Eintrag löschen
     await sb.from('customers').delete().eq('id',key);
 
     // 4. Lokal aufraeumen
@@ -1531,12 +1531,12 @@ async function deleteCustomer(key){
     renderAgencyOverview();
     hideLoading();
 
-    // 5. Popup: Link zu Supabase Auth um User komplett zu loeschen
+    // 5. Popup: Link zu Supabase Auth um User komplett zu löschen
     showDeleteUserHint(custName, authUserId);
 
   } catch(e) {
     hideLoading();
-    alert('Fehler beim Loeschen: '+e.message);
+    alert('Fehler beim Löschen: '+e.message);
     console.error('deleteCustomer error:',e);
   }
 }
@@ -1551,16 +1551,16 @@ function showDeleteUserHint(custName, authUserId){
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999';
   overlay.innerHTML=
     '<div style="background:#fff;border-radius:16px;padding:28px 28px 24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.18)">'
-    +'<div style="font-size:22px;margin-bottom:10px">🗑️ Kunde geloescht</div>'
+    +'<div style="font-size:22px;margin-bottom:10px">🗑️ Kunde gelöscht</div>'
     +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">'+custName+' wurde aus dem Dashboard entfernt.</div>'
     +'<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:18px">'
-    +'Der Supabase Auth-User existiert noch und muss manuell geloescht werden:<br>'
+    +'Der Supabase Auth-User existiert noch und muss manuell gelöscht werden:<br>'
     +(authUserId?'<span style="font-family:monospace;font-size:10px;background:var(--surface2);padding:2px 6px;border-radius:4px;display:inline-block;margin:4px 0">User-ID: '+authUserId+'</span><br>':'')
     +'</div>'
     +'<a href="'+url+'" target="_blank" rel="noopener" style="display:block;text-align:center;background:var(--accent);color:#fff;border-radius:8px;padding:10px 0;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:10px">'
     +'Supabase Auth &rarr; Users oeffnen</a>'
     +'<div style="font-size:10px;color:var(--text3);margin-bottom:14px;line-height:1.5">'
-    +'Dort den User suchen und per Kontextmenue "Delete User" loeschen.'
+    +'Dort den User suchen und per Kontextmenü "Delete User" löschen.'
     +(authUserId?' Die User-ID oben hilft beim Suchen.':'')
     +'</div>'
     +'<button onclick="document.getElementById(&quot;delete-user-hint-modal&quot;).remove()" style="width:100%;padding:8px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit">Schliessen</button>'
@@ -2888,7 +2888,7 @@ function renderCredList(){
     var td4=document.createElement('td');td4.className='cred-status-col';
     var sb=document.createElement('span');sb.className='priority-pill';
     if(c.pwChanged===false&&c.resetPending){sb.className+=' p-high';sb.textContent='Reset angefragt';}
-    else if(c.pwChanged===false){sb.className+=' p-med';sb.textContent='Noch nicht geaendert';}
+    else if(c.pwChanged===false){sb.className+=' p-med';sb.textContent='Noch nicht geändert';}
     else{sb.className+=' p-low';sb.textContent='Eigenes Passwort';}
     td4.appendChild(sb);
     var td5=document.createElement('td');td5.className='cred-reset-col';
@@ -4235,7 +4235,7 @@ async function loadAllCustomers(){
 async function loadCustomerData(custId,custObj){
   var sb=getSB();var cust=custObj;
   if(!cust){var cr=await sb.from('customers').select('*').eq('id',custId).maybeSingle();if(cr.error||!cr.data)return;cust=cr.data;}
-  if(!cust){console.error('loadCustomerData: cust nicht gefunden fuer',custId);return;}
+  if(!cust){console.error('loadCustomerData: cust nicht gefunden für',custId);return;}
   var r=await Promise.all([
     sb.from('todos').select('*').eq('customer_id',custId),
     sb.from('shoots').select('*').eq('customer_id',custId).order('date').then(function(r){if(r.error)console.error('shoots load error:',r.error);return r;}),
@@ -4361,14 +4361,14 @@ async function doSetPassword(){
 // ── FIX: doAgencyReset löscht Reset-Todo und setzt pw_changed zurück ──
 async function doAgencyReset(k){
   var label=CREDS[k]?CREDS[k].label:k;
-  if(!confirm('Passwort fuer "'+label+'" zuruecksetzen? Der Kunde muss beim naechsten Login ein neues Passwort vergeben.'))return;
+  if(!confirm('Passwort für "'+label+'" zurücksetzen? Der Kunde muss beim nächsten Login ein neues Passwort vergeben.'))return;
   var sb=getSB();
   try{
     await sb.from('customer_creds').update({pw_changed:false}).eq('customer_id',k);
     if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;}
     renderCredList();
     var tmpPw=CREDS[k]?CREDS[k].tempPw:'(siehe Supabase)';
-    alert('Temporaeres Passwort: '+tmpPw+' - Bitte gib dem Kunden dieses Passwort. Er wird beim naechsten Login aufgefordert, ein neues zu vergeben.');
+    alert('Temporäres Passwort: '+tmpPw+' - Bitte gib dem Kunden dieses Passwort. Er wird beim nächsten Login aufgefordert, ein neues zu vergeben.');
   }catch(e){
     alert('Fehler: '+e.message);
   }
