@@ -1800,7 +1800,7 @@ function renderShootsList(){
   futureIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
   pastIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
   var showIdx=futureIdx.slice();
-  if(SHOW_PAST_SHOOTS&&ROLE==='agency') showIdx=showIdx.concat(pastIdx);
+  if(ROLE==='agency'){if(SHOW_PAST_SHOOTS)showIdx=showIdx.concat(pastIdx);}else{showIdx=showIdx.concat(pastIdx);}
 
   var sl=document.getElementById('shoots-list');
   if(!sl)return;
