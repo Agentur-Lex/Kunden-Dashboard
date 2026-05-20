@@ -378,7 +378,7 @@ textarea{resize:vertical;line-height:1.5}
   .shoot-done-mobile{display:none}
   
   .shoot-done-mobile{display:flex!important;font-size:9px!important;align-items:center;gap:4px}
-  .shoot-done-wrap{display:none!important}
+  /* .shoot-done-wrap ist auf Desktop sichtbar */
   .shoot-del-btn{margin-left:8px;flex-shrink:0}
   
   .cal-grid{grid-auto-rows:60px!important}
@@ -1926,7 +1926,7 @@ function renderShootsList(){
     // Abgeschlossen checkbox
     var doneWrap=document.createElement('label');
     doneWrap.className='shoot-done-wrap';
-    doneWrap.style.cssText='display:none;align-items:center;gap:5px;font-size:11px;color:var(--text3);flex-shrink:0;margin-left:4px;'+(ROLE!=='agency'?'pointer-events:none;opacity:.6':'cursor:pointer');
+    doneWrap.style.cssText='display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);flex-shrink:0;margin-left:4px;'+(ROLE!=='agency'?'pointer-events:none;opacity:.6':'cursor:pointer');
     var doneChk=document.createElement('input');
     doneChk.type='checkbox';
     doneChk.checked=(s.status==='done');
@@ -1944,7 +1944,6 @@ function renderShootsList(){
           cd().todos.unshift(newTodo);
           // Direkt in Supabase speichern
           (function(custId,todo){
-            console.log('Inserting todo for customer:', custId, 'todo:', JSON.stringify(todo));
             getSB().from('todos').insert({
               customer_id:custId,
               text:todo.text,
@@ -1957,7 +1956,6 @@ function renderShootsList(){
               is_reset:false,
               is_brainstorm:false
             }).select().maybeSingle().then(function(r){
-              console.log('Insert result:', JSON.stringify(r));
               if(r.data)todo._id=r.data.id;
             });
           })(ACTIVE_CUSTOMER,newTodo);
@@ -1976,7 +1974,22 @@ function renderShootsList(){
     var doneWrapClone=doneWrap.cloneNode(true);
     doneWrapClone.className='shoot-done-mobile';
     doneWrapClone.style.cssText='display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);cursor:'+(ROLE==="agency"?'pointer':'default');
-        (function(s3,i3){doneWrapClone.querySelector('input').addEventListener('change',function(){var d=cd();if(d.shoots[i3])d.shoots[i3].status=this.checked?'done':(d.shoots[i3].status==='done'?'ok':d.shoots[i3].status);scheduleSave();renderShootsList();});})( s,i);
+        (function(s3,i3,shootTitle){doneWrapClone.querySelector('input').addEventListener('change',function(){
+          var d=cd();
+          if(!d.shoots[i3])return;
+          var wasDone=d.shoots[i3].status==='done';
+          d.shoots[i3].status=this.checked?'done':(wasDone?'plan':d.shoots[i3].status);
+          if(this.checked&&!wasDone){
+            var todoText='Drehtermin abgeschlossen: '+shootTitle+' – Bitte Content-Pieces prüfen.';
+            var newTodo={text:todoText,due:'',prio:'high',assign:'client',done:false,shootRef:i3,createdAt:Date.now()};
+            d.todos.unshift(newTodo);
+            getSB().from('todos').insert({customer_id:ACTIVE_CUSTOMER,text:todoText,due:null,prio:'high',assign:'client',done:false,created_at:newTodo.createdAt,shoot_ref:i3,is_reset:false,is_brainstorm:false}).select().maybeSingle().then(function(r){if(r&&r.data)newTodo._id=r.data.id;});
+            showToast('To-Do für Kunden erstellt!');
+          } else if(!this.checked&&wasDone){
+            d.todos=d.todos.filter(function(t){return!(t.shootRef===i3&&!t.done);});
+          }
+          scheduleSave();renderShootsList();renderTodos();
+        });})( s,i,s.title);
     if(locRow)locRow.appendChild(doneWrapClone);
 
 
@@ -4265,7 +4278,6 @@ async function loadCustomerData(custId,custObj){
     sb.from('customer_creds').select('*').eq('customer_id',custId).maybeSingle()
   ]);
   DATA[custId]=sbRowToData(cust,r[0].data||[],r[1].data||[],r[2].data||[],r[3].data||[],r[4].data||{},r[5].data||{});
-  console.log('loadCustomerData todos:', r[0].data?.length, 'todos geladen, assign-client:', (r[0].data||[]).filter(function(t){return t.assign==='client';}).length);
   ACTIVE_CUSTOMER=custId;
   var cred=r[6].data||{};
   CREDS[custId]={
@@ -4291,7 +4303,6 @@ async function sbSaveCustomer(){
   else{await sb.from('onboarding').insert({customer_id:cId,questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{},ob_steps:d.obSteps||[]});}
 }
 async function sbSaveAllTodos(){
-  console.log('sbSaveAllTodos: todos count=', (cd()&&cd().todos)?cd().todos.length:0, 'client todos=', (cd()&&cd().todos)?cd().todos.filter(function(t){return t.assign==='client';}).length:0);
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
   // Einzelne Todos upserten statt delete+insert (RLS-sicher für Kunden)
   for(var i=0;i<todos.length;i++){
