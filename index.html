@@ -1276,9 +1276,18 @@ async function doLogin(){
       if(allC.data&&allC.data.length){var uid=res.data.user.id;for(var ci=0;ci<allC.data.length;ci++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[ci].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
       await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
     }else{
+      console.log('USER ID:', res.data.user.id);
       var cr=await sb.from('user_customer').select('customer_id,role').eq('user_id',res.data.user.id);
-      var crRow=cr.data&&cr.data.find(function(r){return r.role==='client';});
-      if(!crRow){hideLoading();err.textContent='Kein Kundenkonto gefunden.';err.style.display='block';return;}
+      console.log('user_customer result:', JSON.stringify(cr));
+      // Fallback: wenn kein client-Eintrag, nimm ersten Eintrag
+      var crRow=cr.data&&(cr.data.find(function(r){return r.role==='client';})||cr.data[0]);
+      if(!crRow){
+        // Letzter Fallback: direkt customers über slug suchen
+        var slugRes=await sb.from('customers').select('id').eq('slug',u).maybeSingle();
+        console.log('slug fallback:', JSON.stringify(slugRes));
+        if(slugRes.data&&slugRes.data.id){crRow={customer_id:slugRes.data.id};}
+        else{hideLoading();err.textContent='Kein Kundenkonto gefunden.';err.style.display='block';return;}
+      }
       var custId=crRow.customer_id;await loadCustomerData(custId);
       hideLoading();SESSION={type:'client',key:custId};startClientSession(custId);
     }
