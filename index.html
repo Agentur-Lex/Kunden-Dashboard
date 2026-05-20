@@ -1276,9 +1276,10 @@ async function doLogin(){
       if(allC.data&&allC.data.length){var uid=res.data.user.id;for(var ci=0;ci<allC.data.length;ci++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[ci].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
       await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
     }else{
-      var cr=await sb.from('user_customer').select('customer_id').eq('user_id',res.data.user.id).eq('role','client').maybeSingle();
-      if(!cr.data||!cr.data.customer_id){hideLoading();err.textContent='Kein Kundenkonto gefunden.';err.style.display='block';return;}
-      var custId=cr.data.customer_id;await loadCustomerData(custId);
+      var cr=await sb.from('user_customer').select('customer_id,role').eq('user_id',res.data.user.id);
+      var crRow=cr.data&&cr.data.find(function(r){return r.role==='client';});
+      if(!crRow){hideLoading();err.textContent='Kein Kundenkonto gefunden.';err.style.display='block';return;}
+      var custId=crRow.customer_id;await loadCustomerData(custId);
       hideLoading();SESSION={type:'client',key:custId};startClientSession(custId);
     }
   }catch(e){hideLoading();console.error('LOGIN ERROR:',e);err.textContent='Fehler: '+e.message;err.style.display='block';}
@@ -4398,8 +4399,8 @@ async function doChangePasswordSB(){
         if(allC.data&&allC.data.length){for(var i2=0;i2<allC.data.length;i2++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[i2].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
         await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
       }else{
-        var cr2=await sb.from('user_customer').select('customer_id').eq('user_id',uid).eq('role','client').maybeSingle();
-        if(cr2.data&&cr2.data.customer_id){var cId2=cr2.data.customer_id;await loadCustomerData(cId2);hideLoading();SESSION={type:'client',key:cId2};startClientSession(cId2);}
+        var cr2=await sb.from('user_customer').select('customer_id,role').eq('user_id',uid);
+        if(cr2.data&&cr2.data.length){var cId2=(cr2.data.find(function(r){return r.role==='client';})||cr2.data[0]).customer_id;await loadCustomerData(cId2);hideLoading();SESSION={type:'client',key:cId2};startClientSession(cId2);}
         else{hideLoading();}
       }
     }
