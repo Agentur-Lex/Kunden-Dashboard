@@ -4265,6 +4265,7 @@ async function loadCustomerData(custId,custObj){
     sb.from('customer_creds').select('*').eq('customer_id',custId).maybeSingle()
   ]);
   DATA[custId]=sbRowToData(cust,r[0].data||[],r[1].data||[],r[2].data||[],r[3].data||[],r[4].data||{},r[5].data||{});
+  console.log('loadCustomerData todos:', r[0].data?.length, 'todos geladen, assign-client:', (r[0].data||[]).filter(function(t){return t.assign==='client';}).length);
   ACTIVE_CUSTOMER=custId;
   var cred=r[6].data||{};
   CREDS[custId]={
@@ -4290,6 +4291,7 @@ async function sbSaveCustomer(){
   else{await sb.from('onboarding').insert({customer_id:cId,questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{},ob_steps:d.obSteps||[]});}
 }
 async function sbSaveAllTodos(){
+  console.log('sbSaveAllTodos: todos count=', (cd()&&cd().todos)?cd().todos.length:0, 'client todos=', (cd()&&cd().todos)?cd().todos.filter(function(t){return t.assign==='client';}).length:0);
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
   // Einzelne Todos upserten statt delete+insert (RLS-sicher für Kunden)
   for(var i=0;i<todos.length;i++){
