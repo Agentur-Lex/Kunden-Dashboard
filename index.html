@@ -1571,7 +1571,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER)return;var d=cd();var an=d.analytics;setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',an.reach],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',an.reach],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
@@ -1809,13 +1809,13 @@ function renderShootsList(){
 
   var sl=document.getElementById('shoots-list');
   if(!sl)return;
-  sl.innerHTML='';
+  try{sl.innerHTML='';}catch(e){return;}
 
   if(showIdx.length===0){
     var em=document.createElement('div');
     em.style.cssText='font-size:11px;color:var(--text3);padding:4px 0';
     em.textContent='Keine Termine geplant.';
-    sl.appendChild(em);
+    if(sl)sl.appendChild(em);
   }
 
   var pastHeaderAdded=false;
@@ -1831,7 +1831,7 @@ function renderShootsList(){
       var ph=document.createElement('div');
       ph.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;padding:10px 0 6px';
       ph.textContent='Vergangene Termine';
-      sl.appendChild(ph);
+      if(sl)sl.appendChild(ph);
     }
 
     // ── Shoot wrapper ──
@@ -1958,7 +1958,7 @@ function renderShootsList(){
     doneWrapClone.className='shoot-done-mobile';
     doneWrapClone.style.cssText='display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);cursor:'+(ROLE==="agency"?'pointer':'default');
         (function(s3,i3){doneWrapClone.querySelector('input').addEventListener('change',function(){var d=cd();if(d.shoots[i3])d.shoots[i3].status=this.checked?'done':(d.shoots[i3].status==='done'?'ok':d.shoots[i3].status);scheduleSave();renderShootsList();});})( s,i);
-    locRow.appendChild(doneWrapClone);
+    if(locRow)locRow.appendChild(doneWrapClone);
 
 
     // Collapse toggle button
@@ -2150,7 +2150,7 @@ function renderShootsList(){
     panel.appendChild(addRow);
 
     wrap.appendChild(panel);
-    sl.appendChild(wrap);
+    if(sl)sl.appendChild(wrap);
   });
 
   // Overview: only future, compact header only
