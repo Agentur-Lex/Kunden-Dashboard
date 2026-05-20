@@ -1944,6 +1944,7 @@ function renderShootsList(){
           cd().todos.unshift(newTodo);
           // Direkt in Supabase speichern
           (function(custId,todo){
+            console.log('Inserting todo for customer:', custId, 'todo:', JSON.stringify(todo));
             getSB().from('todos').insert({
               customer_id:custId,
               text:todo.text,
@@ -1956,6 +1957,7 @@ function renderShootsList(){
               is_reset:false,
               is_brainstorm:false
             }).select().maybeSingle().then(function(r){
+              console.log('Insert result:', JSON.stringify(r));
               if(r.data)todo._id=r.data.id;
             });
           })(ACTIVE_CUSTOMER,newTodo);
