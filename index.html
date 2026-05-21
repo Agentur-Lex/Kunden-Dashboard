@@ -2051,7 +2051,7 @@ function renderShootsList(){
     if(ROLE==='agency'){
       var cpWrap=document.createElement('div');
       cpWrap.className='cp-counter';
-      cpWrap.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);flex-shrink:0';
+      cpWrap.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);flex-shrink:0;margin-left:38px';
       cpWrap.appendChild(document.createTextNode('Anzahl '));
       var cpIdeas=s.ideas||[];
       var cpCount=document.createElement('span');
@@ -2252,7 +2252,7 @@ function renderShootsList(){
       })(ri,linkBtn,delLinkBtn);
 
       tdL.style.cssText='text-align:center;padding:4px 6px;white-space:nowrap;position:relative';
-      delLinkBtn.style.cssText='display:'+(idea.link?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;line-height:1;padding:0;margin-left:2px;align-items:center;vertical-align:middle;transition:color .15s';
+      delLinkBtn.style.cssText='display:'+(idea.link?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;line-height:1;padding:0;align-items:center;transition:color .15s;position:relative;left:-57px;top:-38px;z-index:1';
       tdL.appendChild(linkBtn);
       tdL.appendChild(delLinkBtn);
       tr.appendChild(tdL);
