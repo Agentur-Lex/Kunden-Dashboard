@@ -2003,7 +2003,7 @@ function renderShootsList(){
         var ideas=d.shoots[shootIdx].ideas||[];
         var countSpan=document.createElement('span');
         countSpan.style.cssText='font-weight:600;color:var(--text)';
-        countSpan.textContent=ideas.length;
+        countSpan.textContent=ideas.filter(function(x){return x.thema&&x.thema.trim();}).length;
         cpWrap.appendChild(countSpan);
         cpWrap.appendChild(document.createTextNode(' / '));
         var targetInp=document.createElement('input');
