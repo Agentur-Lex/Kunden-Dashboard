@@ -1466,12 +1466,15 @@ function renderUpcomingShoots(){
   shoots.forEach(function(s){
     var filled=s.ideas.filter(function(x){return x.thema&&x.thema.trim();}).length;
     var contentStr=filled+' / '+s.target;
-    var contentColor=filled===0?'#dc2626':filled>=s.target&&s.target>0?'var(--green)':'#ea580c';
+    var contentColor,contentBg,contentBorder;
+    if(filled===0){contentColor='#dc2626';contentBg='rgba(220,38,38,0.08)';contentBorder='rgba(220,38,38,0.25)';}
+    else if(s.target>0&&filled>=s.target){contentColor='#16a34a';contentBg='rgba(22,163,74,0.08)';contentBorder='rgba(22,163,74,0.25)';}
+    else{contentColor='#f59e0b';contentBg='rgba(245,158,11,0.10)';contentBorder='rgba(245,158,11,0.30)';}
     html+='<tr style="border-bottom:1px solid var(--border2)">'
       +'<td style="padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)">'+fmtISO(s.date)+(s.time?' · '+s.time+' Uhr':'')+'</td>'
       +'<td style="padding:6px 10px;font-weight:600;color:var(--text)">'+escHtml(s.title||'–')+'</td>'
       +'<td style="padding:6px 10px;color:var(--text2)">'+escHtml(s.custName)+'</td>'
-      +'<td style="padding:6px 10px;text-align:center;font-weight:600;color:'+contentColor+'">'+contentStr+'</td>'
+      +'<td style="padding:6px 10px;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:'+contentColor+';background:'+contentBg+';border:1px solid '+contentBorder+'">'+contentStr+'</span></td>'
       +'</tr>';
   });
   html+='</tbody></table>';
