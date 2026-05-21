@@ -2075,6 +2075,7 @@ function renderShootsList(){
     var thDefs=[
       {l:'Content-Thema',w:'160px'},
       {l:'Erledigt',w:'72px'},
+      {l:'Link',w:'44px'},
       {l:'Spez.',w:'80px'},
       {l:'',w:'36px'}
     ];
@@ -2092,7 +2093,7 @@ function renderShootsList(){
     if(ideas.length===0){
       var emRow=document.createElement('tr');
       var emTd=document.createElement('td');
-      emTd.colSpan=4;
+      emTd.colSpan=5;
       emTd.style.cssText='padding:12px 10px;font-size:11px;color:var(--text3);text-align:center';
       emTd.textContent='Noch keine Content-Pieces.';
       emRow.appendChild(emTd);tbody.appendChild(emRow);
@@ -2156,6 +2157,43 @@ function renderShootsList(){
         });
         sel.addEventListener('click',function(e){e.stopPropagation();});
       })(ri);
+      // Link-Icon zwischen Erledigt und Spez.
+      var tdL=document.createElement('td');tdL.style.cssText='text-align:center;padding:4px 6px';
+      var linkBtn=document.createElement('button');
+      linkBtn.className='btn-icon';
+      linkBtn.title=idea.link?'Link öffnen: '+idea.link:'Link hinzufügen';
+      linkBtn.style.cssText='color:'+(idea.link?'var(--accent)':'var(--text3)')+';background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;transition:color .15s';
+      linkBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+      (function(idx2,btn){
+        btn.addEventListener('click',function(e){
+          e.stopPropagation();
+          var cur=cd().shoots[i].ideas[idx2].link||'';
+          if(cur){
+            // Link vorhanden: öffnen oder löschen (Shift+Klick löscht)
+            window.open(cur.startsWith('http')?cur:'https://'+cur,'_blank');
+          } else {
+            // Kein Link: eingeben
+            var url=prompt('Link eingeben:','');
+            if(url&&url.trim()){
+              cd().shoots[i].ideas[idx2].link=url.trim();
+              btn.style.color='var(--accent)';
+              btn.title='Link öffnen: '+url.trim();
+              scheduleSave();
+            }
+          }
+        });
+        btn.addEventListener('contextmenu',function(e){
+          e.preventDefault();e.stopPropagation();
+          if(confirm('Link entfernen?')){
+            cd().shoots[i].ideas[idx2].link='';
+            btn.style.color='var(--text3)';
+            btn.title='Link hinzufügen';
+            scheduleSave();
+          }
+        });
+      })(ri,linkBtn);
+      tdL.appendChild(linkBtn);tr.appendChild(tdL);
+
       tdS.appendChild(sel);tr.appendChild(tdS);
 
       // Delete – agency always, client only own
