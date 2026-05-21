@@ -2078,6 +2078,7 @@ function renderShootsList(){
           });
         })(shootIdx,targetVal);
         cpWrap.appendChild(minusBtn);cpWrap.appendChild(targetVal);cpWrap.appendChild(plusBtn);
+        header.appendChild(cpWrap);
       })(i);
     }
     // doneWrapClone entfernt – original doneWrap ist auf Desktop sichtbar
@@ -2140,7 +2141,6 @@ function renderShootsList(){
       {l:'Erledigt',w:'72px'},
       {l:'Link',w:'44px'},
       {l:'Spez.',w:'80px',cls:'shoot-ideas-spez'},
-      {l:'',w:'16px'},
       {l:'',w:'36px'}
     ];
     thDefs.forEach(function(th){
@@ -2158,7 +2158,7 @@ function renderShootsList(){
     if(ideas.length===0){
       var emRow=document.createElement('tr');
       var emTd=document.createElement('td');
-      emTd.colSpan=6;
+      emTd.colSpan=5;
       emTd.style.cssText='padding:12px 10px;font-size:11px;color:var(--text3);text-align:center';
       emTd.textContent='Noch keine Content-Pieces.';
       emRow.appendChild(emTd);tbody.appendChild(emRow);
@@ -2264,17 +2264,14 @@ function renderShootsList(){
         });
       })(ri,linkBtn,delLinkBtn);
 
-      tdL.style.cssText='text-align:center;padding:4px 6px';
+      tdL.style.cssText='text-align:center;padding:4px 6px;white-space:nowrap';
+      delLinkBtn.style.cssText='display:'+(idea.link?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;line-height:1;padding:0 0 0 3px;align-items:center;transition:color .15s';
       tdL.appendChild(linkBtn);
+      tdL.appendChild(delLinkBtn);
       tr.appendChild(tdL);
-      // X-Button in eigener Zelle nach Spez.
 
       tdS.appendChild(sel);tr.appendChild(tdS);
 
-      // X-Button (Link löschen) – nach Spez.
-      var tdX=document.createElement('td');tdX.style.cssText='padding:2px 4px;text-align:center;width:16px';
-      delLinkBtn.style.cssText='display:'+(idea.link?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:0;align-items:center;flex-shrink:0;transition:color .15s';
-      tdX.appendChild(delLinkBtn);tr.appendChild(tdX);
 
       // Delete – agency always, client only own
       var tdDel=document.createElement('td');tdDel.style.cssText='text-align:center;padding:4px';
