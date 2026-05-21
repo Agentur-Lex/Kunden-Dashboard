@@ -553,7 +553,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           <div class="card"><div class="card-title">Kommende Werbeanzeigen</div><div id="upcoming-posts-all"></div><div id="upcoming-posts-empty" style="display:none;font-size:11px;color:var(--text3)">Keine kommenden Ads.</div></div>
         </div>
         <div class="card" style="margin-bottom:14px">
-          <div class="card-title">Kommende Drehtermine</div>
+          <div class="card-title">Drehterminplanung</div>
           <div id="agency-upcoming-shoots"></div>
         </div>
       </div>
@@ -1461,12 +1461,12 @@ function renderUpcomingShoots(){
     +'<th style="text-align:left;padding:5px 10px 5px 0;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">DATUM</th>'
     +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">TITEL</th>'
     +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">KUNDE</th>'
-    +'<th style="text-align:center;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">CONTENT</th>'
+    +'<th style="text-align:center;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">ANZAHL</th>'
     +'</tr></thead><tbody>';
   shoots.forEach(function(s){
     var filled=s.ideas.filter(function(x){return x.thema&&x.thema.trim();}).length;
     var contentStr=filled+' / '+s.target;
-    var contentColor=s.target>0&&filled>=s.target?'var(--green)':'var(--text)';
+    var contentColor=filled===0?'#dc2626':filled>=s.target&&s.target>0?'var(--green)':'#ea580c';
     html+='<tr style="border-bottom:1px solid var(--border2)">'
       +'<td style="padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)">'+fmtISO(s.date)+(s.time?' · '+s.time+' Uhr':'')+'</td>'
       +'<td style="padding:6px 10px;font-weight:600;color:var(--text)">'+escHtml(s.title||'–')+'</td>'
