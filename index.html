@@ -2346,7 +2346,15 @@ function addShootIdeaRow(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;if(
 function updateShootIdea(ri,key,val){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas&&s.ideas[ri]!==undefined){s.ideas[ri][key]=val;renderShootsList();}}
 function deleteShootIdea(ri){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas){s.ideas.splice(ri,1);scheduleSave();renderShootIdeasTable();renderShootsList();}}
 function saveShootDetail(){scheduleSave();closeModal('shoot-detail-modal');renderShootsList();}
-function saveShoot(){var date=(document.getElementById('sh-modal-date')||document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-modal-time')||document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-modal-title')||document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-modal-location')||document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-modal-customer')||document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[]});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+function saveShoot(){
+  // Prüfe welches Formular aktiv ist (Modal oder Inline)
+  var modalOpen=document.getElementById('shoot-add-modal')&&document.getElementById('shoot-add-modal').style.display!=='none';
+  var prefix=modalOpen?'sh-modal-':'sh-';
+  var date=(document.getElementById(prefix+'date')||{}).value;
+  var time=(document.getElementById(prefix+'time')||{}).value;
+  var title=((document.getElementById(prefix+'title')||{}).value||'').trim();
+  var location=((document.getElementById(prefix+'location')||{}).value||'').trim();
+  var ckey=(document.getElementById(prefix+'customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[]});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
