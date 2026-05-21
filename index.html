@@ -2015,6 +2015,31 @@ function renderShootsList(){
     doneWrap.appendChild(doneChk);
     doneWrap.appendChild(document.createTextNode('Abgeschlossen'));
     if(ROLE==='agency')subWrap.appendChild(doneWrap);else header.appendChild(doneWrap);
+
+    // Content-Pieces Zähler: nach doneWrap in subWrap (blaue Position)
+    if(ROLE==='agency'){
+      (function(shootIdx){
+        var cpWrap=document.createElement('div');
+        cpWrap.className='cp-counter';
+        cpWrap.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);flex-shrink:0;margin-left:12px';
+        cpWrap.appendChild(document.createTextNode('Anzahl '));
+        var ideas=d.shoots[shootIdx].ideas||[];
+        var countSpan=document.createElement('span');
+        countSpan.style.cssText='font-weight:600;color:var(--text)';
+        countSpan.textContent=ideas.length;
+        cpWrap.appendChild(countSpan);
+        cpWrap.appendChild(document.createTextNode(' / '));
+        var targetInp=document.createElement('input');
+        targetInp.type='number';targetInp.min='0';targetInp.max='99';
+        targetInp.value=d.shoots[shootIdx].targetPieces||0;
+        targetInp.style.cssText='width:34px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
+        targetInp.title='Geplante Anzahl Content-Pieces';
+        targetInp.addEventListener('click',function(e){e.stopPropagation();});
+        (function(idx2){targetInp.addEventListener('change',function(){cd().shoots[idx2].targetPieces=parseInt(this.value)||0;scheduleSave();});})(shootIdx);
+        cpWrap.appendChild(targetInp);
+        subWrap.appendChild(cpWrap);
+      })(i);
+    }
     // doneWrapClone entfernt – original doneWrap ist auf Desktop sichtbar
 
 
