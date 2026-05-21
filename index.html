@@ -1953,7 +1953,7 @@ function renderShootsList(){
         var targetInp=document.createElement('input');
         targetInp.type='number';targetInp.min='0';targetInp.max='99';
         targetInp.value=d.shoots[shootIdx].targetPieces||0;
-        targetInp.style.cssText='width:34px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
+        targetInp.style.cssText='width:53px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
         targetInp.title='Geplante Anzahl Content-Pieces';
         targetInp.addEventListener('click',function(e){e.stopPropagation();});
         (function(idx2){targetInp.addEventListener('change',function(){cd().shoots[idx2].targetPieces=parseInt(this.value)||0;scheduleSave();});})(shootIdx);
@@ -2032,7 +2032,7 @@ function renderShootsList(){
         var targetInp=document.createElement('input');
         targetInp.type='number';targetInp.min='0';targetInp.max='99';
         targetInp.value=d.shoots[shootIdx].targetPieces||0;
-        targetInp.style.cssText='width:34px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
+        targetInp.style.cssText='width:53px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
         targetInp.title='Geplante Anzahl Content-Pieces';
         targetInp.addEventListener('click',function(e){e.stopPropagation();});
         (function(idx2){targetInp.addEventListener('change',function(){cd().shoots[idx2].targetPieces=parseInt(this.value)||0;scheduleSave();});})(shootIdx);
