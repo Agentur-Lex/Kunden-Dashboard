@@ -2056,15 +2056,28 @@ function renderShootsList(){
         countSpan.textContent=ideas.filter(function(x){return x.thema&&x.thema.trim();}).length;
         cpWrap.appendChild(countSpan);
         cpWrap.appendChild(document.createTextNode(' / '));
-        var targetInp=document.createElement('input');
-        targetInp.type='number';targetInp.min='0';targetInp.max='99';
-        targetInp.value=d.shoots[shootIdx].targetPieces||0;
-        targetInp.style.cssText='width:53px;border:1px solid var(--border2);border-radius:4px;padding:2px 4px;font-size:11px;font-family:inherit;background:var(--surface2);color:var(--text);text-align:center';
-        targetInp.title='Geplante Anzahl Content-Pieces';
-        targetInp.addEventListener('click',function(e){e.stopPropagation();});
-        (function(idx2){targetInp.addEventListener('change',function(){cd().shoots[idx2].targetPieces=parseInt(this.value)||0;scheduleSave();});})(shootIdx);
-        cpWrap.appendChild(targetInp);
-        subWrap.appendChild(cpWrap);
+        // +/- Stepper statt Eingabefeld, Standard: 12
+        if(d.shoots[shootIdx].targetPieces==null||d.shoots[shootIdx].targetPieces===0){d.shoots[shootIdx].targetPieces=12;}
+        var curTarget=d.shoots[shootIdx].targetPieces;
+        var btnSt='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;width:20px;height:20px;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0;font-family:inherit;padding:0';
+        var minusBtn=document.createElement('button');minusBtn.textContent='−';minusBtn.style.cssText=btnSt;
+        minusBtn.addEventListener('click',function(e){e.stopPropagation();});
+        var targetVal=document.createElement('span');
+        targetVal.style.cssText='font-weight:600;color:var(--text);min-width:20px;text-align:center;font-size:11px';
+        targetVal.textContent=curTarget;
+        var plusBtn=document.createElement('button');plusBtn.textContent='+';plusBtn.style.cssText=btnSt;
+        plusBtn.addEventListener('click',function(e){e.stopPropagation();});
+        (function(idx2,valSpan){
+          minusBtn.addEventListener('click',function(){
+            var v=Math.max(0,(cd().shoots[idx2].targetPieces||0)-1);
+            cd().shoots[idx2].targetPieces=v;valSpan.textContent=v;scheduleSave();
+          });
+          plusBtn.addEventListener('click',function(){
+            var v=Math.min(99,(cd().shoots[idx2].targetPieces||0)+1);
+            cd().shoots[idx2].targetPieces=v;valSpan.textContent=v;scheduleSave();
+          });
+        })(shootIdx,targetVal);
+        cpWrap.appendChild(minusBtn);cpWrap.appendChild(targetVal);cpWrap.appendChild(plusBtn);
       })(i);
     }
     // doneWrapClone entfernt – original doneWrap ist auf Desktop sichtbar
@@ -2215,35 +2228,45 @@ function renderShootsList(){
       linkBtn.title=idea.link?'Link öffnen: '+idea.link:'Link hinzufügen';
       linkBtn.style.cssText='color:'+(idea.link?'var(--accent)':'var(--text3)')+';background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;transition:color .15s';
       linkBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-      (function(idx2,btn){
+      // X-Button zum Löschen des Links
+      var delLinkBtn=document.createElement('button');
+      delLinkBtn.textContent='×';
+      delLinkBtn.title='Link entfernen';
+      delLinkBtn.style.cssText='display:'+(idea.link?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:0 0 0 3px;align-items:center;flex-shrink:0;transition:color .15s';
+      delLinkBtn.addEventListener('mouseenter',function(){this.style.color='var(--accent)';});
+      delLinkBtn.addEventListener('mouseleave',function(){this.style.color='var(--text3)';});
+
+      (function(idx2,btn,delBtn){
         btn.addEventListener('click',function(e){
           e.stopPropagation();
           var cur=cd().shoots[i].ideas[idx2].link||'';
           if(cur){
-            // Link vorhanden: öffnen oder löschen (Shift+Klick löscht)
             window.open(cur.startsWith('http')?cur:'https://'+cur,'_blank');
           } else {
-            // Kein Link: eingeben
             var url=prompt('Link eingeben:','');
             if(url&&url.trim()){
               cd().shoots[i].ideas[idx2].link=url.trim();
               btn.style.color='var(--accent)';
               btn.title='Link öffnen: '+url.trim();
+              delBtn.style.display='inline-flex';
               scheduleSave();
             }
           }
         });
-        btn.addEventListener('contextmenu',function(e){
-          e.preventDefault();e.stopPropagation();
-          if(confirm('Link entfernen?')){
-            cd().shoots[i].ideas[idx2].link='';
-            btn.style.color='var(--text3)';
-            btn.title='Link hinzufügen';
-            scheduleSave();
-          }
+        delBtn.addEventListener('click',function(e){
+          e.stopPropagation();
+          cd().shoots[i].ideas[idx2].link='';
+          btn.style.color='var(--text3)';
+          btn.title='Link hinzufügen';
+          delBtn.style.display='none';
+          scheduleSave();
         });
-      })(ri,linkBtn);
-      tdL.appendChild(linkBtn);tr.appendChild(tdL);
+      })(ri,linkBtn,delLinkBtn);
+
+      tdL.style.cssText='text-align:center;padding:4px 6px;white-space:nowrap';
+      tdL.appendChild(linkBtn);
+      tdL.appendChild(delLinkBtn);
+      tr.appendChild(tdL);
 
       tdS.appendChild(sel);tr.appendChild(tdS);
 
@@ -4364,7 +4387,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   if(strat&&strat.data&&Object.keys(strat.data).length)Object.assign(base.strategy,strat.data);
   base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id};});
   var shootArr=Array.isArray(shoots)?shoots:(shoots&&shoots.data?shoots.data:[]);
-  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces||0};});
+  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces!=null?s.target_pieces:12};});
   base.shoots.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
   base.rows=(content||[]).map(function(r){return{date:r.date||'',name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',_id:r.id};});
   base.questions=(ob&&ob.questions)||DEFAULT_QUESTIONS.slice();
