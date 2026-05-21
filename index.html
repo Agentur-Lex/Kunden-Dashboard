@@ -395,6 +395,7 @@ textarea{resize:vertical;line-height:1.5}
   .shoot-del-btn{margin-left:8px;flex-shrink:0}
   
   .cal-grid{grid-auto-rows:60px!important}
+  .shoot-ideas-spez{display:none!important}
   .tb-name{display:none!important}
   .shoot-header{display:flex;align-items:center;flex-wrap:wrap}
   #analytics-report-btn{margin-left:0!important}
@@ -2076,12 +2077,13 @@ function renderShootsList(){
       {l:'Content-Thema',w:'160px'},
       {l:'Erledigt',w:'72px'},
       {l:'Link',w:'44px'},
-      {l:'Spez.',w:'80px'},
+      {l:'Spez.',w:'80px',cls:'shoot-ideas-spez'},
       {l:'',w:'36px'}
     ];
     thDefs.forEach(function(th){
       var el=document.createElement('th');
       el.textContent=th.l;
+      if(th.cls)el.className=th.cls;
       el.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)'+(th.w?';width:'+th.w:'');
       hr.appendChild(el);
     });
@@ -2109,7 +2111,7 @@ function renderShootsList(){
       var tdT=document.createElement('td');tdT.style.padding='6px 10px';
       var themaInp=document.createElement('input');
       themaInp.type='text';themaInp.value=idea.thema||'';themaInp.placeholder='Content-Thema...';
-      themaInp.style.cssText='width:100%;border:none;background:transparent;color:var(--text);font-size:11px;font-family:inherit;padding:0;outline:none';
+      themaInp.style.cssText='width:100%;border:none;background:transparent;color:var(--text);font-size:11px;font-family:inherit;padding:5px 0;outline:none';
       // Desc indicator
       if(idea.desc&&idea.desc.trim()){
         var dot=document.createElement('span');dot.textContent=' 📝';dot.style.cssText='font-size:10px;cursor:pointer';
@@ -2141,7 +2143,7 @@ function renderShootsList(){
       tdD.appendChild(chkDiv);tr.appendChild(tdD);
 
       // Spez
-      var tdS=document.createElement('td');tdS.style.padding='4px 10px';
+      var tdS=document.createElement('td');tdS.className='shoot-ideas-spez';tdS.style.padding='4px 10px';
       var sel=document.createElement('select');
       sel.style.cssText='width:100%;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:11px;font-family:inherit;border-radius:4px;padding:2px 4px';
       SPEZ_OPTS.forEach(function(o){
