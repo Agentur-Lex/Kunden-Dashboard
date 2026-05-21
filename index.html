@@ -2059,7 +2059,7 @@ function renderShootsList(){
       cpCount.textContent=cpIdeas.filter(function(x){return x.thema&&x.thema.trim();}).length;
       cpWrap.appendChild(cpCount);
       cpWrap.appendChild(document.createTextNode(' / '));
-      if(!s.targetPieces){s.targetPieces=12;}
+      if(!s.targetPieces||s.targetPieces<1){s.targetPieces=12;}
       var cpInp=document.createElement('input');
       cpInp.type='number';cpInp.min='0';cpInp.max='99';cpInp.value=s.targetPieces;
       cpInp.style.cssText='width:44px;font-size:11px;font-weight:600;font-family:inherit;color:var(--text);background:transparent;border:none;outline:none;text-align:left;padding:0;cursor:default';
@@ -2354,7 +2354,7 @@ function saveShoot(){
   var time=(document.getElementById(prefix+'time')||{}).value;
   var title=((document.getElementById(prefix+'title')||{}).value||'').trim();
   var location=((document.getElementById(prefix+'location')||{}).value||'').trim();
-  var ckey=(document.getElementById(prefix+'customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[]});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+  var ckey=(document.getElementById(prefix+'customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[],targetPieces:12});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
@@ -4386,7 +4386,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   if(strat&&strat.data&&Object.keys(strat.data).length)Object.assign(base.strategy,strat.data);
   base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id};});
   var shootArr=Array.isArray(shoots)?shoots:(shoots&&shoots.data?shoots.data:[]);
-  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces!=null?s.target_pieces:12};});
+  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces!=null&&s.target_pieces>0?s.target_pieces:12};});
   base.shoots.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
   base.rows=(content||[]).map(function(r){return{date:r.date||'',name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',_id:r.id};});
   base.questions=(ob&&ob.questions)||DEFAULT_QUESTIONS.slice();
