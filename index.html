@@ -925,10 +925,10 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:440px">
     <div class="modal-head"><span class="modal-title">Neuer Drehtermin</span><button class="modal-close" onclick="closeModal('shoot-add-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-row"><div><span class="flbl">Datum</span><input type="date" id="sh-date" style="margin-bottom:10px"></div><div><span class="flbl">Uhrzeit</span><input type="time" id="sh-time" style="margin-bottom:10px"></div></div>
-      <span class="flbl">Titel</span><input type="text" id="sh-title" style="margin-bottom:10px">
-      <span class="flbl">Ort</span><input type="text" id="sh-location" style="margin-bottom:10px">
-      <span class="flbl">Kunde</span><select id="sh-customer" style="margin-bottom:14px"></select>
+      <div class="form-row"><div><span class="flbl">Datum</span><input type="date" id="sh-modal-date" style="margin-bottom:10px"></div><div><span class="flbl">Uhrzeit</span><input type="time" id="sh-modal-time" style="margin-bottom:10px"></div></div>
+      <span class="flbl">Titel</span><input type="text" id="sh-modal-title" style="margin-bottom:10px">
+      <span class="flbl">Ort</span><input type="text" id="sh-modal-location" style="margin-bottom:10px">
+      <span class="flbl">Kunde</span><select id="sh-modal-customer" style="margin-bottom:14px"></select>
     </div>
     <div class="modal-foot"><button class="btn-primary" onclick="saveShoot()">Speichern</button><button class="btn-outline" onclick="closeModal('shoot-add-modal')">Abbrechen</button></div>
   </div>
@@ -1207,7 +1207,7 @@ function isPastDate(d){var n=normalizeDate(d);return n?n<getTodayISO():false;}
 function sortRows(rows){return rows.slice().sort(function(a,b){var da=normalizeDate(a.date)||'9999';var db=normalizeDate(b.date)||'9999';return da<db?-1:da>db?1:0;});}
 function getCustomerKeys(){return Object.keys(DATA);}
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function syncDropdowns(){var dd=document.getElementById('cust-dropdown');if(dd)dd.innerHTML=getCustomerKeys().map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');var shd=document.getElementById('sh-customer');if(shd)shd.innerHTML=getCustomerKeys().map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');}
+function syncDropdowns(){var dd=document.getElementById('cust-dropdown');if(dd)dd.innerHTML=getCustomerKeys().map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');var shd=document.getElementById('sh-customer');if(shd)shd.innerHTML=getCustomerKeys().map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');var shmd=document.getElementById('sh-modal-customer');if(shmd)shmd.innerHTML=shd?shd.innerHTML:'';}
 function chk(checked,onclick){var cls='todo-chk'+(checked?' done':'');return'<div class="'+cls+'" onclick="'+onclick+'"></div>';}
 function showToast(msg){var t=document.getElementById('toast');var tm=document.getElementById('toast-msg');if(tm)tm.textContent=msg;if(t){t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3000);}}
 
@@ -1405,6 +1405,8 @@ function startClientSession(k){
   if(main)main.scrollTo({top:0,behavior:'smooth'});
 }
 function setRole(r,el){}
+function sfmOpen(){}function sfmClose(){}function sfmRender(){}function sfmIdeaChange(){}function sfmIdeaAdd(){}function sfmIdeaDel(){}function openShootFullscreen(){}function closeShootFullscreen(){}
+function showErr(id,msg){var e=document.getElementById(id);if(e){e.textContent=msg;e.style.display='block';}}
 function resetAllEditStates(){
   if(typeof ANALYTICS_EDIT_MODE!=='undefined'){ANALYTICS_EDIT_MODE=false;}
   var aeb=document.getElementById('analytics-edit-btn');
@@ -2330,7 +2332,7 @@ function addShootIdeaRow(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;if(
 function updateShootIdea(ri,key,val){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas&&s.ideas[ri]!==undefined){s.ideas[ri][key]=val;renderShootsList();}}
 function deleteShootIdea(ri){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas){s.ideas.splice(ri,1);scheduleSave();renderShootIdeasTable();renderShootsList();}}
 function saveShootDetail(){scheduleSave();closeModal('shoot-detail-modal');renderShootsList();}
-function saveShoot(){var date=(document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[]});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+function saveShoot(){var date=(document.getElementById('sh-modal-date')||document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-modal-time')||document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-modal-title')||document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-modal-location')||document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-modal-customer')||document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[]});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
@@ -4362,7 +4364,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   if(strat&&strat.data&&Object.keys(strat.data).length)Object.assign(base.strategy,strat.data);
   base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id};});
   var shootArr=Array.isArray(shoots)?shoots:(shoots&&shoots.data?shoots.data:[]);
-  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:s.ideas||[],_id:s.id};});
+  base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces||0};});
   base.shoots.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
   base.rows=(content||[]).map(function(r){return{date:r.date||'',name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',_id:r.id};});
   base.questions=(ob&&ob.questions)||DEFAULT_QUESTIONS.slice();
@@ -4449,7 +4451,7 @@ async function sbSaveAllShoots(overrideCustId){
   // Upsert per Eintrag (RLS-sicher für Kunden)
   for(var i=0;i<shoots.length;i++){
     var s=shoots[i];
-    var row={customer_id:cId,title:s.title||'',date:s.date||null,time:s.time||'',location:s.location||'',status:s.status||'planned',ideas:s.ideas||[],sort_order:i};
+    var row={customer_id:cId,title:s.title||'',date:s.date||null,time:s.time||'',location:s.location||'',status:s.status||'planned',ideas:s.ideas||[],sort_order:i,target_pieces:s.targetPieces||0};
     if(s._id){
       await sb.from('shoots').update(row).eq('id',s._id);
     } else {
