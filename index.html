@@ -415,7 +415,7 @@ textarea{resize:vertical;line-height:1.5}
 .caption-input:focus{height:auto;min-height:34px;overflow-y:auto}
   /* ── Erklärtexte ── */
   .pi-icon{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:9px;font-weight:700;cursor:default;margin-left:7px;position:relative;vertical-align:middle;flex-shrink:0;line-height:1}
-  .pi-icon .pi-tip{display:none;position:absolute;left:50%;transform:translateX(-50%);top:22px;background:#f3f4f6;color:#374151;font-size:10px;font-weight:400;line-height:1.6;padding:10px 14px;border-radius:8px;width:270px;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:normal;border:1px solid #e5e7eb}
+  .pi-icon .pi-tip{display:none;position:fixed;left:50%;transform:translateX(-50%);top:auto;background:#f3f4f6;color:#374151;font-size:10px;font-weight:400;line-height:1.6;padding:10px 14px;border-radius:8px;width:min(270px,80vw);z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:normal;border:1px solid #e5e7eb;margin-top:22px}
   .pi-icon:hover .pi-tip{display:block}
 </style>
 </head>
