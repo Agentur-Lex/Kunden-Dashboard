@@ -4566,17 +4566,18 @@ async function doChangePasswordSB(){
     var sess=await sb.auth.getSession();
     if(sess.data&&sess.data.session){
       showLoading('Sitzung wiederherstellen...');
-      var em=sess.data.session.user.email;var uid=sess.data.session.user.id;
-      var isAg=(em===AGENCY_EMAIL);
-      if(isAg){
-        var allC=await sb.from('customers').select('id');
-        if(allC.data&&allC.data.length){for(var i2=0;i2<allC.data.length;i2++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[i2].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
-        await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
-      }else{
-        var cr2=await sb.from('user_customer').select('customer_id,role').eq('user_id',uid);
-        if(cr2.data&&cr2.data.length){var cId2=(cr2.data.find(function(r){return r.role==='client';})||cr2.data[0]).customer_id;await loadCustomerData(cId2);hideLoading();SESSION={type:'client',key:cId2};startClientSession(cId2);}
-        else{hideLoading();}
-      }
+      try{
+        var em=sess.data.session.user.email;var uid=sess.data.session.user.id;
+        var isAg=(em===AGENCY_EMAIL);
+        if(isAg){
+          var allC=await sb.from('customers').select('id');
+          if(allC.data&&allC.data.length){for(var i2=0;i2<allC.data.length;i2++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[i2].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
+          await loadAllCustomers();SESSION={type:'agency',key:null};startAgencySession();
+        }else{
+          var cr2=await sb.from('user_customer').select('customer_id,role').eq('user_id',uid);
+          if(cr2.data&&cr2.data.length){var cId2=(cr2.data.find(function(r){return r.role==='client';})||cr2.data[0]).customer_id;await loadCustomerData(cId2);SESSION={type:'client',key:cId2};startClientSession(cId2);}
+        }
+      }finally{hideLoading();}
     }
   }catch(e){hideLoading();console.error('INIT ERROR:',e);}
 })();
