@@ -1315,7 +1315,7 @@ async function doLogin(){
   }catch(e){hideLoading();console.error('LOGIN ERROR:',e);err.textContent='Fehler: '+e.message;err.style.display='block';}
 }
 
-async function doLogout(){var sb=getSB();await sb.auth.signOut();SESSION={type:null,key:null};ROLE='agency';ACTIVE_CUSTOMER='';DATA={};CREDS={};updateTodoBadge();var b=document.getElementById('todo-badge');if(b){b.style.display='none';b.textContent='';}showScreen('screen-login');}
+async function doLogout(){var sb=getSB();await sb.auth.signOut();SESSION={type:null,key:null};ROLE='agency';ACTIVE_CUSTOMER='';DATA={};CREDS={};showScreen('screen-login');}
 
 async function doForgot(){
   var u=(document.getElementById('forgot-user')||{}).value.trim();
@@ -1436,7 +1436,7 @@ function resetAllEditStates(){
   var obp=document.getElementById('ob-panel');
   if(obp)obp.style.display='none';
 }
-function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();renderCustomerView();updateTodoBadge();}
+function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();renderCustomerView();}
 function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
   var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
@@ -4336,14 +4336,10 @@ function toggleKpiCard(key){
 function updateTodoBadge(){
   var badge=document.getElementById('todo-nav-badge');
   if(!badge)return;
-  if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER]){badge.textContent='';badge.style.display='none';return;}
-  var todos=DATA[ACTIVE_CUSTOMER].todos||[];
-  var pct=calcProgress(ACTIVE_CUSTOMER);
-  var count=todos.filter(function(t){
-    if(ROLE==='agency')return !t.done;
-    return !t.done&&(t.assign==='client'||t.assign==='both')&&!t.isReset;
-  }).length;
-  if(ROLE==='client'&&pct<100)count+=1;
+  var count=0;
+  Object.keys(DATA).forEach(function(k){
+    count+=(DATA[k].todos||[]).filter(function(t){return !t.done;}).length;
+  });
   badge.textContent=count>0?count:'';
   badge.style.display=count>0?'flex':'none';
 }
