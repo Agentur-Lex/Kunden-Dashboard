@@ -1315,7 +1315,7 @@ async function doLogin(){
   }catch(e){hideLoading();console.error('LOGIN ERROR:',e);err.textContent='Fehler: '+e.message;err.style.display='block';}
 }
 
-async function doLogout(){var sb=getSB();await sb.auth.signOut();SESSION={type:null,key:null};ROLE='agency';ACTIVE_CUSTOMER='';DATA={};CREDS={};showScreen('screen-login');}
+async function doLogout(){var sb=getSB();await sb.auth.signOut();SESSION={type:null,key:null};ROLE='agency';ACTIVE_CUSTOMER='';DATA={};CREDS={};var b=document.getElementById('todo-badge');if(b){b.style.display='none';b.textContent='';}var b2=document.getElementById('todo-nav-badge');if(b2){b2.style.display='none';b2.textContent='';}showScreen('screen-login');}
 
 async function doForgot(){
   var u=(document.getElementById('forgot-user')||{}).value.trim();
@@ -1381,7 +1381,6 @@ function startClientSession(k){
     showScreen('screen-firstlogin');
     return;
   }
-  DATA={};CREDS={};
   showScreen('main-app');
   document.getElementById('agency-tb').style.display='none';
   document.getElementById('client-tb').style.display='flex';
