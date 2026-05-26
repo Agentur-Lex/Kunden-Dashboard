@@ -1240,7 +1240,7 @@ var ART_OPTS=['Reach-Content','Trust-Content','Werbeanzeige'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'📸'},{id:'facebook',label:'Facebook',icon:'👥'},{id:'linkedin',label:'LinkedIn',icon:'💼'},{id:'tiktok',label:'TikTok',icon:'🎵'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
-function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
+function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
 // ── HELPERS ──
 function cd(){return DATA[ACTIVE_CUSTOMER];}
@@ -1451,6 +1451,8 @@ function startClientSession(k){
   ROLE='client';ACTIVE_CUSTOMER=k;
   document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='none';});
   document.querySelectorAll('.client-only').forEach(function(el){el.style.display='';});
+  // Letzter Login speichern
+  if(DATA[k]){DATA[k].lastLogin=Date.now();scheduleSave();}
   showPage('overview',document.getElementById('nav-overview'));
   renderCustomerView();
   updateShootReminder();
@@ -1574,6 +1576,8 @@ function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kach
       +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+d.analytics.reach+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Offene To-Dos</span><span class="kachel-val" style="color:'+tc+'">'+open+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Nächster Post</span><span class="kachel-val">'+next+'</span></div>'
+      +'<div class="kachel-row"><span class="kachel-key">Letzter Login</span><span class="kachel-val" style="font-size:9px">'+( d.lastLogin?new Date(d.lastLogin).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'–')+'</span></div>'
+      +'<textarea class="kachel-note agency-only" placeholder="Interne Notiz..." onclick="event.stopPropagation()" onchange="DATA[&quot;'+k+'&quot;].agencyNote=this.value;scheduleSave()" style="width:100%;margin-top:8px;font-size:10px;border:1px solid var(--border2);border-radius:5px;padding:5px 7px;font-family:inherit;color:var(--text2);resize:none;background:var(--surface2);box-sizing:border-box;min-height:36px">'+escHtml(d.agencyNote||'')+'</textarea>'
       +'</div>';
   }
   activeKeys.forEach(function(k){h+=kachelHtml(k);});
@@ -4584,7 +4588,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   base.answers=(ob&&ob.answers)||{};
   base.socialCreds=(ob&&ob.social_creds)||{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}};
   if(ob&&ob.ob_steps&&ob.ob_steps.length)base.obSteps=ob.ob_steps;
-  base.name=cust.name;base._custId=cust.id;base._slug=cust.slug;base._status=cust.status||'active';
+  base.name=cust.name;base._custId=cust.id;base._slug=cust.slug;base._status=cust.status||'active';base.agencyNote=cust.agency_note||'';base.lastLogin=cust.last_login||null;
   return base;
 }
 async function loadAllCustomers(){
@@ -4629,6 +4633,8 @@ async function sbSaveCustomer(){
   var obRes=await sb.from('onboarding').select('customer_id').eq('customer_id',cId).limit(1);
   if(obRes.data&&obRes.data.length){await sb.from('onboarding').update({questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{},ob_steps:d.obSteps||[]}).eq('customer_id',cId);}
   else{await sb.from('onboarding').insert({customer_id:cId,questions:d.questions,answers:d.answers,social_creds:d.socialCreds||{},ob_steps:d.obSteps||[]});}
+  // agencyNote + lastLogin in customers speichern
+  await sb.from('customers').update({agency_note:d.agencyNote||'',last_login:d.lastLogin||null}).eq('id',cId);
 }
 async function sbSaveAllTodos(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
