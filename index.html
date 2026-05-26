@@ -328,8 +328,7 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3){grid-column:2!important;grid-row:2!important;padding-top:0!important;display:flex;align-items:flex-end}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
-  .shoot-panel-wrap{overflow:hidden;max-height:0;transition:max-height .3s ease,opacity .25s ease;opacity:0}
-  .shoot-panel-wrap.open{max-height:2000px;opacity:1}
+  .shoot-panel-wrap{overflow:hidden;transition:max-height .3s ease,opacity .25s ease}
   @media(max-width:768px){
     .page-desc-text{display:none!important}
     .page-info-mobile-only{display:inline-flex!important;visibility:visible!important;position:relative;cursor:default;width:15px;height:15px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:9px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;margin-left:6px}
@@ -2102,8 +2101,9 @@ function renderShootsList(){
         e.stopPropagation();
         var p=document.querySelector('[data-panel-idx="'+shootIdx+'"]');
         if(!p)return;
-        var isOpen=p.classList.contains('open');
-        if(isOpen){p.classList.remove('open');}else{p.classList.add('open');}
+        var isOpen=p.style.maxHeight!=='0px'&&p.style.maxHeight!=='';
+        p.style.maxHeight=isOpen?'0':'2000px';
+        p.style.opacity=isOpen?'0':'1';
         btn.style.transform=isOpen?'rotate(-90deg)':'';
         OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+shootIdx]=!isOpen;
       };
@@ -2138,8 +2138,8 @@ function renderShootsList(){
     var panel=document.createElement('div');
     panel.setAttribute('data-panel-idx',i);
     var panelOpen=OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i]===true;
-    panel.className='shoot-panel-wrap'+(panelOpen?' open':'');
-    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface)';
+    panel.className='shoot-panel-wrap';
+    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);overflow:hidden;max-height:'+(panelOpen?'2000px':'0')+';opacity:'+(panelOpen?'1':'0');
 
     // Table
     var table=document.createElement('table');
