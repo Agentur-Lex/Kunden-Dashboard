@@ -1178,13 +1178,13 @@ function toggleShootAddForm(){
   if(btn) btn.textContent = isOpen ? '+ Drehtermin' : '✕ Schließen';
   if(!isOpen){
     // Clear form
-    ['sh-date','sh-time','sh-title','sh-location'].forEach(function(id){
-      var e=document.getElementById(id); if(e) e.value='';
-    });
+    ['sh-date','sh-time'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    var sti=document.getElementById('sh-title');if(sti)sti.value='Drehtermin';
+    var slo=document.getElementById('sh-location');if(slo)slo.value='Vor Ort';
     syncDropdowns();
   }
 }
-function openShootAddModal(){openModal('shoot-add-modal');}
+function openShootAddModal(){openModal('shoot-add-modal');var mt=document.getElementById('sh-modal-title');if(mt&&!mt.value)mt.value='Drehtermin';var ml=document.getElementById('sh-modal-location');if(ml&&!ml.value)ml.value='Vor Ort';}
 
 function openOnboardingModal(){
   try {
