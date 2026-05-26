@@ -2509,7 +2509,7 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
     tb+='<td><input class="cell-input" type="url" value="'+(row.link||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].link=this.value" placeholder="https://..."></td>';
     tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].art=this.value;buildCalendar()">'+ART_OPTS.map(function(o){return'<option'+(row.art===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
     tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].spez=this.value">'+SPEZ_OPTS.map(function(o){return'<option'+(row.spez===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
-    tb+='<td class="caption-cell"><textarea class="cell-input caption-input" rows="1" onclick="event.stopPropagation();this.rows=4;" onkeydown="captionKeydown(event,this)" onblur="this.rows=1;cd().rows['+ri+'].caption=this.value;" onchange="cd().rows['+ri+'].caption=this.value;scheduleSave()">'+escHtml(row.caption||'')+'</textarea></td>';
+    tb+='<td class="caption-cell"><textarea class="cell-input caption-input" rows="1" onclick="event.stopPropagation();this.rows=4;" onkeydown="captionKeydown(event,this)" onblur="this.rows=1;this.scrollTop=0;cd().rows['+ri+'].caption=this.value;" onchange="cd().rows['+ri+'].caption=this.value;scheduleSave()">'+escHtml(row.caption||'')+'</textarea></td>';
     tb+='<td style="text-align:center;padding:0 4px"><button class="btn-icon del" onclick="event.stopPropagation();if(confirm(\'Löschen?\'))deleteRow('+ri+')" title="Löschen">🗑</button></td></tr>';
   });
   var tbody=document.getElementById('content-tbody');if(tbody)tbody.innerHTML=tb;}
