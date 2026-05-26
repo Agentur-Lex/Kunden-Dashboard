@@ -1551,6 +1551,13 @@ async function setCustomerStatus(k,status){
 function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kacheln');if(!kacheln)return;var today=getTodayISO();
   renderUpcomingShoots();
   var allKeys=Object.keys(DATA);
+  var statusOrder={'active':0,'paused':1,'done':2};
+  allKeys.sort(function(a,b){
+    var sa=statusOrder[DATA[a]._status]||0;
+    var sb=statusOrder[DATA[b]._status]||0;
+    if(sa!==sb)return sa-sb;
+    return (DATA[a].name||'').localeCompare(DATA[b].name||'','de');
+  });
   var activeKeys=allKeys.filter(function(k){return DATA[k]._status!=='done';});
   var doneKeys=allKeys.filter(function(k){return DATA[k]._status==='done';});
   var h='';
