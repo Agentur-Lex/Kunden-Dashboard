@@ -4525,7 +4525,7 @@ async function sbSaveAllContentRows(){
 async function sbSaveLegal(){var sb=getSB();await sb.from('legal').upsert({id:1,impressum:LEGAL.impressum,datenschutz:LEGAL.datenschutz});}
 async function sbLoadLegal(){var sb=getSB();var res=await sb.from('legal').select('*').eq('id',1).maybeSingle();if(res.data){LEGAL.impressum=res.data.impressum||'';LEGAL.datenschutz=res.data.datenschutz||'';}}
 var _sbSaveTimer=null;
-function scheduleSave(){clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},1500);}
+function scheduleSave(){clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);}
 
 async function doSetPassword(){
   var p1=(document.getElementById('first-pw1')||{}).value||'';
