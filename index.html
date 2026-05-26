@@ -1379,7 +1379,7 @@ function resetForgotForm(){
 // ── SESSIONS ──
 function startAgencySession(){
   ACTIVE_CUSTOMER=Object.keys(DATA)[0]||'';
-  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();flushPendingNotifications();}
+  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();updateShootReminder();flushPendingNotifications();}
 function startClientSession(k){
   // Passwort noch nie geändert → First-Login-Screen zeigen
   if(CREDS[k]&&CREDS[k].pwChanged===false){
@@ -1411,6 +1411,7 @@ function startClientSession(k){
   document.querySelectorAll('.client-only').forEach(function(el){el.style.display='';});
   showPage('overview',document.getElementById('nav-overview'));
   renderCustomerView();
+  updateShootReminder();
   window.scrollTo({top:0,behavior:'smooth'});
   var main=document.getElementById('main-app');
   if(main)main.scrollTo({top:0,behavior:'smooth'});
@@ -1652,7 +1653,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;updateShootReminder();var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',an.reach],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',an.reach],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
