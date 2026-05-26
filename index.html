@@ -823,7 +823,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           <div class="card"><div class="card-title">Frequenz</div><div id="strat-freq"></div></div>
         </div>
         <div class="card agency-only">
-          <div class="card-title">Spez. pro Drehtermin</div>
+          <div class="card-title">Content-Spezifikation</div>
           <div id="strat-spez-container" style="margin-top:6px"></div>
         </div>
         <div class="card">
@@ -1197,7 +1197,7 @@ function openOnboardingModal(){
 }
 
 var SESSION={type:null,key:null},ROLE='agency',ACTIVE_CUSTOMER='',EDITING_TODO=-1,PENDING_FIRST=null,PW_REVEALED={};
-var SHOW_PAST=false,SHOW_PAST_SHOOTS=false,SHOW_ADD_FORM=false,CURRENT_SHOOT_IDX=-1,CURRENT_IDEA_IDX=-1,CAL_OFFSET=0,OB_DRAG_IDX=-1;
+var SHOW_PAST=false,SHOW_PAST_SHOOTS=false,SHOW_ADD_FORM=false,CURRENT_SHOOT_IDX=-1,CURRENT_IDEA_IDX=-1,CAL_OFFSET=0,OB_DRAG_IDX=-1,OPEN_SHOOT_PANELS={};
 var ART_OPTS=['Reach-Content','Trust-Content','Werbeanzeige'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'📸'},{id:'facebook',label:'Facebook',icon:'👥'},{id:'linkedin',label:'LinkedIn',icon:'💼'},{id:'tiktok',label:'TikTok',icon:'🎵'},{id:'youtube',label:'YouTube',icon:'▶️'}];
@@ -2089,6 +2089,8 @@ function renderShootsList(){
     collapseBtn.style.cssText='background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);display:flex;align-items:center;flex-shrink:0;transition:transform .2s';
     collapseBtn.title='Content-Themen ein-/ausklappen';
     collapseBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l4 4 4-4"/></svg>';
+    // Pfeil-Zustand wiederherstellen
+    if(!OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i])collapseBtn.style.transform='rotate(-90deg)';
     (function(btn,shootIdx){
       btn.onclick=function(e){
         e.stopPropagation();
@@ -2097,6 +2099,7 @@ function renderShootsList(){
         var isOpen=p.style.display!=='none';
         p.style.display=isOpen?'none':'block';
         btn.style.transform=isOpen?'rotate(-90deg)':'';
+        OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+shootIdx]=!isOpen;
       };
     })(collapseBtn,i);
     header.appendChild(collapseBtn);
@@ -2128,7 +2131,8 @@ function renderShootsList(){
     // ── Content-Pieces inline panel ──
     var panel=document.createElement('div');
     panel.setAttribute('data-panel-idx',i);
-    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);overflow:hidden';
+    var panelOpen=OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i]===true;
+    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);overflow:hidden;display:'+(panelOpen?'block':'none');
 
     // Table
     var table=document.createElement('table');
