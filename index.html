@@ -557,13 +557,13 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           
         </div>
         <div id="client-tb" style="display:none;align-items:center;gap:8px">
-          
+          <button onclick="tourStart()" style="background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:inherit">Anleitung</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
         
         <div class="tb-chip" id="agency-chip" style="display:none"><div class="tb-av">AG</div><span class="tb-name">Social-Media-Lex</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
-        <div class="tb-chip" id="client-chip" style="display:none"><div class="tb-av" id="client-chip-av">K</div><span class="tb-name" id="client-chip-name">Kunde</span><button class="tb-logout" onclick="tourStart()" style="background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:10px;cursor:pointer;margin-right:4px">Anleitung</button><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
+        <div class="tb-chip" id="client-chip" style="display:none"><div class="tb-av" id="client-chip-av">K</div><span class="tb-name" id="client-chip-name">Kunde</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
       </div>
     </div>
 
@@ -4778,11 +4778,11 @@ async function doChangePasswordSB(){
 
 // ── Tour ──
 var TOUR_STEPS=[
-  {target:'nav-overview',title:'Dashboard – Deine Übersicht',text:'Hier siehst du auf einen Blick wie dein Social-Media-Account wächst: Follower, Reichweite, Engagement und mehr. Alles was du über deine Performance wissen musst.'},
-  {target:'nav-todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle offenen Aufgaben von deiner Agentur. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir für dich arbeiten.'},
+  {target:'nav-overview',title:'Dashboard – Deine Übersicht',text:'Hier siehst du auf einen Blick was du wissen musst: Das Wachstum deiner Accounts, offene To-Dos und nächste Drehtermine. Außerdem findest du hier das Onboarding und hast einen Bereich, in den du Ideen teilen kannst.'},
   {target:'nav-shoots',title:'Drehtermine – Deine Aufnahmen',text:'Hier sind alle geplanten Drehtage aufgelistet. Du siehst was geplant ist, kannst eigene Content-Ideen hinzufügen und vorhandene bearbeiten.'},
-  {target:'nav-calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
-  {target:'nav-analytics',title:'Analysedaten – Deine Zahlen',text:'Hier pflegt deine Agentur monatlich die wichtigsten Kennzahlen ein. So behältst du immer den Überblick über dein Wachstum.'},
+  {target:'nav-todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle deine offenen Aufgaben. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir umsetzen.'},
+  {target:'nav-calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen an Posts innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
+  {target:'nav-analytics',title:'Analysedaten – Deine Zahlen',text:'Hier werden monatlich die wichtigsten Kennzahlen eingepflegt. So behältst du immer den Überblick über dein Wachstum.'},
   {target:'nav-strategy',title:'Strategie – Dein Fahrplan',text:'Hier findest du deine Content-Strategie: Zielgruppe, Themenfelder, Plattformen und Frequenz. Das ist die Grundlage für alle Inhalte die wir für dich erstellen.'},
 ];
 var TOUR_IDX=0;
