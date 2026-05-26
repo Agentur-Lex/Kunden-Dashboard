@@ -2358,17 +2358,7 @@ function addShootIdeaRow(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;if(
 function updateShootIdea(ri,key,val){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas&&s.ideas[ri]!==undefined){s.ideas[ri][key]=val;renderShootsList();}}
 function deleteShootIdea(ri){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas){s.ideas.splice(ri,1);scheduleSave();renderShootIdeasTable();renderShootsList();}}
 function saveShootDetail(){scheduleSave();closeModal('shoot-detail-modal');renderShootsList();}
-function saveShoot(){var date=(document.getElementById('sh-modal-date')||document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-modal-time')||document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-modal-title')||document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-modal-location')||document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-modal-customer')||document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}
-  // Auto-Content-Themen aus Strategie-Spez.
-  var autoIdeas=[];
-  var sf2=DATA[ckey]&&DATA[ckey].strategy&&DATA[ckey].strategy.spezFreq||{};
-  SPEZ_OPTS.filter(function(o){return o!=='-';}).forEach(function(opt){
-    var n=(sf2[opt]||0)*2;
-    for(var ai=0;ai<n;ai++){
-      autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});
-    }
-  });
-  DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+function saveShoot(){var date=(document.getElementById('sh-modal-date')||document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-modal-time')||document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-modal-title')||document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-modal-location')||document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-modal-customer')||document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}var autoIdeas=[];var spezF=(DATA[ckey]&&DATA[ckey].strategy&&DATA[ckey].strategy.spezFreq)?DATA[ckey].strategy.spezFreq:{};SPEZ_OPTS.filter(function(o){return o!=='-';}).forEach(function(opt){var n=(spezF[opt]||0)*2;for(var ai=0;ai<n;ai++){autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});}});DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
