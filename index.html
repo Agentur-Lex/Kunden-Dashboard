@@ -1548,7 +1548,26 @@ async function setCustomerStatus(k,status){
   renderAgencyOverview();
   renderCredList();
 }
-function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kacheln');if(!kacheln)return;var today=getTodayISO();
+async function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kacheln');if(!kacheln)return;var today=getTodayISO();
+  // Agentur-Todos frisch aus Supabase laden
+  try{
+    var sb=getSB();var custIds=Object.keys(DATA);
+    if(custIds.length){
+      var freshTodos=await sb.from('todos').select('*').in('customer_id',custIds).eq('done',false).in('assign',['agency','both']);
+      if(freshTodos.data){
+        // DATA-Todos aktualisieren
+        freshTodos.data.forEach(function(t){
+          var cId=t.customer_id;
+          if(DATA[cId]){
+            var existing=DATA[cId].todos.find(function(x){return x._id===t.id;});
+            if(!existing){
+              DATA[cId].todos.push({_id:t.id,text:t.text,prio:t.prio||'med',assign:t.assign,done:false,due:t.due||'',isReset:t.is_reset,resetKey:t.reset_key,createdAt:t.created_at});
+            }
+          }
+        });
+      }
+    }
+  }catch(e){}
   renderUpcomingShoots();
   var allKeys=Object.keys(DATA);
   var statusOrder={'active':0,'paused':1,'done':2};
