@@ -2150,13 +2150,12 @@ function renderShootsList(){
     var thDefs=[
       {l:'Content-Thema',w:'160px'},
       {l:'Erledigt',w:'72px'},
-      {l:'Link',w:'44px'},
-      {l:'Spez.',w:'80px',cls:'shoot-ideas-spez'},
     ];
-    if(customCol){thDefs.push({l:customCol,w:'100px',cls:'shoot-ideas-custom'});}
+    if(customCol){thDefs.push({l:customCol,w:'100px',cls:'shoot-ideas-custom',isCustomCol:true});}
+    else if(ROLE==='agency'){thDefs.push({l:'+',w:'36px',isAddCol:true});}
+    thDefs.push({l:'Link',w:'44px'});
+    thDefs.push({l:'Spez.',w:'80px',cls:'shoot-ideas-spez'});
     thDefs.push({l:'',w:'36px'});
-    // +Spalte-Button im Header (nur Agentur, nur wenn noch keine customCol)
-    if(ROLE==='agency'&&!customCol){thDefs.push({l:'+',w:'36px',isAddCol:true});}
     thDefs.forEach(function(th){
       var el=document.createElement('th');
       if(th.isAddCol){
@@ -2180,15 +2179,16 @@ function renderShootsList(){
         el.textContent=th.l;
         if(th.cls)el.className=th.cls;
         // Agentur kann customCol umbenennen oder löschen
-        if(customCol&&th.l===customCol&&ROLE==='agency'){
-          el.style.cursor='pointer';
-          el.title='Spalte löschen (Klick)';
-          el.onclick=function(e){
-            e.stopPropagation();
-            if(confirm('Spalte "'+customCol+'" löschen?')){
-              cd().strategy.customCol='';scheduleSave();renderShootsList();
-            }
-          };
+        if(th.isCustomCol&&ROLE==='agency'){
+          // Spaltentitel + Papierkorb
+          el.textContent='';
+          var colLbl=document.createElement('span');colLbl.textContent=th.l;colLbl.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase';
+          var colDel=document.createElement('button');
+          colDel.title='Spalte löschen';
+          colDel.style.cssText='background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:0 0 0 4px;line-height:1;vertical-align:middle;opacity:.6';
+          colDel.innerHTML='<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg>';
+          colDel.onclick=function(e){e.stopPropagation();if(confirm('Spalte "'+customCol+'" löschen?')){cd().strategy.customCol='';scheduleSave();renderShootsList();}};
+          el.appendChild(colLbl);el.appendChild(colDel);
         }
         el.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)'+(th.w?';width:'+th.w:'');
       }
@@ -2248,6 +2248,19 @@ function renderShootsList(){
         };
       })(ri);
       tdD.appendChild(chkDiv);tr.appendChild(tdD);
+
+      // Custom Column (zwischen Erledigt und Link)
+      if(customCol){
+        var tdCC=document.createElement('td');tdCC.className='shoot-ideas-custom';tdCC.style.cssText='padding:4px 8px';
+        var ccInp=document.createElement('input');
+        ccInp.type='text';ccInp.value=idea.customVal||'';ccInp.placeholder='...';
+        ccInp.style.cssText='width:100%;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-size:11px;font-family:inherit;padding:3px 6px;outline:none;box-sizing:border-box';
+        ccInp.addEventListener('click',function(e){e.stopPropagation();});
+        (function(idx2){ccInp.addEventListener('change',function(){cd().shoots[i].ideas[idx2].customVal=this.value;scheduleSave();});})(ri);
+        tdCC.appendChild(ccInp);tr.appendChild(tdCC);
+      } else if(ROLE==='agency'){
+        tr.appendChild(document.createElement('td'));
+      }
 
       // Spez
       var tdS=document.createElement('td');tdS.className='shoot-ideas-spez';tdS.style.padding='4px 10px';
@@ -2317,17 +2330,6 @@ function renderShootsList(){
 
       tdS.appendChild(sel);tr.appendChild(tdS);
 
-
-      // Custom Column
-      if(customCol){
-        var tdCC=document.createElement('td');tdCC.className='shoot-ideas-custom';tdCC.style.padding='4px 10px';
-        var ccInp=document.createElement('input');
-        ccInp.type='text';ccInp.value=idea.customVal||'';ccInp.placeholder='...';
-        ccInp.style.cssText='width:100%;border:none;background:transparent;color:var(--text);font-size:11px;font-family:inherit;padding:3px 0;outline:none';
-        ccInp.addEventListener('click',function(e){e.stopPropagation();});
-        (function(idx2){ccInp.addEventListener('change',function(){cd().shoots[i].ideas[idx2].customVal=this.value;scheduleSave();});})(ri);
-        tdCC.appendChild(ccInp);tr.appendChild(tdCC);
-      }
 
 
       // Delete – agency always, client only own
