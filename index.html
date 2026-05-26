@@ -1577,7 +1577,6 @@ function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kach
       +'<div class="kachel-row"><span class="kachel-key">Offene To-Dos</span><span class="kachel-val" style="color:'+tc+'">'+open+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Nächster Post</span><span class="kachel-val">'+next+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Letzter Login</span><span class="kachel-val" style="font-size:9px">'+( d.lastLogin?new Date(d.lastLogin).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'–')+'</span></div>'
-      +'<textarea class="kachel-note agency-only" placeholder="Interne Notiz..." onclick="event.stopPropagation()" onchange="DATA[&quot;'+k+'&quot;].agencyNote=this.value;scheduleSave()" style="width:100%;margin-top:8px;font-size:10px;border:1px solid var(--border2);border-radius:5px;padding:5px 7px;font-family:inherit;color:var(--text2);resize:none;background:var(--surface2);box-sizing:border-box;min-height:36px">'+escHtml(d.agencyNote||'')+'</textarea>'
       +'</div>';
   }
   activeKeys.forEach(function(k){h+=kachelHtml(k);});
