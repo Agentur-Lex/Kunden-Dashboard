@@ -722,7 +722,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           <div id="ag-ob-lbl" style="font-size:10px;color:var(--text3);margin-bottom:16px"></div>
           <div id="agency-onboarding-steps"></div>
           <div id="ob-step-form" style="display:flex;align-items:center;gap:8px;margin-top:10px" class="agency-only">
-            <input type="text" id="new-ob-step-input" placeholder="Neuer Schritt..." style="width:470px;flex:none;margin:0;font-size:11px">
+            <input type="text" id="new-ob-step-input" placeholder="Neuer Schritt..." style="width:470px;flex:none;margin:0;font-size:11px" onkeydown="if(event.key==='Enter'){event.preventDefault();addObStep();}else if(event.key==='Escape'){this.value='';this.blur();}">
             <button class="btn-primary" onclick="addObStep()" style="flex-shrink:0;padding:6px 14px;font-size:11px">Hinzufügen</button>
           </div>
         </div>
@@ -4906,8 +4906,12 @@ document.addEventListener('keydown',function(e){
       e.preventDefault();t.blur();
     }
   }
-  // Escape: schließt offene Modals
+  // Escape: Eingabefeld verlassen oder Modal schließen
   if(e.key==='Escape'){
+    var ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')&&!ae.classList.contains('cell-input')){
+      ae.blur();return;
+    }
     var modals=['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'];
     modals.forEach(function(id){var el=document.getElementById(id);if(el&&el.style.display!=='none'){closeModal(id);}});
   }
