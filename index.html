@@ -282,7 +282,7 @@ textarea{resize:vertical;line-height:1.5}
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ── MOBILE ── */
-@media (max-width:480px){  .cp-counter{display:none!important}  .upc-time{display:none!important}}
+@media (max-width:480px){  .cp-counter{display:none!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}}
 @media (max-width:768px){
   /* ── Layout ── */
   .app{flex-direction:column;height:auto;min-height:100vh}
@@ -1207,7 +1207,7 @@ var ART_OPTS=['Reach-Content','Trust-Content','Werbeanzeige'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'📸'},{id:'facebook',label:'Facebook',icon:'👥'},{id:'linkedin',label:'LinkedIn',icon:'💼'},{id:'tiktok',label:'TikTok',icon:'🎵'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
-function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{}},shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
+function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
 // ── HELPERS ──
 function cd(){return DATA[ACTIVE_CUSTOMER];}
@@ -1497,7 +1497,7 @@ function renderUpcomingShoots(){
       +'<td style="padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)">'+fmtISO(s.date)+'<span class="upc-time">'+(s.time?' · '+s.time+' Uhr':'')+'</span>'+'</td>'
       +'<td style="padding:6px 10px;font-weight:600;color:var(--text)">'+escHtml(s.title||'–')+'</td>'
       +'<td style="padding:6px 10px;color:var(--text2)">'+escHtml(s.custName)+'</td>'
-      +'<td style="padding:6px 10px;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:'+contentColor+';background:'+contentBg+';border:1px solid '+contentBorder+'">'+contentStr+'</span></td>'
+      +'<td style="padding:6px 10px;text-align:center"><span class="upc-anzahl" style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:'+contentColor+';background:'+contentBg+';border:1px solid '+contentBorder+'">'+contentStr+'</span></td>'
       +'</tr>';
   });
   html+='</tbody></table>';
@@ -2146,18 +2146,52 @@ function renderShootsList(){
     table.style.cssText='width:100%;border-collapse:collapse;font-size:11px';
     var thead=document.createElement('thead');
     var hr=document.createElement('tr');
+    var customCol=(cd().strategy&&cd().strategy.customCol)||'';
     var thDefs=[
       {l:'Content-Thema',w:'160px'},
       {l:'Erledigt',w:'72px'},
       {l:'Link',w:'44px'},
       {l:'Spez.',w:'80px',cls:'shoot-ideas-spez'},
-      {l:'',w:'36px'}
     ];
+    if(customCol){thDefs.push({l:customCol,w:'100px',cls:'shoot-ideas-custom'});}
+    thDefs.push({l:'',w:'36px'});
+    // +Spalte-Button im Header (nur Agentur, nur wenn noch keine customCol)
+    if(ROLE==='agency'&&!customCol){thDefs.push({l:'+',w:'36px',isAddCol:true});}
     thDefs.forEach(function(th){
       var el=document.createElement('th');
-      el.textContent=th.l;
-      if(th.cls)el.className=th.cls;
-      el.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)'+(th.w?';width:'+th.w:'');
+      if(th.isAddCol){
+        // +Spalte Button
+        var addColBtn=document.createElement('button');
+        addColBtn.textContent='+';
+        addColBtn.title='Eigene Spalte hinzufügen';
+        addColBtn.style.cssText='background:var(--surface2);border:1px dashed var(--border2);border-radius:4px;cursor:pointer;font-size:11px;color:var(--text3);padding:1px 7px;font-family:inherit';
+        addColBtn.onclick=function(e){
+          e.stopPropagation();
+          var name=prompt('Spaltenname:','');
+          if(name&&name.trim()){
+            if(!cd().strategy)cd().strategy={};
+            cd().strategy.customCol=name.trim();
+            scheduleSave();renderShootsList();
+          }
+        };
+        el.style.cssText='padding:4px 6px;border-bottom:1px solid var(--border);background:var(--surface2);width:36px';
+        el.appendChild(addColBtn);
+      } else {
+        el.textContent=th.l;
+        if(th.cls)el.className=th.cls;
+        // Agentur kann customCol umbenennen oder löschen
+        if(customCol&&th.l===customCol&&ROLE==='agency'){
+          el.style.cursor='pointer';
+          el.title='Spalte löschen (Klick)';
+          el.onclick=function(e){
+            e.stopPropagation();
+            if(confirm('Spalte "'+customCol+'" löschen?')){
+              cd().strategy.customCol='';scheduleSave();renderShootsList();
+            }
+          };
+        }
+        el.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)'+(th.w?';width:'+th.w:'');
+      }
       hr.appendChild(el);
     });
     thead.appendChild(hr); table.appendChild(thead);
@@ -2168,7 +2202,7 @@ function renderShootsList(){
     if(ideas.length===0){
       var emRow=document.createElement('tr');
       var emTd=document.createElement('td');
-      emTd.colSpan=5;
+      emTd.colSpan=5+(customCol?1:0)+(ROLE==='agency'&&!customCol?1:0);
       emTd.style.cssText='padding:12px 10px;font-size:11px;color:var(--text3);text-align:center';
       emTd.textContent='Noch keine Content-Pieces.';
       emRow.appendChild(emTd);tbody.appendChild(emRow);
@@ -2282,6 +2316,18 @@ function renderShootsList(){
       tr.appendChild(tdL);
 
       tdS.appendChild(sel);tr.appendChild(tdS);
+
+
+      // Custom Column
+      if(customCol){
+        var tdCC=document.createElement('td');tdCC.className='shoot-ideas-custom';tdCC.style.padding='4px 10px';
+        var ccInp=document.createElement('input');
+        ccInp.type='text';ccInp.value=idea.customVal||'';ccInp.placeholder='...';
+        ccInp.style.cssText='width:100%;border:none;background:transparent;color:var(--text);font-size:11px;font-family:inherit;padding:3px 0;outline:none';
+        ccInp.addEventListener('click',function(e){e.stopPropagation();});
+        (function(idx2){ccInp.addEventListener('change',function(){cd().shoots[i].ideas[idx2].customVal=this.value;scheduleSave();});})(ri);
+        tdCC.appendChild(ccInp);tr.appendChild(tdCC);
+      }
 
 
       // Delete – agency always, client only own
