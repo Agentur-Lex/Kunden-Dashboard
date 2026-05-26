@@ -2501,7 +2501,10 @@ function renderTodos(){if(!ACTIVE_CUSTOMER)return;Object.keys(DATA).forEach(func
 // ── CONTENT TABLE ──
 function togglePastRows(){SHOW_PAST=!SHOW_PAST;renderContentTable();}
 
-function captionKeydown(e,el){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur();}}
+function captionKeydown(e,el){
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();var pos=el.selectionStart;el.value=el.value.slice(0,pos)+'\n'+el.value.slice(pos);el.selectionStart=el.selectionEnd=pos+1;return;}
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur();}
+}
 function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO();var allRows=sortRows(cd().rows);cd().rows=allRows;var pastRows=allRows.filter(function(r){return isPastDate(r.date);});var futureRows=allRows.filter(function(r){return!isPastDate(r.date);});var pastCount=pastRows.length;var toggleBtn=document.getElementById('past-toggle-btn');if(toggleBtn){toggleBtn.style.display=pastCount>0?'flex':'none';var ti=document.getElementById('past-toggle-icon');var tl=document.getElementById('past-toggle-label');var tb2=document.getElementById('past-count-badge');if(ti)ti.textContent=SHOW_PAST?'▼':'▶';if(tl)tl.textContent=SHOW_PAST?'Vergangene Posts ausblenden':'Vergangene Posts anzeigen';if(tb2)tb2.textContent=pastCount;}
   var rowsToRender=SHOW_PAST?allRows:futureRows;var tb='';
   rowsToRender.forEach(function(row){var ri=allRows.indexOf(row);var past=isPastDate(row.date);
@@ -4742,6 +4745,13 @@ async function doChangePasswordSB(){
 <script>
 // ── Tastaturkürzel ──
 document.addEventListener('keydown',function(e){
+  // Enter auf cell-input = bestätigen (blur)
+  if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey){
+    var t=e.target;
+    if(t&&t.classList&&t.classList.contains('cell-input')&&t.tagName!=='TEXTAREA'){
+      e.preventDefault();t.blur();
+    }
+  }
   // Escape: schließt offene Modals
   if(e.key==='Escape'){
     var modals=['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'];
