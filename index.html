@@ -1386,7 +1386,7 @@ async function doForgot(){
     // To-Do für die Agentur anlegen: Passwort-Reset-Anfrage
     var custId=custRes.data.id;
     var custName=custRes.data.name;
-    await sb.from('todos').insert({
+    var insertRes=await sb.from('todos').insert({
       customer_id: custId,
       text: '🔑 Passwort-Reset angefragt für: '+custName+' ('+u+')',
       prio: 'high',
@@ -1396,6 +1396,12 @@ async function doForgot(){
       is_reset: true,
       reset_key: custId
     });
+    if(insertRes.error){
+      hideLoading();
+      err.textContent='Fehler beim Senden: '+insertRes.error.message;
+      err.style.display='block';
+      return;
+    }
 
     hideLoading();
     // Slider zur Bestätigungsseite animieren
