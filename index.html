@@ -2216,7 +2216,7 @@ function renderShootsList(){
     panel.setAttribute('data-panel-idx',i);
     var panelOpen=OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i]===true;
     panel.className='shoot-panel-wrap';
-    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);overflow:hidden;max-height:'+(panelOpen?'2000px':'0')+';opacity:'+(panelOpen?'1':'0');
+    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);overflow:hidden;max-height:'+(panelOpen?'2000px':'0')+';opacity:'+(panelOpen?'1':'0')+';transition:max-height .3s ease,opacity .25s ease';
 
     // Table
     var table=document.createElement('table');
