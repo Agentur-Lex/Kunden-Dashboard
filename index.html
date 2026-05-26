@@ -328,6 +328,8 @@ textarea{resize:vertical;line-height:1.5}
   .brainstorm-form-grid > div:nth-child(3){grid-column:2!important;grid-row:2!important;padding-top:0!important;display:flex;align-items:flex-end}
   .brainstorm-form-grid > div:nth-child(3) button{height:36px!important;margin:0!important}
   /* ── Drehtermine ── */  .shoot-collapse-btn{order:-1;margin-right:4px}
+  .shoot-panel-wrap{overflow:hidden;max-height:0;transition:max-height .3s ease,opacity .25s ease;opacity:0}
+  .shoot-panel-wrap.open{max-height:2000px;opacity:1}
   @media(max-width:768px){
     .page-desc-text{display:none!important}
     .page-info-mobile-only{display:inline-flex!important;visibility:visible!important;position:relative;cursor:default;width:15px;height:15px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:9px;font-weight:700;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;margin-left:6px}
@@ -365,9 +367,13 @@ textarea{resize:vertical;line-height:1.5}
   #analytics-import-panel, #analytics-import-btn{display:none!important}
   #agency-ov-grid{grid-template-columns:1fr!important}
   #nav-contentlist{display:none!important}
-  .kacheln-grid{grid-template-columns:repeat(2,1fr)!important}
-  .kachel .kachel-del{position:absolute;top:10px;right:10px}
-  .kachel-name{padding-right:24px}
+  .kacheln-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .kachel{padding:10px 12px!important}
+  .kachel .kachel-del{position:absolute;top:8px;right:8px}
+  .kachel-name{padding-right:22px;font-size:12px!important}
+  .kachel-status-sel{font-size:10px!important;padding:2px 4px!important}
+  .kachel-metric{font-size:10px!important}
+  .kachel-metric-val{font-size:12px!important}
   #q-add-form{flex-wrap:wrap!important}
   #new-q-input{width:100%!important;flex:none!important}
   #new-ob-step-input{width:180px!important}
@@ -2090,14 +2096,14 @@ function renderShootsList(){
     collapseBtn.title='Content-Themen ein-/ausklappen';
     collapseBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l4 4 4-4"/></svg>';
     // Pfeil-Zustand wiederherstellen
-    if(!OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i])collapseBtn.style.transform='rotate(-90deg)';
+    collapseBtn.style.transform=OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i]?'':'rotate(-90deg)';
     (function(btn,shootIdx){
       btn.onclick=function(e){
         e.stopPropagation();
         var p=document.querySelector('[data-panel-idx="'+shootIdx+'"]');
         if(!p)return;
-        var isOpen=p.style.display!=='none';
-        p.style.display=isOpen?'none':'block';
+        var isOpen=p.classList.contains('open');
+        if(isOpen){p.classList.remove('open');}else{p.classList.add('open');}
         btn.style.transform=isOpen?'rotate(-90deg)':'';
         OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+shootIdx]=!isOpen;
       };
@@ -2132,7 +2138,8 @@ function renderShootsList(){
     var panel=document.createElement('div');
     panel.setAttribute('data-panel-idx',i);
     var panelOpen=OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+i]===true;
-    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);overflow:hidden;display:'+(panelOpen?'block':'none');
+    panel.className='shoot-panel-wrap'+(panelOpen?' open':'');
+    panel.style.cssText='border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface)';
 
     // Table
     var table=document.createElement('table');
