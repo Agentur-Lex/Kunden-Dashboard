@@ -424,7 +424,21 @@ textarea{resize:vertical;line-height:1.5}
   .cp-counter input[type=number]{-webkit-appearance:auto;appearance:auto;width:44px;font-size:11px!important;font-weight:600;padding-right:2px}
   .cp-counter input[type=number]::-webkit-inner-spin-button{opacity:1;height:15px;cursor:pointer;margin-left:-8px}
   .cp-counter input[type=number]::-webkit-outer-spin-button{opacity:1;height:15px;cursor:pointer}
-  /* ── Erklärtexte ── */
+  /* ── Tour ── */
+  #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:none}
+  #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease}
+  #tour-tooltip{position:fixed;z-index:8002;background:#fff;border-radius:12px;padding:18px 20px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.18);pointer-events:all;transition:all .3s ease}
+  #tour-tooltip h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--text)}
+  #tour-tooltip p{margin:0 0 14px;font-size:12px;color:var(--text2);line-height:1.6}
+  #tour-tooltip .tour-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  #tour-tooltip .tour-step{font-size:10px;color:var(--text3)}
+  #tour-tooltip .tour-dots{display:flex;gap:4px}
+  #tour-tooltip .tour-dot{width:6px;height:6px;border-radius:50%;background:var(--surface3)}
+  #tour-tooltip .tour-dot.active{background:var(--accent)}
+  #tour-tooltip .tour-btns{display:flex;gap:6px}
+  #tour-skip{background:none;border:none;cursor:pointer;font-size:11px;color:var(--text3);padding:0;font-family:inherit}
+  #tour-skip:hover{color:var(--text)}
+/* ── Erklärtexte ── */
   .pi-icon{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--surface2);color:var(--text3);font-size:9px;font-weight:700;cursor:default;margin-left:7px;position:relative;vertical-align:middle;flex-shrink:0;line-height:1}
   .pi-icon .pi-tip{display:none;position:fixed;left:50%;transform:translateX(-50%);top:auto;background:#f3f4f6;color:#374151;font-size:10px;font-weight:400;line-height:1.6;padding:10px 14px;border-radius:8px;width:min(270px,80vw);z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.12);white-space:normal;border:1px solid #e5e7eb;margin-top:22px}
   .pi-icon:hover .pi-tip{display:block}
@@ -516,14 +530,14 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
     <div class="nav-item active client-only" id="nav-overview" onclick="showPage('overview',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9.5L10 3l7 6.5"/><path d="M5.5 9.5V17h9V9.5"/></svg> Dashboard</div>
     <div class="nav-item agency-only" id="nav-onboarding" onclick="showPage('onboarding',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="15" cy="4" r="2.5"/><path d="M13.8 4l.9.9 1.8-1.8"/></svg> Onboarding</div>
     <div class="nav-label" style="margin-top:8px">Planung</div>
-    <div class="nav-item" onclick="showPage('shoots',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="6" width="12" height="9" rx="1.5"/><path d="M14 9.5l4-2v6l-4-2"/></svg> Drehtermine</div>
+    <div class="nav-item" id="nav-shoots" onclick="showPage('shoots',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="6" width="12" height="9" rx="1.5"/><path d="M14 9.5l4-2v6l-4-2"/></svg> Drehtermine</div>
     <div class="nav-item" id="nav-todos" onclick="showPage('todos',this)" style="position:relative"><span id="todo-nav-badge" style="position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:700;display:none;align-items:center;justify-content:center;line-height:1"></span><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 5h9M8 10h9M8 15h9"/><polyline points="3,5 4.5,6.5 7,4"/><polyline points="3,10 4.5,11.5 7,9"/><polyline points="3,15 4.5,16.5 7,14"/></svg> To-Dos <span class="nav-badge" id="todo-badge" style="display:none"></span></div>
     <div class="nav-label" style="margin-top:8px">Content</div>
     <div id="nav-contentlist" class="nav-item agency-only" onclick="showPage('contentlist',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10.5h6M7 14h4"/></svg> Content-Liste</div>
-    <div class="nav-item" onclick="showPage('calendar',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2.5" y="4" width="15" height="14" rx="1.5"/><path d="M2.5 8.5h15"/><path d="M7 2.5v3M13 2.5v3"/><rect x="6" y="11" width="2" height="2" rx=".4"/><rect x="9" y="11" width="2" height="2" rx=".4"/><rect x="12" y="11" width="2" height="2" rx=".4"/></svg> Kalender</div>
+    <div class="nav-item" id="nav-calendar" onclick="showPage('calendar',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2.5" y="4" width="15" height="14" rx="1.5"/><path d="M2.5 8.5h15"/><path d="M7 2.5v3M13 2.5v3"/><rect x="6" y="11" width="2" height="2" rx=".4"/><rect x="9" y="11" width="2" height="2" rx=".4"/><rect x="12" y="11" width="2" height="2" rx=".4"/></svg> Kalender</div>
     <div class="nav-label" style="margin-top:8px">Analyse</div>
-    <div class="nav-item" onclick="showPage('analytics',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="2,15 7,9 11,12 16,6 18,8"/><path d="M2 18h16"/></svg> Analysedaten</div>
-    <div class="nav-item" onclick="showPage('strategy',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r=".8" fill="currentColor"/></svg> Strategie</div>
+    <div class="nav-item" id="nav-analytics" onclick="showPage('analytics',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="2,15 7,9 11,12 16,6 18,8"/><path d="M2 18h16"/></svg> Analysedaten</div>
+    <div class="nav-item" id="nav-strategy" onclick="showPage('strategy',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r=".8" fill="currentColor"/></svg> Strategie</div>
     <div class="nav-item agency-only" onclick="showPage('settings',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="7.5" cy="10" r="4"/><path d="M11 8.5l7 7"/><path d="M15 12.5l2-2"/><path d="M13.5 14l2-2"/></svg> Zugangsdaten</div>
     <div class="sidebar-bottom">
       <div class="user-card" id="sidebar-user-card" style="display:none">
@@ -549,11 +563,28 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
         
         <div class="tb-chip" id="agency-chip" style="display:none"><div class="tb-av">AG</div><span class="tb-name">Social-Media-Lex</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
-        <div class="tb-chip" id="client-chip" style="display:none"><div class="tb-av" id="client-chip-av">K</div><span class="tb-name" id="client-chip-name">Kunde</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
+        <div class="tb-chip" id="client-chip" style="display:none"><div class="tb-av" id="client-chip-av">K</div><span class="tb-name" id="client-chip-name">Kunde</span><button class="tb-logout" onclick="tourStart()" style="background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:10px;cursor:pointer;margin-right:4px">Anleitung</button><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
       </div>
     </div>
 
-    <div id="shoot-reminder-banner" style="display:none;background:#fff3cd;border-bottom:2px solid #f59e0b;padding:10px 24px;align-items:center;gap:10px;flex-shrink:0">
+    <div id="tour-overlay" style="display:none">
+  <div id="tour-highlight"></div>
+  <div id="tour-tooltip">
+    <h3 id="tour-title"></h3>
+    <p id="tour-text"></p>
+    <div class="tour-footer">
+      <div>
+        <div class="tour-dots" id="tour-dots"></div>
+      </div>
+      <div class="tour-btns">
+        <button id="tour-skip" onclick="tourEnd()">Überspringen</button>
+        <button class="btn-outline" id="tour-prev" onclick="tourPrev()" style="font-size:11px;padding:5px 12px">←</button>
+        <button class="btn-primary" id="tour-next" onclick="tourNext()" style="font-size:11px;padding:5px 14px">Weiter</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="shoot-reminder-banner"  style="display:none;background:#fff3cd;border-bottom:2px solid #f59e0b;padding:10px 24px;align-items:center;gap:10px;flex-shrink:0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span id="shoot-reminder-text" style="font-size:12px;font-weight:600;color:#92400e;flex:1"></span>
       <button onclick="document.getElementById('shoot-reminder-banner').style.display='none'" style="background:none;border:none;cursor:pointer;color:#92400e;font-size:16px;line-height:1;padding:0 4px;flex-shrink:0">&#x2715;</button>
@@ -1424,6 +1455,7 @@ function startClientSession(k){
   renderCustomerView();
   updateShootReminder();
   window.scrollTo({top:0,behavior:'smooth'});
+  tourCheckFirstLogin();
   var main=document.getElementById('main-app');
   if(main)main.scrollTo({top:0,behavior:'smooth'});
 }
@@ -4743,6 +4775,93 @@ async function doChangePasswordSB(){
 
 </script>
 <script>
+
+// ── Tour ──
+var TOUR_STEPS=[
+  {target:'nav-overview',title:'Dashboard – Deine Übersicht',text:'Hier siehst du auf einen Blick wie dein Social-Media-Account wächst: Follower, Reichweite, Engagement und mehr. Alles was du über deine Performance wissen musst.'},
+  {target:'nav-todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle offenen Aufgaben von deiner Agentur. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir für dich arbeiten.'},
+  {target:'nav-shoots',title:'Drehtermine – Deine Aufnahmen',text:'Hier sind alle geplanten Drehtage aufgelistet. Du siehst was geplant ist, kannst eigene Content-Ideen hinzufügen und vorhandene bearbeiten.'},
+  {target:'nav-calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
+  {target:'nav-analytics',title:'Analysedaten – Deine Zahlen',text:'Hier pflegt deine Agentur monatlich die wichtigsten Kennzahlen ein. So behältst du immer den Überblick über dein Wachstum.'},
+  {target:'nav-strategy',title:'Strategie – Dein Fahrplan',text:'Hier findest du deine Content-Strategie: Zielgruppe, Themenfelder, Plattformen und Frequenz. Das ist die Grundlage für alle Inhalte die wir für dich erstellen.'},
+];
+var TOUR_IDX=0;
+
+function tourStart(){
+  TOUR_IDX=0;
+  var ov=document.getElementById('tour-overlay');
+  if(ov)ov.style.display='block';
+  tourShow();
+}
+
+function tourShow(){
+  var step=TOUR_STEPS[TOUR_IDX];
+  var target=document.getElementById(step.target);
+  if(!target){tourNext();return;}
+
+  // Highlight
+  var rect=target.getBoundingClientRect();
+  var pad=6;
+  var hl=document.getElementById('tour-highlight');
+  hl.style.left=(rect.left-pad)+'px';
+  hl.style.top=(rect.top-pad)+'px';
+  hl.style.width=(rect.width+pad*2)+'px';
+  hl.style.height=(rect.height+pad*2)+'px';
+
+  // Tooltip positionieren
+  var tt=document.getElementById('tour-tooltip');
+  var ttW=280,ttH=160;
+  var left=rect.right+16;
+  var top=rect.top;
+  if(left+ttW>window.innerWidth-10)left=rect.left-ttW-16;
+  if(left<10)left=10;
+  if(top+ttH>window.innerHeight-10)top=window.innerHeight-ttH-10;
+  if(top<10)top=10;
+  tt.style.left=left+'px';
+  tt.style.top=top+'px';
+
+  // Inhalt
+  document.getElementById('tour-title').textContent=step.title;
+  document.getElementById('tour-text').textContent=step.text;
+
+  // Dots
+  var dots='';
+  for(var i=0;i<TOUR_STEPS.length;i++){
+    dots+='<div class="tour-dot'+(i===TOUR_IDX?' active':'')+'"></div>';
+  }
+  document.getElementById('tour-dots').innerHTML=dots;
+
+  // Buttons
+  document.getElementById('tour-prev').style.display=TOUR_IDX>0?'':'none';
+  var nextBtn=document.getElementById('tour-next');
+  nextBtn.textContent=TOUR_IDX===TOUR_STEPS.length-1?'Fertig ✓':'Weiter';
+}
+
+function tourNext(){
+  if(TOUR_IDX>=TOUR_STEPS.length-1){tourEnd();return;}
+  TOUR_IDX++;tourShow();
+}
+
+function tourPrev(){
+  if(TOUR_IDX>0){TOUR_IDX--;tourShow();}
+}
+
+function tourEnd(){
+  var ov=document.getElementById('tour-overlay');
+  if(ov)ov.style.display='none';
+  // Tour als gesehen markieren
+  try{localStorage.setItem('lex_tour_done_'+ACTIVE_CUSTOMER,'1');}catch(e){}
+}
+
+function tourCheckFirstLogin(){
+  // Prüfe ob Tour bereits gezeigt wurde
+  try{
+    if(!localStorage.getItem('lex_tour_done_'+ACTIVE_CUSTOMER)){
+      setTimeout(tourStart,800);
+    }
+  }catch(e){}
+}
+
 // ── Tastaturkürzel ──
 document.addEventListener('keydown',function(e){
   // Enter auf cell-input = bestätigen (blur)
