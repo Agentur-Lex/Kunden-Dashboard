@@ -107,8 +107,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden}
 .smart-tbl tr:last-child td{border-bottom:none}
 .smart-tbl tr:hover td{background:rgba(255,255,255,0.02)}
 .smart-tbl tr.past-row td{opacity:.4}
-.cell-input{display:block;width:100%;padding:5px 7px;background:transparent;border:none;color:var(--text);font-size:9px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;min-height:34px}
-.cell-input:focus{background:rgba(255,87,87,0.06);box-shadow:inset 0 0 0 1.5px rgba(255,87,87,0.4)}
+.cell-input{display:block;width:100%;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:9px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;min-height:34px;box-sizing:border-box;transition:background .15s}
+.cell-input.has-value{background:#fff}
+.cell-input.needs-value{background:rgba(255,80,80,0.07)}
 .cell-select{display:block;width:100%;padding:5px 7px;background:transparent;border:none;color:var(--text);font-size:9px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;min-height:34px}
 .cell-select:focus{background:rgba(255,87,87,0.06)}
 .add-row-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;border-top:1px solid var(--border);transition:color .15s,background .15s}
@@ -2512,7 +2513,25 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
     tb+='<td class="caption-cell"><textarea class="cell-input caption-input" rows="1" onclick="event.stopPropagation();this.rows=4;" onkeydown="captionKeydown(event,this)" onblur="this.rows=1;this.scrollTop=0;cd().rows['+ri+'].caption=this.value;" onchange="cd().rows['+ri+'].caption=this.value;scheduleSave()">'+escHtml(row.caption||'')+'</textarea></td>';
     tb+='<td style="text-align:center;padding:0 4px"><button class="btn-icon del" onclick="event.stopPropagation();if(confirm(\'Löschen?\'))deleteRow('+ri+')" title="Löschen">🗑</button></td></tr>';
   });
-  var tbody=document.getElementById('content-tbody');if(tbody)tbody.innerHTML=tb;}
+  var tbody=document.getElementById('content-tbody');
+  if(tbody){
+    tbody.innerHTML=tb;
+    // Hintergrund-Logik: leer=grau, befüllt=weiß, fast-voll=hellrot
+    tbody.querySelectorAll('tr').forEach(function(row){
+      var inputs=Array.from(row.querySelectorAll('.cell-input'));
+      if(!inputs.length)return;
+      var vals=inputs.map(function(inp){return(inp.value||inp.textContent||'').trim();});
+      var filled=vals.filter(function(v){return v&&v!=='https://...';}).length;
+      var total=inputs.length;
+      inputs.forEach(function(inp){
+        var v=(inp.value||inp.textContent||'').trim();
+        var hasVal=!!(v&&v!=='https://...');
+        inp.classList.toggle('has-value',hasVal);
+        inp.classList.toggle('needs-value',!hasVal&&filled>=total-1&&total>1);
+      });
+    });
+  }
+}
 function addContentRow(){cd().rows.push({date:getTodayISO(),name:'',link:'',art:ART_OPTS[0],spez:SPEZ_OPTS[0],caption:''});scheduleSave();renderContentTable();buildCalendar();}
 function deleteRow(ri){cd().rows.splice(ri,1);scheduleSave();renderContentTable();buildCalendar();closeModal('content-modal');}
 function openContentModal(ri){
