@@ -531,7 +531,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
     <div class="nav-item agency-only" id="nav-onboarding" onclick="showPage('onboarding',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="15" cy="4" r="2.5"/><path d="M13.8 4l.9.9 1.8-1.8"/></svg> Onboarding</div>
     <div class="nav-label" style="margin-top:8px">Planung</div>
     <div class="nav-item" id="nav-shoots" onclick="showPage('shoots',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="6" width="12" height="9" rx="1.5"/><path d="M14 9.5l4-2v6l-4-2"/></svg> Drehtermine</div>
-    <div class="nav-item" id="nav-todos" onclick="showPage('todos',this)" style="position:relative"><span id="todo-nav-badge" style="position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:700;display:none;align-items:center;justify-content:center;line-height:1"></span><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 5h9M8 10h9M8 15h9"/><polyline points="3,5 4.5,6.5 7,4"/><polyline points="3,10 4.5,11.5 7,9"/><polyline points="3,15 4.5,16.5 7,14"/></svg> To-Dos <span class="nav-badge" id="todo-badge" style="display:none"></span></div>
+    <div class="nav-item" id="nav-todos" onclick="showPage('todos',this)" style="position:relative"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 5h9M8 10h9M8 15h9"/><polyline points="3,5 4.5,6.5 7,4"/><polyline points="3,10 4.5,11.5 7,9"/><polyline points="3,15 4.5,16.5 7,14"/></svg> To-Dos <span class="nav-badge" id="todo-badge" style="display:none"></span></div>
     <div class="nav-label" style="margin-top:8px">Content</div>
     <div id="nav-contentlist" class="nav-item agency-only" onclick="showPage('contentlist',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10.5h6M7 14h4"/></svg> Content-Liste</div>
     <div class="nav-item" id="nav-calendar" onclick="showPage('calendar',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2.5" y="4" width="15" height="14" rx="1.5"/><path d="M2.5 8.5h15"/><path d="M7 2.5v3M13 2.5v3"/><rect x="6" y="11" width="2" height="2" rx=".4"/><rect x="9" y="11" width="2" height="2" rx=".4"/><rect x="12" y="11" width="2" height="2" rx=".4"/></svg> Kalender</div>
@@ -4574,16 +4574,7 @@ function updateShootReminder(){
   txt.textContent='📅 Drehtermin'+( shoots.length>1?'e':'')+' bald: '+msgs.join(' · ');
   banner.style.display='flex';
 }
-function updateTodoBadge(){
-  var badge=document.getElementById('todo-nav-badge');
-  if(!badge)return;
-  var count=0;
-  if(ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
-    count=(DATA[ACTIVE_CUSTOMER].todos||[]).filter(function(t){return !t.done;}).length;
-  }
-  badge.textContent=count>0?count:'';
-  badge.style.display=count>0?'flex':'none';
-}
+function updateTodoBadge(){}
 
 function showSupabaseUserHint(email, pw, name){
   var supabaseUrl = 'https://supabase.com/dashboard/project/kvytyavgosxhvijmfxef/auth/users';
@@ -4657,7 +4648,7 @@ async function loadCustomerData(custId,custObj){
     password:cred.temp_pw||'set',
     setAt:null,
     resetPending:false,
-    pwChanged:cred.pw_changed!==false
+    pwChanged:cred.pw_changed===true
   };
 }
 async function sbSaveCustomer(){
