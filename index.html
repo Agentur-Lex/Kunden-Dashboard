@@ -822,6 +822,10 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           <div class="card"><div class="card-title">Plattformen</div><div id="strat-plat" style="margin-top:4px"></div></div>
           <div class="card"><div class="card-title">Frequenz</div><div id="strat-freq"></div></div>
         </div>
+        <div class="card agency-only">
+          <div class="card-title">Spez. pro Drehtermin</div>
+          <div id="strat-spez-container" style="margin-top:6px"></div>
+        </div>
         <div class="card">
           <div class="card-title">Content-Strategie PDF
             <span id="strat-pdf-badge" style="font-size:9px;font-weight:500;color:var(--text3);margin-left:8px"></span>
@@ -1198,7 +1202,7 @@ var ART_OPTS=['Reach-Content','Trust-Content','Werbeanzeige'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'📸'},{id:'facebook',label:'Facebook',icon:'👥'},{id:'linkedin',label:'LinkedIn',icon:'💼'},{id:'tiktok',label:'TikTok',icon:'🎵'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
-function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:''},shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
+function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{}},shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
 // ── HELPERS ──
 function cd(){return DATA[ACTIVE_CUSTOMER];}
@@ -2354,7 +2358,17 @@ function addShootIdeaRow(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;if(
 function updateShootIdea(ri,key,val){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas&&s.ideas[ri]!==undefined){s.ideas[ri][key]=val;renderShootsList();}}
 function deleteShootIdea(ri){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas){s.ideas.splice(ri,1);scheduleSave();renderShootIdeasTable();renderShootsList();}}
 function saveShootDetail(){scheduleSave();closeModal('shoot-detail-modal');renderShootsList();}
-function saveShoot(){var date=(document.getElementById('sh-modal-date')||document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-modal-time')||document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-modal-title')||document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-modal-location')||document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-modal-customer')||document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:[]});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+function saveShoot(){var date=(document.getElementById('sh-modal-date')||document.getElementById('sh-date')||{}).value;var time=(document.getElementById('sh-modal-time')||document.getElementById('sh-time')||{}).value;var title=((document.getElementById('sh-modal-title')||document.getElementById('sh-title')||{}).value||'').trim();var location=((document.getElementById('sh-modal-location')||document.getElementById('sh-location')||{}).value||'').trim();var ckey=(document.getElementById('sh-modal-customer')||document.getElementById('sh-customer')||{}).value;if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}
+  // Auto-Content-Themen aus Strategie-Spez.
+  var autoIdeas=[];
+  var sf2=DATA[ckey]&&DATA[ckey].strategy&&DATA[ckey].strategy.spezFreq||{};
+  SPEZ_OPTS.filter(function(o){return o!=='-';}).forEach(function(opt){
+    var n=(sf2[opt]||0)*2;
+    for(var ai=0;ai<n;ai++){
+      autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});
+    }
+  });
+  DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
@@ -3511,6 +3525,46 @@ function renderStrategyPage() {
     }
   }
 
+
+  // ── Spez. pro Drehtermin ──
+  var spezEl=document.getElementById('strat-spez-container');
+  if(spezEl){
+    spezEl.innerHTML='';
+    var spezFreq=s.spezFreq||{};
+    var spezOpts=SPEZ_OPTS.filter(function(o){return o!=='-';});
+    spezOpts.forEach(function(opt){
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:8px';
+      var lbl=document.createElement('div');
+      lbl.style.cssText='font-size:11px;color:var(--text2);min-width:140px';
+      lbl.textContent=opt;
+      row.appendChild(lbl);
+      if(isEdit){
+        var inp=document.createElement('input');
+        inp.type='number';inp.min='0';inp.max='99';
+        inp.value=spezFreq[opt]||0;
+        inp.style.cssText='width:52px;font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:3px 6px;background:var(--surface2);color:var(--text);text-align:center';
+        (function(o2){inp.addEventListener('change',function(){
+          if(!cd().strategy.spezFreq)cd().strategy.spezFreq={};
+          cd().strategy.spezFreq[o2]=parseInt(this.value)||0;
+          renderStrategyPage();scheduleSave();
+        });})(opt);
+        row.appendChild(inp);
+        var hint=document.createElement('span');
+        hint.style.cssText='font-size:10px;color:var(--text3);margin-left:4px';
+        hint.textContent='× in Strategie = '+((spezFreq[opt]||0)*2)+' Content-Themen pro Drehtermin';
+        row.appendChild(hint);
+      }else{
+        var val=spezFreq[opt]||0;
+        var badge2=document.createElement('div');
+        badge2.style.cssText='font-size:11px;font-weight:600;color:'+(val>0?'var(--text)':'var(--text3)');
+        badge2.textContent=val>0?(val*2)+' pro Drehtermin':'–';
+        row.appendChild(badge2);
+      }
+      spezEl.appendChild(row);
+    });
+  }
+
   // ── Plattformen – Checkboxen ──
   var sp = document.getElementById('strat-plat');
   if (sp) {
@@ -4608,6 +4662,15 @@ async function doChangePasswordSB(){
 
 </script>
 <script>
+// ── Tastaturkürzel ──
+document.addEventListener('keydown',function(e){
+  // Escape: schließt offene Modals
+  if(e.key==='Escape'){
+    var modals=['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'];
+    modals.forEach(function(id){var el=document.getElementById(id);if(el&&el.style.display!=='none'){closeModal(id);}});
+  }
+});
+
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(function(regs){
     regs.forEach(function(r){r.unregister();});
