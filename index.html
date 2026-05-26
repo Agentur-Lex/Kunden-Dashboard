@@ -282,7 +282,7 @@ textarea{resize:vertical;line-height:1.5}
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ── MOBILE ── */
-@media (max-width:480px){  .cp-counter{display:none!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}}
+@media (max-width:480px){  .cp-counter{display:none!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}  .col-del-btn{display:none!important}}
 @media (max-width:768px){
   /* ── Layout ── */
   .app{flex-direction:column;height:auto;min-height:100vh}
@@ -2185,9 +2185,11 @@ function renderShootsList(){
           var colLbl=document.createElement('span');colLbl.textContent=th.l;colLbl.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase';
           var colDel=document.createElement('button');
           colDel.title='Spalte löschen';
+          colDel.className='col-del-btn';
           colDel.style.cssText='background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:0 0 0 4px;line-height:1;vertical-align:middle;opacity:.6';
           colDel.innerHTML='<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg>';
           colDel.onclick=function(e){e.stopPropagation();if(confirm('Spalte "'+customCol+'" löschen?')){cd().strategy.customCol='';scheduleSave();renderShootsList();}};
+          if(ROLE!=='agency')colDel.style.display='none';
           el.appendChild(colLbl);el.appendChild(colDel);
         }
         el.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)'+(th.w?';width:'+th.w:'');
@@ -2218,7 +2220,7 @@ function renderShootsList(){
       var tdT=document.createElement('td');tdT.style.padding='6px 10px';
       var themaInp=document.createElement('input');
       themaInp.type='text';themaInp.value=idea.thema||'';themaInp.placeholder='Content-Thema...';
-      themaInp.style.cssText='width:100%;border:none;background:transparent;color:var(--text);font-size:11px;font-family:inherit;padding:5px 0;outline:none';
+      themaInp.style.cssText='width:100%;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-size:11px;font-family:inherit;padding:3px 6px;outline:none;box-sizing:border-box';
       // Desc indicator
       if(idea.desc&&idea.desc.trim()){
         var dot=document.createElement('span');dot.textContent=' 📝';dot.style.cssText='font-size:10px;cursor:pointer';
