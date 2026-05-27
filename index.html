@@ -2586,13 +2586,15 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
     if(row.art==='Light-Ad'&&ROLE==='agency'){
       var today30=new Date();today30.setDate(today30.getDate()-30);
       var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
-      var recentPieces=(cd().rows||[]).filter(function(r,i){return i!==ri&&normalizeDate(r.date)>=minDate&&r.name;});
+      var todayStr=getTodayISO();
+      var recentPieces=(cd().rows||[]).filter(function(r,i){var d=normalizeDate(r.date);return i!==ri&&d>=minDate&&d<=todayStr&&r.name;});
       if(!recentPieces.length){
-        tb+='<td><div style="font-size:9px;color:var(--text3);padding:6px 8px;background:var(--surface2);border-radius:5px;border:1px solid var(--border)">Keine Pieces der letzten 30 Tage</div></td>';
+        tb+='<td><div style="font-size:9px;color:var(--text3);padding:6px 8px;background:var(--surface2);border-radius:5px;border:1px solid var(--border)">Keine Content-Pieces der letzten 30 Tage</div></td>';
       } else {
+        var selIdx2=recentPieces.findIndex(function(r){return r.name===row.name&&r._lightAdRef!==undefined;});
         tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="lightAdSelect('+ri+',this.value)" style="width:100%">'
           +'<option value="">– Piece auswählen –</option>'
-          +recentPieces.map(function(r,idx2){var sel=r.name===row.name?' selected':'';return'<option value="'+idx2+'"'+sel+'>'+escHtml(r.name)+' ('+fmtISO(normalizeDate(r.date))+')</option>';}).join('')
+          +recentPieces.map(function(r,idx2){var sel=(row._lightAdRef!==undefined&&cd().rows.indexOf(r)===row._lightAdRef)?' selected':'';return'<option value="'+idx2+'"'+sel+'>'+escHtml(r.name)+' ('+fmtISO(normalizeDate(r.date))+')</option>';}).join('')
           +'</select></td>';
       }
     } else {
@@ -2651,7 +2653,7 @@ function openContentModal(ri){
       var changeHandler='cd().rows['+ri+'].'+key+'=this.value'+(key==='link'?';updatePreview()':'')+(key==='date'||key==='art'?';renderContentTable();buildCalendar()':'');
     // Light-Ad: Link-Zelle als klickbarer Button
     if(key==='link'&&row.art==='Light-Ad'&&row.link==='zum Piece'){
-      body+='<button class="cell-input" style="cursor:pointer;text-align:left;color:var(--accent);font-weight:600" onclick="event.stopPropagation();lightAdJumpToPiece('+ri+')">zum Piece →</button>';
+      body+='<button class="cell-input" style="cursor:pointer;text-align:left;color:var(--accent);font-weight:600" onclick="event.stopPropagation();lightAdJumpToPiece('+ri+')">→ zum Piece</button>';
       return;
     }
       var inputExtra=(key==='link'?' oninput="updatePreview()"':'');
@@ -4967,14 +4969,14 @@ function lightAdSelect(ri,selIdx){
   var row=cd().rows[ri];
   row.name=piece.name;
   row.spez=piece.spez||row.spez;
-  row.link='zum Piece';
+  row.link=piece.link||'';
   row._lightAdRef=cd().rows.indexOf(piece);
   scheduleSave();
   renderContentTable();buildCalendar();
 }
 function lightAdJumpToPiece(ri){
   var row=cd().rows[ri];
-  if(!row||row.link!=='zum Piece')return;
+  if(!row)return;
   var refIdx=row._lightAdRef;
   if(refIdx===undefined||refIdx<0)return;
   // Zur Content-Liste navigieren und Zeile hervorheben
