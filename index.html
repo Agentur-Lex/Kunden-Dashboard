@@ -556,11 +556,11 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div id="agency-tb" style="display:none;align-items:center;gap:10px">
           <span style="font-size:10px;font-weight:500;color:var(--text3)">Kunde</span>
           <select id="cust-dropdown" class="cust-sel" onchange="agencySwitchCustomer(this.value)"></select>
-          <button id="undo-btn" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="display:none;background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text2);font-size:18px;line-height:1;font-family:inherit" disabled>↩</button>
+          <button id="undo-btn" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;opacity:0.35" disabled>↩</button>
         </div>
         <div id="client-tb" style="display:none;align-items:center;gap:8px">
           <button onclick="tourStart()" style="background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:inherit">Anleitung</button>
-          <button id="undo-btn-client" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="display:none;background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text2);font-size:18px;line-height:1;font-family:inherit" disabled>↩</button>
+          <button id="undo-btn-client" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;opacity:0.35" disabled>↩</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
@@ -4819,10 +4819,10 @@ function updateUndoBtn(){
   ['undo-btn','undo-btn-client'].forEach(function(id){
     var btn=document.getElementById(id);
     if(!btn)return;
-    btn.style.display='';
     btn.disabled=!can;
     btn.style.opacity=can?'1':'0.35';
     btn.style.cursor=can?'pointer':'default';
+    btn.style.color=can?'var(--text)':'var(--text3)';
   });
 }
 
