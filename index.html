@@ -2593,6 +2593,7 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
   var tbody=document.getElementById('content-tbody');
   if(tbody){
     tbody.innerHTML=tb;
+    tbody.addEventListener('input',function(e){if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))updateRowColors(e.target);},true);
     // Hintergrund-Logik: leer=grau, befüllt=weiß, fast-voll=hellrot
     tbody.querySelectorAll('tr').forEach(function(row){
       var inputs=Array.from(row.querySelectorAll('.cell-input'));
@@ -4936,6 +4937,22 @@ function tourCheckFirstLogin(){
   }catch(e){}
 }
 
+// ── Content-Liste Hintergrund live aktualisieren ──
+function updateRowColors(inputEl){
+  var row=inputEl.closest('tr');
+  if(!row)return;
+  var inputs=Array.from(row.querySelectorAll('input[type=text],input[type=url],textarea.caption-input'));
+  if(!inputs.length)return;
+  var filled=inputs.filter(function(inp){var v=(inp.value||'').trim();return v&&v!=='https://...';}).length;
+  var total=inputs.length;
+  inputs.forEach(function(inp){
+    var v=(inp.value||'').trim();
+    var hasVal=!!(v&&v!=='https://...');
+    inp.classList.remove('has-value','needs-value');
+    if(hasVal){inp.classList.add('has-value');}
+    else if(filled>=total-1&&total>1){inp.classList.add('needs-value');}
+  });
+}
 // ── Tastaturkürzel ──
 document.addEventListener('keydown',function(e){
   // Enter auf cell-input = bestätigen (blur)
