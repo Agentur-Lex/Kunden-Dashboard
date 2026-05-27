@@ -2598,7 +2598,7 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
           +'</select></td>';
       }
     } else {
-      tb+='<td style="overflow:visible;position:relative"><input class="cell-input" type="text" value="'+escHtml(row.name||'')+'" onclick="event.stopPropagation();this.style.position=\'absolute\';this.style.top=\'0\';this.style.left=\'0\';this.style.zIndex=\'10\';this.style.width=\'250px\';this.style.background=\'#fff\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.12)\';" onblur="this.style.position=\'\';this.style.zIndex=\'\';this.style.width=\'\';this.style.background=\'\';this.style.boxShadow=\'\';}" onchange="cd().rows['+ri+'].name=this.value"></td>';
+      tb+='<td style="overflow:visible;position:relative"><input class="cell-input" type="text" value="'+escHtml(row.name||'')+'" onclick="event.stopPropagation();this.style.position=\'absolute\';this.style.top=\'0\';this.style.left=\'0\';this.style.zIndex=\'10\';this.style.width=\'250px\';this.style.background=\'#fff\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.12)\';" onblur="this.style.position=\'\';this.style.zIndex=\'\';this.style.width=\'\';this.style.background=\'\';this.style.boxShadow=\'\'" onchange="cd().rows['+ri+'].name=this.value"></td>';
     }
     tb+='<td><input class="cell-input" type="url" value="'+(row.link||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].link=this.value" placeholder="https://..."></td>';
     tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].art=this.value;renderContentTable();buildCalendar()">'+ART_OPTS.map(function(o){return'<option'+(row.art===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
