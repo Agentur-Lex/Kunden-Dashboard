@@ -284,6 +284,7 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── MOBILE ── */
 @media (max-width:480px){  .cp-counter{display:none!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}  .col-del-btn{display:none!important}}
+@media (min-width:481px){  #todo-nav-badge{display:none!important}}
 @media (max-width:768px){
   /* ── Layout ── */
   .app{flex-direction:column;height:auto;min-height:100vh}
@@ -399,6 +400,7 @@ textarea{resize:vertical;line-height:1.5}
   /* .shoot-done-wrap ist auf Desktop sichtbar */
   .shoot-done-wrap{margin-top:2px}
   .shoot-del-btn{margin-left:8px;flex-shrink:0}
+  @media(max-width:480px){.shoot-del-btn{position:absolute;top:8px;right:8px;margin-left:0}}
   
   .cal-grid{grid-auto-rows:60px!important}
   .shoot-ideas-spez{display:none!important}
@@ -531,7 +533,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
     <div class="nav-item agency-only" id="nav-onboarding" onclick="showPage('onboarding',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="15" cy="4" r="2.5"/><path d="M13.8 4l.9.9 1.8-1.8"/></svg> Onboarding</div>
     <div class="nav-label" style="margin-top:8px">Planung</div>
     <div class="nav-item" id="nav-shoots" onclick="showPage('shoots',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="6" width="12" height="9" rx="1.5"/><path d="M14 9.5l4-2v6l-4-2"/></svg> Drehtermine</div>
-    <div class="nav-item" id="nav-todos" onclick="showPage('todos',this)" style="position:relative"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 5h9M8 10h9M8 15h9"/><polyline points="3,5 4.5,6.5 7,4"/><polyline points="3,10 4.5,11.5 7,9"/><polyline points="3,15 4.5,16.5 7,14"/></svg> To-Dos <span class="nav-badge" id="todo-badge" style="display:none"></span></div>
+    <div class="nav-item" id="nav-todos" onclick="showPage('todos',this)" style="position:relative"><span id="todo-nav-badge" style="display:none;position:absolute;top:2px;right:2px;background:var(--accent);color:#fff;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:700;align-items:center;justify-content:center;line-height:1"></span><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 5h9M8 10h9M8 15h9"/><polyline points="3,5 4.5,6.5 7,4"/><polyline points="3,10 4.5,11.5 7,9"/><polyline points="3,15 4.5,16.5 7,14"/></svg> To-Dos <span class="nav-badge" id="todo-badge" style="display:none"></span></div>
     <div class="nav-label" style="margin-top:8px">Content</div>
     <div id="nav-contentlist" class="nav-item agency-only" onclick="showPage('contentlist',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10.5h6M7 14h4"/></svg> Content-Liste</div>
     <div class="nav-item" id="nav-calendar" onclick="showPage('calendar',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2.5" y="4" width="15" height="14" rx="1.5"/><path d="M2.5 8.5h15"/><path d="M7 2.5v3M13 2.5v3"/><rect x="6" y="11" width="2" height="2" rx=".4"/><rect x="9" y="11" width="2" height="2" rx=".4"/><rect x="12" y="11" width="2" height="2" rx=".4"/></svg> Kalender</div>
@@ -2005,7 +2007,7 @@ function renderShootsList(){
 
     // ── Header row ──
     var header=document.createElement('div');
-    header.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:default';
+    header.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:default;position:relative';
 
     // Date box
     var dateBox=document.createElement('div');
@@ -2555,7 +2557,7 @@ function startEdit(idx){EDITING_TODO=idx;renderTodos();}
 function cancelEdit(){EDITING_TODO=-1;renderTodos();}
 function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var t=cd().todos[idx];t.text=txt;t.due=(document.getElementById('edit-due-'+idx)||{}).value;t.prio=(document.getElementById('edit-prio-'+idx)||{}).value;t.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;scheduleSave();renderTodos();}
 // doAgencyReset → weiter unten implementiert
-function renderTodos(){if(!ACTIVE_CUSTOMER)return;Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});var isAgency=ROLE==='agency';var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);var visible;if(isAgency){visible=todos;}else{visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}}
+function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});var isAgency=ROLE==='agency';var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);var visible;if(isAgency){visible=todos;}else{visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}}
   var open=visible.filter(function(t){return!t.done;}).map(function(t){return{t:t,i:todos.indexOf(t)};});var done2=visible.filter(function(t){return t.done&&!t.isOnboarding;}).map(function(t){return{t:t,i:todos.indexOf(t)};});
   var badge=document.getElementById('todo-badge');if(badge){badge.style.display=open.length?'inline':'none';badge.textContent=open.length;}
   var oc=document.getElementById('open-count');if(oc)oc.textContent='('+open.length+')';var dc=document.getElementById('done-count');if(dc)dc.textContent='('+done2.length+')';
@@ -4595,7 +4597,22 @@ function updateShootReminder(){
     container.appendChild(div);
   });
 }
-function updateTodoBadge(){}
+function updateTodoBadge(){
+  var badge=document.getElementById('todo-nav-badge');
+  if(!badge)return;
+  var count=0;
+  if(ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
+    var todos=DATA[ACTIVE_CUSTOMER].todos||[];
+    var pct=calcProgress(ACTIVE_CUSTOMER);
+    count=todos.filter(function(t){
+      if(ROLE==='agency')return !t.done;
+      return !t.done&&(t.assign==='client'||t.assign==='both')&&!t.isReset;
+    }).length;
+    if(ROLE==='client'&&pct<100)count+=1;
+  }
+  badge.textContent=count>0?count:'';
+  badge.style.display=count>0?'flex':'none';
+}
 
 function showSupabaseUserHint(email, pw, name){
   var supabaseUrl = 'https://supabase.com/dashboard/project/kvytyavgosxhvijmfxef/auth/users';
