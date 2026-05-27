@@ -2592,7 +2592,7 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
         tb+='<td><div style="font-size:9px;color:var(--text3);padding:6px 8px;background:var(--surface2);border-radius:5px;border:1px solid var(--border)">Keine Content-Pieces der letzten 30 Tage</div></td>';
       } else {
         var selIdx2=recentPieces.findIndex(function(r){return r.name===row.name&&r._lightAdRef!==undefined;});
-        tb+='<td style="padding:3px 6px"><select class="cell-select" onclick="event.stopPropagation()" onchange="lightAdSelect('+ri+',this.value)" style="width:100%;border:1px solid var(--border2);border-radius:5px;background:#fff;padding:3px 6px;font-size:9px">'
+        tb+='<td><select class="cell-input" onclick="event.stopPropagation()" onchange="lightAdSelect('+ri+',this.value)" style="width:100%;cursor:pointer">'
           +'<option value="">– Piece auswählen –</option>'
           +recentPieces.map(function(r,idx2){var sel=(row._lightAdRef!==undefined&&cd().rows.indexOf(r)===row._lightAdRef)?' selected':'';return'<option value="'+idx2+'"'+sel+'>'+escHtml(r.name)+' ('+fmtISO(normalizeDate(r.date))+')</option>';}).join('')
           +'</select></td>';
