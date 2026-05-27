@@ -829,7 +829,6 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div id="bulk-bar">
           <span id="bulk-count">0 ausgewählt</span>
           <button onclick="bulkDelete()">🗑 Löschen</button>
-          <button onclick="bulkSetArt()">Art ändern</button>
           <button onclick="bulkDeselect()">✕ Aufheben</button>
         </div>
         <div class="tbl-outer">
@@ -5185,12 +5184,13 @@ document.addEventListener('keydown',function(e){
     var ae=document.activeElement;
     if(!ae||ae.tagName==='BODY'){e.preventDefault();undoLast();}
   }
-  // Escape: Eingabefeld verlassen oder Modal schließen
+  // Escape: Eingabefeld verlassen, Bulk-Auswahl aufheben oder Modal schließen
   if(e.key==='Escape'){
     var ae=document.activeElement;
     if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')&&!ae.classList.contains('cell-input')){
       ae.blur();return;
     }
+    if(_bulkSelected&&_bulkSelected.size>0){bulkDeselect();return;}
     var modals=['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'];
     modals.forEach(function(id){var el=document.getElementById(id);if(el&&el.style.display!=='none'){closeModal(id);}});
   }
