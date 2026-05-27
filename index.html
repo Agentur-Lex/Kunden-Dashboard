@@ -4557,14 +4557,21 @@ function updateShootReminder(){
   var banner=document.getElementById('shoot-reminder-banner');
   var txt=document.getElementById('shoot-reminder-text');
   if(!banner||!txt)return;
-  if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER]){banner.style.display='none';return;}
+  if(!ACTIVE_CUSTOMER&&ROLE!=='agency'){banner.style.display='none';return;}
   var today=getTodayISO();
-  // Lokales Datum statt UTC verwenden
   var in3=new Date();in3.setDate(in3.getDate()+3);
   var in3str=in3.getFullYear()+'-'+String(in3.getMonth()+1).padStart(2,'0')+'-'+String(in3.getDate()).padStart(2,'0');
-  var shoots=(DATA[ACTIVE_CUSTOMER].shoots||[]).filter(function(s){
-    var d=normalizeDate(s.date);
-    return d&&d>=today&&d<=in3str;
+  // Agentur: alle Kunden prüfen; Kunde: nur eigene
+  var shoots=[];
+  var keysToCheck=ROLE==='agency'?Object.keys(DATA):(ACTIVE_CUSTOMER?[ACTIVE_CUSTOMER]:[]);
+  keysToCheck.forEach(function(k){
+    if(!DATA[k])return;
+    (DATA[k].shoots||[]).forEach(function(s){
+      var d=normalizeDate(s.date);
+      if(d&&d>=today&&d<=in3str){
+        shoots.push({title:s.title,date:s.date,custName:ROLE==='agency'?DATA[k].name:''});
+      }
+    });
   });
   if(!shoots.length){banner.style.display='none';return;}
   shoots.sort(function(a,b){return normalizeDate(a.date).localeCompare(normalizeDate(b.date));});
@@ -4572,7 +4579,8 @@ function updateShootReminder(){
     var d=normalizeDate(s.date);
     var diff=Math.round((new Date(d)-new Date(today))/(1000*60*60*24));
     var when=diff===0?'heute':diff===1?'morgen':'in '+diff+' Tagen';
-    return (s.title||'Drehtermin')+' – '+when+' ('+fmtISO(d)+')';
+    var cname=s.custName?' ('+s.custName+')':'';
+    return (s.title||'Drehtermin')+cname+' – '+when+' ('+fmtISO(d)+')';
   });
   // Mehrere Termine untereinander
   txt.innerHTML=msgs.map(function(m){
