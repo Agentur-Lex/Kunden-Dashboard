@@ -1426,7 +1426,7 @@ function resetForgotForm(){
 // ── SESSIONS ──
 function startAgencySession(){
   ACTIVE_CUSTOMER=Object.keys(DATA)[0]||'';
-  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();}
+  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();}
 function startClientSession(k){
   // Passwort noch nie geändert → First-Login-Screen zeigen
   if(CREDS[k]&&CREDS[k].pwChanged===false){
@@ -1462,7 +1462,7 @@ function startClientSession(k){
   renderCustomerView();
   updateShootReminder();
   window.scrollTo({top:0,behavior:'smooth'});
-  tourCheckFirstLogin();
+  tourCheckFirstLogin();updateUndoBtn();
   var main=document.getElementById('main-app');
   if(main)main.scrollTo({top:0,behavior:'smooth'});
 }
