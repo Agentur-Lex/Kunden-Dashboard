@@ -426,7 +426,16 @@ textarea{resize:vertical;line-height:1.5}
   .cp-counter input[type=number]{-webkit-appearance:auto;appearance:auto;width:44px;font-size:11px!important;font-weight:600;padding-right:2px}
   .cp-counter input[type=number]::-webkit-inner-spin-button{opacity:1;height:15px;cursor:pointer;margin-left:-8px}
   .cp-counter input[type=number]::-webkit-outer-spin-button{opacity:1;height:15px;cursor:pointer}
-  /* ── Tour ── */
+  /* ── Bulk-Aktionen ──*/
+  #bulk-bar{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;padding:8px 16px;display:none;align-items:center;gap:12px;border-radius:6px;margin-bottom:8px;font-size:12px;font-weight:600}
+  #bulk-bar button{background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:5px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600}
+  #bulk-bar button:hover{background:rgba(255,255,255,0.35)}
+  .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
+  /* ── PWA-Banner ── */
+  #pwa-banner{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 20px;display:none;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:9000;font-size:12px;min-width:280px}
+  #pwa-banner button.install{background:var(--accent);border:none;color:#fff;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+  #pwa-banner button.dismiss{background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:0 4px;margin-left:auto}
+/* ── Tour ── */
   #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:none}
   #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease}
   #tour-tooltip{position:fixed;z-index:8002;background:#fff;border-radius:12px;padding:18px 20px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.18);pointer-events:all;transition:all .3s ease}
@@ -817,10 +826,16 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           </div>
           </div>
         </div>
+        <div id="bulk-bar">
+          <span id="bulk-count">0 ausgewählt</span>
+          <button onclick="bulkDelete()">🗑 Löschen</button>
+          <button onclick="bulkSetArt()">Art ändern</button>
+          <button onclick="bulkDeselect()">✕ Aufheben</button>
+        </div>
         <div class="tbl-outer">
           <div class="tbl-wrap">
             <table class="smart-tbl">
-              <thead><tr><th style="width:100px">Datum</th><th style="width:110px">Titel</th><th style="width:120px">Drive-Link</th><th style="width:100px">Content-Art</th><th style="width:90px">Spez.</th><th>Caption</th><th style="width:28px"></th></tr></thead>
+              <thead><tr><th style="width:24px"><input type="checkbox" class="bulk-cb" id="bulk-select-all" onclick="bulkToggleAll(this.checked)" title="Alle auswählen"></th><th style="width:100px">Datum</th><th style="width:110px">Titel</th><th style="width:120px">Drive-Link</th><th style="width:100px">Content-Art</th><th style="width:90px">Spez.</th><th>Caption</th><th style="width:28px"></th></tr></thead>
               <tbody id="content-tbody"></tbody>
             </table>
           </div>
@@ -2583,7 +2598,7 @@ function captionKeydown(e,el){
 function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO();var allRows=sortRows(cd().rows);cd().rows=allRows;var pastRows=allRows.filter(function(r){return isPastDate(r.date);});var futureRows=allRows.filter(function(r){return!isPastDate(r.date);});var pastCount=pastRows.length;var toggleBtn=document.getElementById('past-toggle-btn');if(toggleBtn){toggleBtn.style.display=pastCount>0?'flex':'none';var ti=document.getElementById('past-toggle-icon');var tl=document.getElementById('past-toggle-label');var tb2=document.getElementById('past-count-badge');if(ti)ti.textContent=SHOW_PAST?'▼':'▶';if(tl)tl.textContent=SHOW_PAST?'Vergangene Posts ausblenden':'Vergangene Posts anzeigen';if(tb2)tb2.textContent=pastCount;}
   var rowsToRender=SHOW_PAST?allRows:futureRows;var tb='';
   rowsToRender.forEach(function(row){var ri=allRows.indexOf(row);var past=isPastDate(row.date);
-    tb+='<tr class="'+(past?'past-row':'')+' onclick="openContentModal('+ri+')" style="cursor:pointer"><td><input class="cell-input" type="date" value="'+(normalizeDate(row.date)||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].date=this.value;buildCalendar()" onblur="renderContentTable()"></td>';
+    tb+='<tr class="'+(past?'past-row':'')+' onclick="openContentModal('+ri+')" style="cursor:pointer"><td style="width:24px;text-align:center;padding:2px"><input type="checkbox" class="bulk-cb" '+(_bulkSelected.has(ri)?'checked':'')+' onclick="event.stopPropagation();bulkToggleRow('+ri+',this.checked)"></td><td><input class="cell-input" type="date" value="'+(normalizeDate(row.date)||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].date=this.value;buildCalendar()" onblur="renderContentTable()"></td>';
     if(row.art==='Light-Ad'&&ROLE==='agency'){
       var today30=new Date();today30.setDate(today30.getDate()-30);
       var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
@@ -5059,6 +5074,60 @@ function lightAdJumpToPiece(ri){
     },200);
   },150);
 }
+
+// ── Bulk-Aktionen Content-Liste ──
+var _bulkSelected=new Set();
+
+function bulkUpdateBar(){
+  var bar=document.getElementById('bulk-bar');
+  var cnt=document.getElementById('bulk-count');
+  if(!bar)return;
+  bar.style.display=_bulkSelected.size>0?'flex':'none';
+  if(cnt)cnt.textContent=_bulkSelected.size+' ausgewählt';
+}
+
+function bulkToggleRow(ri,checked){
+  if(checked)_bulkSelected.add(ri);
+  else _bulkSelected.delete(ri);
+  bulkUpdateBar();
+}
+
+function bulkToggleAll(checked){
+  _bulkSelected.clear();
+  if(checked){
+    (cd().rows||[]).forEach(function(_,i){_bulkSelected.add(i);});
+  }
+  bulkUpdateBar();
+  renderContentTable();
+}
+
+function bulkDeselect(){
+  _bulkSelected.clear();
+  var all=document.getElementById('bulk-select-all');
+  if(all)all.checked=false;
+  bulkUpdateBar();
+  renderContentTable();
+}
+
+function bulkDelete(){
+  if(!_bulkSelected.size)return;
+  if(!confirm(_bulkSelected.size+' Zeilen wirklich löschen?'))return;
+  pushUndo();
+  var indices=Array.from(_bulkSelected).sort(function(a,b){return b-a;});
+  indices.forEach(function(i){cd().rows.splice(i,1);});
+  _bulkSelected.clear();
+  scheduleSave();renderContentTable();buildCalendar();bulkUpdateBar();
+}
+
+function bulkSetArt(){
+  if(!_bulkSelected.size)return;
+  var art=prompt('Neue Content-Art:\n'+ART_OPTS.join(', '),'');
+  if(!art||ART_OPTS.indexOf(art)===-1){alert('Ungültige Art. Bitte genau eingeben.');return;}
+  pushUndo();
+  _bulkSelected.forEach(function(i){if(cd().rows[i])cd().rows[i].art=art;});
+  scheduleSave();renderContentTable();buildCalendar();
+}
+
 // ── Content-Liste Hintergrund live aktualisieren ──
 function updateRowColors(inputEl){
   var row=inputEl.closest('tr');
@@ -5075,6 +5144,33 @@ function updateRowColors(inputEl){
     else if(filled>=total-1&&total>1){inp.classList.add('needs-value');}
   });
 }
+
+// ── PWA Install Banner ──
+var _pwaDeferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  _pwaDeferredPrompt=e;
+  try{if(localStorage.getItem('pwa_dismissed'))return;}catch(ex){}
+  setTimeout(function(){
+    var b=document.getElementById('pwa-banner');
+    if(b)b.style.display='flex';
+  },3000);
+});
+function pwaBannerInstall(){
+  if(!_pwaDeferredPrompt)return;
+  _pwaDeferredPrompt.prompt();
+  _pwaDeferredPrompt.userChoice.then(function(){
+    _pwaDeferredPrompt=null;
+    var b=document.getElementById('pwa-banner');
+    if(b)b.style.display='none';
+  });
+}
+function pwaBannerDismiss(){
+  var b=document.getElementById('pwa-banner');
+  if(b)b.style.display='none';
+  try{localStorage.setItem('pwa_dismissed','1');}catch(e){}
+}
+
 // ── Tastaturkürzel ──
 document.addEventListener('keydown',function(e){
   // Enter auf cell-input = bestätigen (blur)
@@ -5114,5 +5210,13 @@ if('serviceWorker' in navigator){
 }
 </script>
 
+<div id="pwa-banner">
+  <div>
+    <div style="font-weight:700;margin-bottom:2px">App installieren</div>
+    <div style="font-size:10px;opacity:.7">Zum Homescreen hinzufügen</div>
+  </div>
+  <button class="install" onclick="pwaBannerInstall()">Installieren</button>
+  <button class="dismiss" onclick="pwaBannerDismiss()">✕</button>
+</div>
 </body>
 </html>
