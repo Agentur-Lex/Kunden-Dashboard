@@ -1234,7 +1234,7 @@ function openOnboardingModal(){
 
 var SESSION={type:null,key:null},ROLE='agency',ACTIVE_CUSTOMER='',EDITING_TODO=-1,PENDING_FIRST=null,PW_REVEALED={};
 var SHOW_PAST=false,SHOW_PAST_SHOOTS=false,SHOW_ADD_FORM=false,CURRENT_SHOOT_IDX=-1,CURRENT_IDEA_IDX=-1,CAL_OFFSET=0,OB_DRAG_IDX=-1,OPEN_SHOOT_PANELS={};
-var ART_OPTS=['Reach-Content','Trust-Content','Werbeanzeige'];
+var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'📸'},{id:'facebook',label:'Facebook',icon:'👥'},{id:'linkedin',label:'LinkedIn',icon:'💼'},{id:'tiktok',label:'TikTok',icon:'🎵'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
@@ -1627,7 +1627,7 @@ async function renderAgencyOverview(){var kacheln=document.getElementById('kunde
   }
   if(SHOW_ADD_FORM){h+='<div class="kachel-form"><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Neuen Kunden anlegen</div><span class="flbl">Firmenname</span><input type="text" id="new-cust-name" placeholder="z.B. Mustermann GmbH" maxlength="25"><span class="flbl">Benutzername</span><input type="text" id="new-cust-user" placeholder="z.B. mustermann"><span class="flbl">Temporäres Passwort</span><input type="text" id="new-cust-pw" placeholder="z.B. temp123" style="margin-bottom:14px"><div style="display:flex;gap:8px"><button class="btn-primary" onclick="addCustomer()">Anlegen</button><button class="btn-outline" onclick="hideAddForm()">Abbrechen</button></div></div>';}else{h+='<div class="kachel-add" onclick="showAddForm()"><div style="font-size:24px;color:var(--accent);margin-bottom:6px">＋</div><div style="font-size:11px;font-weight:600;color:var(--accent)">Kunden hinzufügen</div></div>';}kacheln.innerHTML=h;
   
-  var postsEl=document.getElementById('upcoming-posts-all');var postsEmpty=document.getElementById('upcoming-posts-empty');var in3w=new Date();in3w.setDate(in3w.getDate()+21);var in3wStr=in3w.getFullYear()+'-'+String(in3w.getMonth()+1).padStart(2,'0')+'-'+String(in3w.getDate()).padStart(2,'0');var ap=[];Object.keys(DATA).forEach(function(k){DATA[k].rows.filter(function(c){var d=normalizeDate(c.date);return d>=today&&d<=in3wStr&&c.art==='Werbeanzeige';}).forEach(function(c){ap.push({c:c,cname:DATA[k].name});});});ap.sort(function(a,b){return normalizeDate(a.c.date).localeCompare(normalizeDate(b.c.date));});ap=ap.slice(0,8);if(!ap.length){postsEl.innerHTML='';if(postsEmpty)postsEmpty.style.display='block';}else{if(postsEmpty)postsEmpty.style.display='none';postsEl.innerHTML=ap.map(function(e){return'<div class="post-row"><span style="font-size:10px;color:var(--text3);width:72px;flex-shrink:0;font-family:\'DM Mono\',monospace">'+fmtDisp(e.c.date)+'</span><span style="flex:1;font-size:11px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.c.name+'</span><span style="font-size:10px;color:var(--text3);margin-right:6px">'+e.cname+'</span></div>';}).join('');}}
+  var postsEl=document.getElementById('upcoming-posts-all');var postsEmpty=document.getElementById('upcoming-posts-empty');var in3w=new Date();in3w.setDate(in3w.getDate()+21);var in3wStr=in3w.getFullYear()+'-'+String(in3w.getMonth()+1).padStart(2,'0')+'-'+String(in3w.getDate()).padStart(2,'0');var ap=[];Object.keys(DATA).forEach(function(k){DATA[k].rows.filter(function(c){var d=normalizeDate(c.date);return d>=today&&d<=in3wStr&& (c.art==='Werbeanzeige'||c.art==='Light-Ad'||c.art==='Hard-Ad');}).forEach(function(c){ap.push({c:c,cname:DATA[k].name});});});ap.sort(function(a,b){return normalizeDate(a.c.date).localeCompare(normalizeDate(b.c.date));});ap=ap.slice(0,8);if(!ap.length){postsEl.innerHTML='';if(postsEmpty)postsEmpty.style.display='block';}else{if(postsEmpty)postsEmpty.style.display='none';postsEl.innerHTML=ap.map(function(e){return'<div class="post-row"><span style="font-size:10px;color:var(--text3);width:72px;flex-shrink:0;font-family:\'DM Mono\',monospace">'+fmtDisp(e.c.date)+'</span><span style="flex:1;font-size:11px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.c.name+'</span><span style="font-size:10px;color:var(--text3);margin-right:6px">'+e.cname+'</span></div>';}).join('');}}
 function showAddForm(){SHOW_ADD_FORM=true;renderAgencyOverview();}function hideAddForm(){SHOW_ADD_FORM=false;renderAgencyOverview();}
 async function addCustomer(){
   var name=((document.getElementById('new-cust-name')||{}).value||'').trim();
@@ -2583,9 +2583,23 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
   var rowsToRender=SHOW_PAST?allRows:futureRows;var tb='';
   rowsToRender.forEach(function(row){var ri=allRows.indexOf(row);var past=isPastDate(row.date);
     tb+='<tr class="'+(past?'past-row':'')+' onclick="openContentModal('+ri+')" style="cursor:pointer"><td><input class="cell-input" type="date" value="'+(normalizeDate(row.date)||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].date=this.value;buildCalendar()" onblur="renderContentTable()"></td>';
-    tb+='<td style="overflow:visible;position:relative"><input class="cell-input" type="text" value="'+escHtml(row.name||'')+'" onclick="event.stopPropagation();this.style.position=\'absolute\';this.style.top=\'0\';this.style.left=\'0\';this.style.zIndex=\'10\';this.style.width=\'250px\';this.style.background=\'#fff\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.12)\';" onblur="this.style.position=\'\';this.style.zIndex=\'\';this.style.width=\'\';this.style.background=\'\';this.style.boxShadow=\'\';" onchange="cd().rows['+ri+'].name=this.value"></td>';
+    if(row.art==='Light-Ad'&&ROLE==='agency'){
+      var today30=new Date();today30.setDate(today30.getDate()-30);
+      var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
+      var recentPieces=(cd().rows||[]).filter(function(r,i){return i!==ri&&normalizeDate(r.date)>=minDate&&r.name;});
+      if(!recentPieces.length){
+        tb+='<td><div style="font-size:9px;color:var(--text3);padding:6px 8px;background:var(--surface2);border-radius:5px;border:1px solid var(--border)">Keine Pieces der letzten 30 Tage</div></td>';
+      } else {
+        tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="lightAdSelect('+ri+',this.value)" style="width:100%">'
+          +'<option value="">– Piece auswählen –</option>'
+          +recentPieces.map(function(r,idx2){var sel=r.name===row.name?' selected':'';return'<option value="'+idx2+'"'+sel+'>'+escHtml(r.name)+' ('+fmtISO(normalizeDate(r.date))+')</option>';}).join('')
+          +'</select></td>';
+      }
+    } else {
+      tb+='<td style="overflow:visible;position:relative"><input class="cell-input" type="text" value="'+escHtml(row.name||'')+'" onclick="event.stopPropagation();this.style.position=\'absolute\';this.style.top=\'0\';this.style.left=\'0\';this.style.zIndex=\'10\';this.style.width=\'250px\';this.style.background=\'#fff\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.12)\';" onblur="this.style.position=\'\';this.style.zIndex=\'\';this.style.width=\'\';this.style.background=\'\';this.style.boxShadow=\'\';}" onchange="cd().rows['+ri+'].name=this.value"></td>';
+    }
     tb+='<td><input class="cell-input" type="url" value="'+(row.link||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].link=this.value" placeholder="https://..."></td>';
-    tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].art=this.value;buildCalendar()">'+ART_OPTS.map(function(o){return'<option'+(row.art===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
+    tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].art=this.value;renderContentTable();buildCalendar()">'+ART_OPTS.map(function(o){return'<option'+(row.art===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
     tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].spez=this.value">'+SPEZ_OPTS.map(function(o){return'<option'+(row.spez===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
     tb+='<td class="caption-cell"><textarea class="cell-input caption-input" rows="1" onclick="event.stopPropagation();this.rows=4;" onkeydown="captionKeydown(event,this)" onblur="this.rows=1;this.scrollTop=0;cd().rows['+ri+'].caption=this.value;" onchange="cd().rows['+ri+'].caption=this.value;scheduleSave()">'+escHtml(row.caption||'')+'</textarea></td>';
     tb+='<td style="text-align:center;padding:0 4px"><button class="btn-icon del" onclick="event.stopPropagation();if(confirm(\'Löschen?\'))deleteRow('+ri+')" title="Löschen">🗑</button></td></tr>';
@@ -2635,6 +2649,11 @@ function openContentModal(ri){
       body+='<textarea rows="3"'+disAttr+' onchange="cd().rows['+ri+'].caption=this.value;scheduleSave()">'+(row[key]||'')+'</textarea>';
     }else{
       var changeHandler='cd().rows['+ri+'].'+key+'=this.value'+(key==='link'?';updatePreview()':'')+(key==='date'||key==='art'?';renderContentTable();buildCalendar()':'');
+    // Light-Ad: Link-Zelle als klickbarer Button
+    if(key==='link'&&row.art==='Light-Ad'&&row.link==='zum Piece'){
+      body+='<button class="cell-input" style="cursor:pointer;text-align:left;color:var(--accent);font-weight:600" onclick="event.stopPropagation();lightAdJumpToPiece('+ri+')">zum Piece →</button>';
+      return;
+    }
       var inputExtra=(key==='link'?' oninput="updatePreview()"':'');
       var ph=(key==='link'?'https://drive.google.com/...':'');
       body+='<input type="'+type+'"'+disAttr+' value="'+(normalizeDate(row[key])||'')+'" onchange="'+changeHandler+'"'+inputExtra+' placeholder="'+ph+'">';
@@ -4937,6 +4956,39 @@ function tourCheckFirstLogin(){
   }catch(e){}
 }
 
+// ── Light-Ad Piece-Auswahl ──
+function lightAdSelect(ri,selIdx){
+  if(selIdx==='')return;
+  var today30=new Date();today30.setDate(today30.getDate()-30);
+  var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
+  var recentPieces=(cd().rows||[]).filter(function(r,i){return i!==ri&&normalizeDate(r.date)>=minDate&&r.name;});
+  var piece=recentPieces[parseInt(selIdx)];
+  if(!piece)return;
+  var row=cd().rows[ri];
+  row.name=piece.name;
+  row.spez=piece.spez||row.spez;
+  row.link='zum Piece';
+  row._lightAdRef=cd().rows.indexOf(piece);
+  scheduleSave();
+  renderContentTable();buildCalendar();
+}
+function lightAdJumpToPiece(ri){
+  var row=cd().rows[ri];
+  if(!row||row.link!=='zum Piece')return;
+  var refIdx=row._lightAdRef;
+  if(refIdx===undefined||refIdx<0)return;
+  // Zur Content-Liste navigieren und Zeile hervorheben
+  showPage('contentlist',document.getElementById('nav-contentlist'));
+  setTimeout(function(){
+    var rows=document.querySelectorAll('#content-tbody tr');
+    var targetRow=rows[refIdx];
+    if(!targetRow)return;
+    targetRow.scrollIntoView({behavior:'smooth',block:'center'});
+    targetRow.style.transition='background .3s';
+    targetRow.style.background='rgba(255,87,87,0.15)';
+    setTimeout(function(){targetRow.style.background='';},2000);
+  },200);
+}
 // ── Content-Liste Hintergrund live aktualisieren ──
 function updateRowColors(inputEl){
   var row=inputEl.closest('tr');
