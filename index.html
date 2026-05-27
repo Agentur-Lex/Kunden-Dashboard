@@ -556,10 +556,11 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div id="agency-tb" style="display:none;align-items:center;gap:10px">
           <span style="font-size:10px;font-weight:500;color:var(--text3)">Kunde</span>
           <select id="cust-dropdown" class="cust-sel" onchange="agencySwitchCustomer(this.value)"></select>
-          
+          <button id="undo-btn" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="display:none;background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text2);font-size:18px;line-height:1;font-family:inherit" disabled>↩</button>
         </div>
         <div id="client-tb" style="display:none;align-items:center;gap:8px">
           <button onclick="tourStart()" style="background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:inherit">Anleitung</button>
+          <button id="undo-btn-client" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="display:none;background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text2);font-size:18px;line-height:1;font-family:inherit" disabled>↩</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
@@ -2543,7 +2544,7 @@ function saveShootDesc() {
 }
 
 // ── TODOS ──
-function addTodo(){var txt=((document.getElementById('new-todo-text')||{}).value||'').trim();if(!txt)return;var due=(document.getElementById('new-todo-date')||{}).value;var prio=(document.getElementById('new-todo-prio')||{}).value;var asgn=(document.getElementById('new-todo-assign')||{}).value;cd().todos.unshift({text:txt,due:due,prio:prio,assign:asgn,done:false,createdAt:Date.now()});scheduleSave();document.getElementById('new-todo-text').value='';document.getElementById('new-todo-date').value='';renderTodos();}
+function addTodo(){pushUndo();var txt=((document.getElementById('new-todo-text')||{}).value||'').trim();if(!txt)return;var due=(document.getElementById('new-todo-date')||{}).value;var prio=(document.getElementById('new-todo-prio')||{}).value;var asgn=(document.getElementById('new-todo-assign')||{}).value;cd().todos.unshift({text:txt,due:due,prio:prio,assign:asgn,done:false,createdAt:Date.now()});scheduleSave();document.getElementById('new-todo-text').value='';document.getElementById('new-todo-date').value='';renderTodos();}
 function toggleTodo(idx){
   cd().todos[idx].done = !cd().todos[idx].done;
   if(cd().todos[idx].done) {
@@ -2554,7 +2555,7 @@ function toggleTodo(idx){
   scheduleSave();
   renderTodos();
 }
-function deleteTodo(idx){cd().todos.splice(idx,1);scheduleSave();renderTodos();}
+function deleteTodo(idx){pushUndo();cd().todos.splice(idx,1);scheduleSave();renderTodos();}
 function startEdit(idx){EDITING_TODO=idx;renderTodos();}
 function cancelEdit(){EDITING_TODO=-1;renderTodos();}
 function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var t=cd().todos[idx];t.text=txt;t.due=(document.getElementById('edit-due-'+idx)||{}).value;t.prio=(document.getElementById('edit-prio-'+idx)||{}).value;t.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;scheduleSave();renderTodos();}
@@ -2629,8 +2630,8 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
     });
   }
 }
-function addContentRow(){cd().rows.push({date:getTodayISO(),name:'',link:'',art:ART_OPTS[0],spez:SPEZ_OPTS[0],caption:''});scheduleSave();renderContentTable();buildCalendar();}
-function deleteRow(ri){cd().rows.splice(ri,1);scheduleSave();renderContentTable();buildCalendar();closeModal('content-modal');}
+function addContentRow(){pushUndo();cd().rows.push({date:getTodayISO(),name:'',link:'',art:ART_OPTS[0],spez:SPEZ_OPTS[0],caption:''});scheduleSave();renderContentTable();buildCalendar();}
+function deleteRow(ri){pushUndo();cd().rows.splice(ri,1);scheduleSave();renderContentTable();buildCalendar();closeModal('content-modal');}
 function openContentModal(ri){
   var row=cd().rows[ri];
   document.getElementById('content-modal-title').textContent=row.name||'Beitrag';
@@ -4784,6 +4785,46 @@ async function sbSaveAllContentRows(){
 async function sbSaveLegal(){var sb=getSB();await sb.from('legal').upsert({id:1,impressum:LEGAL.impressum,datenschutz:LEGAL.datenschutz});}
 async function sbLoadLegal(){var sb=getSB();var res=await sb.from('legal').select('*').eq('id',1).maybeSingle();if(res.data){LEGAL.impressum=res.data.impressum||'';LEGAL.datenschutz=res.data.datenschutz||'';}}
 var _sbSaveTimer=null;
+// ── Undo-Stack ──
+var _undoStack=[];
+var MAX_UNDO=10;
+
+function pushUndo(){
+  if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;
+  var d=DATA[ACTIVE_CUSTOMER];
+  _undoStack.push({
+    rows:JSON.parse(JSON.stringify(d.rows||[])),
+    todos:JSON.parse(JSON.stringify(d.todos||[])),
+    shoots:JSON.parse(JSON.stringify(d.shoots||[]))
+  });
+  if(_undoStack.length>MAX_UNDO)_undoStack.shift();
+  updateUndoBtn();
+}
+
+function updateUndoBtn(){
+  var can=_undoStack.length>0;
+  ['undo-btn','undo-btn-client'].forEach(function(id){
+    var btn=document.getElementById(id);
+    if(!btn)return;
+    btn.style.display='';
+    btn.disabled=!can;
+    btn.style.opacity=can?'1':'0.35';
+    btn.style.cursor=can?'pointer':'default';
+  });
+}
+
+function undoLast(){
+  if(!_undoStack.length||!ACTIVE_CUSTOMER)return;
+  var snap=_undoStack.pop();
+  DATA[ACTIVE_CUSTOMER].rows=snap.rows;
+  DATA[ACTIVE_CUSTOMER].todos=snap.todos;
+  DATA[ACTIVE_CUSTOMER].shoots=snap.shoots;
+  scheduleSave();
+  renderContentTable();buildCalendar();renderTodos();renderShootsList();
+  updateUndoBtn();
+  showToast('Änderung rückgängig gemacht');
+}
+
 function scheduleSave(){clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);}
 
 async function doSetPassword(){
@@ -5030,6 +5071,11 @@ document.addEventListener('keydown',function(e){
     if(t&&t.classList&&t.classList.contains('cell-input')&&t.tagName!=='TEXTAREA'){
       e.preventDefault();t.blur();
     }
+  }
+  // Strg+Z: Undo
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){
+    var ae=document.activeElement;
+    if(!ae||ae.tagName==='BODY'){e.preventDefault();undoLast();}
   }
   // Escape: Eingabefeld verlassen oder Modal schließen
   if(e.key==='Escape'){
