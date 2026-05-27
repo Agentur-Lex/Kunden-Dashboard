@@ -5155,7 +5155,11 @@ function checkIosPwaBanner(){
 window.addEventListener('beforeinstallprompt',function(e){
   e.preventDefault();
   _pwaDeferredPrompt=e;
-  // Nur speichern – Banner wird nach Login gezeigt
+  try{if(sessionStorage.getItem('pwa_dismissed_session'))return;}catch(ex){}
+  setTimeout(function(){
+    var b=document.getElementById('pwa-banner');
+    if(b)b.style.display='flex';
+  },1000);
 });
 function pwaBannerInstall(){
   if(!_pwaDeferredPrompt)return;
