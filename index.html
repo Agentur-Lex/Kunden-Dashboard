@@ -1128,7 +1128,7 @@ function exportMonthlyReport(){
     var autoER=calcAutoEngRate(an);
     body += '<h2>Kennzahlen</h2><div class="kpi-grid">';
     body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(an.followers||'–')+'</div><div class="kpi-d'+(((an.fdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.fdelta||'')+'</div></div>';
-    body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtNum(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
+    body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
     body += '<div class="kpi kpi-eng"><div class="kpi-lbl">Engagement-Rate</div><div class="kpi-val">'+(autoER?autoER+'%':escHtml(an.eng||'–'))+'</div><div class="kpi-d'+(((an.edelt||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.edelt||'')+'</div></div>';
     body += '</div>';
   }
@@ -1626,7 +1626,7 @@ async function renderAgencyOverview(){var kacheln=document.getElementById('kunde
       +'</select>'
       +'<button class="kachel-del" onclick="deleteCustomer(&quot;'+k+'&quot;)" title="Löschen">🗑</button>'
       +'</div>'
-      +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+fmtNum(d.analytics.reach)+'</span></div>'
+      +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+fmtThousands(d.analytics.reach)+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Offene To-Dos</span><span class="kachel-val" style="color:'+tc+'">'+open+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Nächster Post</span><span class="kachel-val">'+next+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Letzter Login</span><span class="kachel-val" style="font-size:9px">'+( d.lastLogin?new Date(d.lastLogin).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'–')+'</span></div>'
@@ -1753,7 +1753,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtNum(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
