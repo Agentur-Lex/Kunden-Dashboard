@@ -572,7 +572,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
         
-        <button id="undo-btn" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;opacity:0.35">↩</button>
+        <button id="undo-btn" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;opacity:0.35"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-1"/></svg></button>
         <div class="tb-chip" id="agency-chip" style="display:none"><div class="tb-av">AG</div><span class="tb-name">Social-Media-Lex</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
         <div class="tb-chip" id="client-chip" style="display:none"><div class="tb-av" id="client-chip-av">K</div><span class="tb-name" id="client-chip-name">Kunde</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
       </div>
@@ -828,7 +828,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         </div>
         <div id="bulk-bar">
           <span id="bulk-count">0 ausgewählt</span>
-          <button onclick="bulkDelete()">🗑 Löschen</button>
+          <button onclick="bulkDelete()"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg> Löschen</button>
           <button onclick="bulkDeselect()">✕ Aufheben</button>
         </div>
         <div class="tbl-outer">
@@ -1624,7 +1624,7 @@ async function renderAgencyOverview(){var kacheln=document.getElementById('kunde
       +'<option value="paused"'+(st==='paused'?' selected':'')+'>Pausiert</option>'
       +'<option value="done"'+(st==='done'?' selected':'')+'>Abgeschlossen</option>'
       +'</select>'
-      +'<button class="kachel-del" onclick="deleteCustomer(&quot;'+k+'&quot;)" title="Löschen">🗑</button>'
+      +'<button class="kachel-del" onclick="deleteCustomer(&quot;'+k+'&quot;)" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button>'
       +'</div>'
       +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+fmtThousands(d.analytics.reach)+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Offene To-Dos</span><span class="kachel-val" style="color:'+tc+'">'+open+'</span></div>'
@@ -1733,7 +1733,7 @@ function showDeleteUserHint(custName, authUserId){
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999';
   overlay.innerHTML=
     '<div style="background:#fff;border-radius:16px;padding:28px 28px 24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.18)">'
-    +'<div style="font-size:22px;margin-bottom:10px">🗑️ Kunde gelöscht</div>'
+    +'<div style="font-size:22px;margin-bottom:10px"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg>️ Kunde gelöscht</div>'
     +'<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">'+custName+' wurde aus dem Dashboard entfernt.</div>'
     +'<div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:18px">'
     +'Der Supabase Auth-User existiert noch und muss manuell gelöscht werden:<br>'
@@ -1835,7 +1835,7 @@ function renderAgencyOnboardingPage(){
     if(ROLE==='agency'){
       if(!isFixed){
         var delBtn=document.createElement('button');
-        delBtn.className='btn-icon del'; delBtn.textContent='🗑'; delBtn.title='Schritt löschen';
+        delBtn.className='btn-icon del'; delBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg>'; delBtn.title='Schritt löschen';
         delBtn.onclick=function(){deleteObStep(step.id);};
         row.appendChild(delBtn);
       }
@@ -2431,7 +2431,7 @@ function renderShootsList(){
       var canDel=ROLE==='agency'||(idea.addedBy==='client');
       if(canDel){
         var delBtn=document.createElement('button');
-        delBtn.className='btn-icon del';delBtn.textContent='🗑';delBtn.title='Löschen';
+        delBtn.className='btn-icon del';delBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg>';delBtn.title='Löschen';
         (function(idx2){
           delBtn.onclick=function(e){
             e.stopPropagation();
@@ -2506,7 +2506,7 @@ function openShootDetail(idx){CURRENT_SHOOT_IDX=idx;CURRENT_IDEA_IDX=-1;var s=cd
   // Reset desc panel
   closeShootDesc();
   openModal('shoot-detail-modal');}
-function renderShootIdeasTable(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;var ideas=s.ideas||[];var tbody=document.getElementById('shoot-ideas-tbody');var empty=document.getElementById('shoot-ideas-empty');if(empty)empty.style.display=ideas.length?'none':'block';var tb='';ideas.forEach(function(idea,ri){tb+='<tr><td><input type="text" value="'+escHtml(idea.thema||'')+'" onchange="updateShootIdea('+ri+',\'thema\',this.value)" placeholder="Content-Thema..."></td><td style="text-align:center">'+chk(idea.done,'updateShootIdea('+ri+',\'done\',!cd().shoots[CURRENT_SHOOT_IDX].ideas['+ri+'].done);renderShootIdeasTable();renderShootsList()')+'</td><td><select onchange="updateShootIdea('+ri+',\'spez\',this.value)" '+(ROLE==='client'?'disabled':'')+'>'  +SPEZ_OPTS.map(function(o){return'<option'+(idea.spez===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td><td>'+(ROLE==='agency'?'<button class="btn-icon del" onclick="deleteShootIdea('+ri+')" title="Löschen">🗑</button>':'')+'</td></tr>';});if(tbody)tbody.innerHTML=tb;}
+function renderShootIdeasTable(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;var ideas=s.ideas||[];var tbody=document.getElementById('shoot-ideas-tbody');var empty=document.getElementById('shoot-ideas-empty');if(empty)empty.style.display=ideas.length?'none':'block';var tb='';ideas.forEach(function(idea,ri){tb+='<tr><td><input type="text" value="'+escHtml(idea.thema||'')+'" onchange="updateShootIdea('+ri+',\'thema\',this.value)" placeholder="Content-Thema..."></td><td style="text-align:center">'+chk(idea.done,'updateShootIdea('+ri+',\'done\',!cd().shoots[CURRENT_SHOOT_IDX].ideas['+ri+'].done);renderShootIdeasTable();renderShootsList()')+'</td><td><select onchange="updateShootIdea('+ri+',\'spez\',this.value)" '+(ROLE==='client'?'disabled':'')+'>'  +SPEZ_OPTS.map(function(o){return'<option'+(idea.spez===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td><td>'+(ROLE==='agency'?'<button class="btn-icon del" onclick="deleteShootIdea('+ri+')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button>':'')+'</td></tr>';});if(tbody)tbody.innerHTML=tb;}
 function addShootIdeaRow(){var s=cd().shoots[CURRENT_SHOOT_IDX];if(!s)return;if(!s.ideas)s.ideas=[];s.ideas.push({thema:'',done:false,spez:SPEZ_OPTS[0],desc:'',addedBy:ROLE});scheduleSave();renderShootIdeasTable();renderShootsList();}
 function updateShootIdea(ri,key,val){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas&&s.ideas[ri]!==undefined){s.ideas[ri][key]=val;renderShootsList();}}
 function deleteShootIdea(ri){var s=cd().shoots[CURRENT_SHOOT_IDX];if(s&&s.ideas){s.ideas.splice(ri,1);scheduleSave();renderShootIdeasTable();renderShootsList();}}
@@ -2582,7 +2582,7 @@ function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();Object.keys(
   function buildItem(entry,isDone){var t=entry.t;var i=entry.i;if(t.isOnboarding){return'<div class="todo-item" style="cursor:pointer" onclick="openOnboardingModal()">'+chk(false,'')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--accent)">📋 Onboarding abschließen</div><div style="margin-top:6px"><div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;background:var(--accent);border-radius:2px;width:'+t._pct+'%"></div></div></div></div><span class="priority-pill p-high">Hoch</span></div>';}
   if(EDITING_TODO===i&&isAgency){return'<div class="todo-edit-form"><span class="flbl">Aufgabe</span><input type="text" id="edit-text-'+i+'" value="'+t.text.replace(/"/g,'&quot;')+'" style="margin-bottom:8px"><div class="form-row"><div><span class="flbl">Fällig</span><input type="date" id="edit-due-'+i+'" value="'+(t.due||'')+'" style="margin:0"></div><div><span class="flbl">Priorität</span><select id="edit-prio-'+i+'" style="margin:0"><option value="high"'+(t.prio==='high'?' selected':'')+'>Hoch</option><option value="med"'+(t.prio==='med'?' selected':'')+'>Mittel</option><option value="low"'+(t.prio==='low'?' selected':'')+'>Niedrig</option></select></div></div><div style="margin-top:8px"><span class="flbl">Zugewiesen an</span><select id="edit-assign-'+i+'" style="margin:0"><option value="agency"'+(t.assign==='agency'?' selected':'')+'>Agentur</option><option value="client"'+(t.assign==='client'?' selected':'')+'>Kunde</option><option value="both"'+(t.assign==='both'?' selected':'')+'>Beide</option></select></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn-primary" onclick="saveEdit('+i+')">Speichern</button><button class="btn-outline" onclick="cancelEdit()">Abbrechen</button></div></div>';}
   var al=t.assign==='agency'?'Agentur':t.assign==='client'?'Kunde':'Beide';var rb=(t.isReset&&isAgency)?'<button class="btn-outline" style="margin:0 0 0 8px;font-size:10px;padding:2px 9px;color:var(--accent);border-color:rgba(255,87,87,0.4)" onclick="agencySwitchCustomer(\''+t.resetKey+'\');showPage(\'settings\',document.getElementById(\'nav-settings\'))">Zurücksetzen →</button>':'';
-  return'<div class="todo-item" style="position:relative">'+(!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+chk(isDone,'toggleTodo('+i+')')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div><div style="display:flex;gap:8px;margin-top:2px">'+(t.due?'<span style="font-size:10px;color:var(--text3)">Fällig: '+fmtISO(t.due)+'</span>':'')+(isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+(t.createdAt&&(t.isReset||t.shootRef!==undefined||t.isBrainstorm)?'<span style="font-size:10px;color:var(--text3)">Erstellt: '+new Date(t.createdAt).toLocaleDateString('de-DE')+'</span>':'')+'</div></div><span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+(isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+')" title="Löschen">🗑</button></div>':'')+'</div>';}
+  return'<div class="todo-item" style="position:relative">'+(!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+chk(isDone,'toggleTodo('+i+')')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div><div style="display:flex;gap:8px;margin-top:2px">'+(t.due?'<span style="font-size:10px;color:var(--text3)">Fällig: '+fmtISO(t.due)+'</span>':'')+(isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+(t.createdAt&&(t.isReset||t.shootRef!==undefined||t.isBrainstorm)?'<span style="font-size:10px;color:var(--text3)">Erstellt: '+new Date(t.createdAt).toLocaleDateString('de-DE')+'</span>':'')+'</div></div><span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+(isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+'</div>';}
   var oel=document.getElementById('todo-open');var oem=document.getElementById('todo-empty');var del=document.getElementById('todo-done');var dem=document.getElementById('done-empty');
   if(oel){oel.innerHTML=open.map(function(e){return buildItem(e,false);}).join('');if(oem)oem.style.display=open.length?'none':'block';}
   if(del){del.innerHTML=done2.map(function(e){return buildItem(e,true);}).join('');if(dem)dem.style.display=done2.length?'none':'block';}}
@@ -2622,7 +2622,7 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
     tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].art=this.value;renderContentTable();buildCalendar()">'+ART_OPTS.map(function(o){return'<option'+(row.art===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
     tb+='<td><select class="cell-select" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].spez=this.value">'+SPEZ_OPTS.map(function(o){return'<option'+(row.spez===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select></td>';
     tb+='<td class="caption-cell"><textarea class="cell-input caption-input" rows="1" onclick="event.stopPropagation();this.rows=4;" onkeydown="captionKeydown(event,this)" onblur="this.rows=1;this.scrollTop=0;pushUndoDebounced();cd().rows['+ri+'].caption=this.value;" onchange="cd().rows['+ri+'].caption=this.value;scheduleSave()">'+escHtml(row.caption||'')+'</textarea></td>';
-    tb+='<td style="text-align:center;padding:0 4px"><button class="btn-icon del" onclick="event.stopPropagation();if(confirm(\'Löschen?\'))deleteRow('+ri+')" title="Löschen">🗑</button></td></tr>';
+    tb+='<td style="text-align:center;padding:0 4px"><button class="btn-icon del" onclick="event.stopPropagation();if(confirm(\'Löschen?\'))deleteRow('+ri+')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></td></tr>';
   });
   var tbody=document.getElementById('content-tbody');
   if(tbody){
@@ -2677,7 +2677,7 @@ function openContentModal(ri){
     body+='</div>';
   });
   document.getElementById('content-modal-body').innerHTML=body;
-  document.getElementById('content-modal-foot').innerHTML='<button class="btn-primary" onclick="closeModal(\'content-modal\')">Schließen</button><button class="btn-outline" style="color:#FF8585;border-color:rgba(255,87,87,0.3)" onclick="if(confirm(\'Löschen?\'))deleteRow('+ri+')">🗑 Löschen</button>';
+  document.getElementById('content-modal-foot').innerHTML='<button class="btn-primary" onclick="closeModal(\'content-modal\')">Schließen</button><button class="btn-outline" style="color:#FF8585;border-color:rgba(255,87,87,0.3)" onclick="if(confirm(\'Löschen?\'))deleteRow('+ri+')"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg> Löschen</button>';
   var link=row.link||'';
   updatePhonePreview(link);
   openModal('content-modal');
@@ -3685,7 +3685,7 @@ function renderStrategyPage() {
           renderStrategyPage(); scheduleSave(); });
         row.appendChild(pi);
         var sym = document.createElement('span'); sym.textContent = '%'; sym.style.cssText = 'font-size:10px;color:var(--text3);margin-left:2px'; row.appendChild(sym);
-        var db = document.createElement('button'); db.className = 'btn-icon del'; db.textContent = '🗑'; db.title = 'Löschen';
+        var db = document.createElement('button'); db.className = 'btn-icon del'; db.innerHTML = '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg>'; db.title = 'Löschen';
         (function(idx2){ db.onclick = function() { cd().strategy.saeuleData.splice(idx2, 1); scheduleSave(); renderStrategyPage(); }; })(i);
         row.appendChild(db);
       } else {
