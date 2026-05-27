@@ -4551,6 +4551,7 @@ function toggleKpiCard(key){
   renderAnalyticsPage();
 }
 
+var _shootReminderTimer=null;
 function updateShootReminder(){
   var container=document.getElementById('shoot-reminder-banners');
   if(!container)return;
@@ -4558,7 +4559,7 @@ function updateShootReminder(){
   var today=getTodayISO();
   var in3=new Date();in3.setDate(in3.getDate()+3);
   var in3str=in3.getFullYear()+'-'+String(in3.getMonth()+1).padStart(2,'0')+'-'+String(in3.getDate()).padStart(2,'0');
-  // Agentur: alle Kunden prüfen; Kunde: nur eigene
+  // Alle relevanten Drehtermine sammeln
   var shoots=[];
   var keysToCheck=ROLE==='agency'?Object.keys(DATA):(ACTIVE_CUSTOMER?[ACTIVE_CUSTOMER]:[]);
   keysToCheck.forEach(function(k){
@@ -4566,36 +4567,34 @@ function updateShootReminder(){
     (DATA[k].shoots||[]).forEach(function(s){
       var d=normalizeDate(s.date);
       if(d&&d>=today&&d<=in3str){
-        shoots.push({title:s.title,date:s.date,custName:ROLE==='agency'?DATA[k].name:''});
+        shoots.push({title:s.title||'Drehtermin',date:d,custName:ROLE==='agency'?DATA[k].name:''});
       }
     });
   });
-  if(!shoots.length)return;
-  shoots.sort(function(a,b){return normalizeDate(a.date).localeCompare(normalizeDate(b.date));});
-  var msgs=shoots.map(function(s){
-    var d=normalizeDate(s.date);
-    var diff=Math.round((new Date(d)-new Date(today))/(1000*60*60*24));
+  // Abgelaufene Banner entfernen
+  Array.from(container.querySelectorAll('.shoot-reminder-item')).forEach(function(el){
+    if(el.dataset.date<today)el.remove();
+  });
+  // Neue Banner hinzufügen (immer alle – vorherige komplett ersetzen)
+  container.innerHTML='';
+  shoots.sort(function(a,b){return a.date.localeCompare(b.date);});
+  shoots.forEach(function(s){
+    var diff=Math.round((new Date(s.date)-new Date(today))/(1000*60*60*24));
     var when=diff===0?'heute':diff===1?'morgen':'in '+diff+' Tagen';
     var cname=s.custName?' ('+s.custName+')':'';
-    return (s.title||'Drehtermin')+cname+' – '+when+' ('+fmtISO(d)+')';
-  });
-  // Einzelne Banner pro Termin
-  var container=document.getElementById('shoot-reminder-banners');
-  if(!container)return;
-  // Nur neue Banner hinzufügen (geschlossene behalten)
-  var existing=Array.from(container.querySelectorAll('.shoot-reminder-item')).map(function(el){return el.dataset.key;});
-  msgs.forEach(function(m,idx){
-    var key=shoots[idx].date+'_'+(shoots[idx].title||'');
-    if(existing.indexOf(key)!==-1)return; // bereits vorhanden
+    var msg=(s.title)+cname+' – '+when+' ('+fmtISO(s.date)+')';
     var div=document.createElement('div');
     div.className='shoot-reminder-item';
-    div.dataset.key=key;
+    div.dataset.date=s.date;
     div.style.cssText='display:flex;align-items:center;gap:10px;background:#fff3cd;border-bottom:2px solid #f59e0b;padding:8px 24px;flex-shrink:0';
     div.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-      +'<span style="font-size:12px;font-weight:600;color:#92400e;flex:1">📅 '+m+'</span>'
+      +'<span style="font-size:12px;font-weight:600;color:#92400e;flex:1">📅 '+msg+'</span>'
       +'<button style="background:none;border:none;cursor:pointer;color:#92400e;font-size:16px;line-height:1;padding:0 4px;flex-shrink:0" onclick="this.parentElement.remove()">&#x2715;</button>';
     container.appendChild(div);
   });
+  // 30-Minuten-Timer: Banner wieder einblenden
+  if(_shootReminderTimer)clearTimeout(_shootReminderTimer);
+  _shootReminderTimer=setTimeout(function(){updateShootReminder();},30*60*1000);
 }
 function updateTodoBadge(){
   var badge=document.getElementById('todo-nav-badge');
