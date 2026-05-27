@@ -1527,6 +1527,8 @@ function renderUpcomingShoots(){
     +'<th style="text-align:center;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">ANZAHL</th>'
     +'</tr></thead><tbody>';
   shoots.forEach(function(s){
+    var key=s.date+'_'+s.title+s.custName;
+    if(_closedBanners.has(key))return;
     var filled=s.ideas.filter(function(x){return x.thema&&x.thema.trim();}).length;
     var contentStr=filled+' / '+s.target;
     var contentColor,contentBg,contentBorder;
@@ -4552,6 +4554,7 @@ function toggleKpiCard(key){
 }
 
 var _shootReminderTimer=null;
+var _closedBanners=new Set();
 function updateShootReminder(){
   var container=document.getElementById('shoot-reminder-banners');
   if(!container)return;
@@ -4586,15 +4589,16 @@ function updateShootReminder(){
     var div=document.createElement('div');
     div.className='shoot-reminder-item';
     div.dataset.date=s.date;
+    div.dataset.key=s.date+'_'+s.title+s.custName;
     div.style.cssText='display:flex;align-items:center;gap:10px;background:#fff3cd;border-bottom:2px solid #f59e0b;padding:8px 24px;flex-shrink:0';
     div.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
       +'<span style="font-size:12px;font-weight:600;color:#92400e;flex:1">📅 '+msg+'</span>'
-      +'<button style="background:none;border:none;cursor:pointer;color:#92400e;font-size:16px;line-height:1;padding:0 4px;flex-shrink:0" onclick="this.parentElement.remove()">&#x2715;</button>';
+      +'<button style="background:none;border:none;cursor:pointer;color:#92400e;font-size:16px;line-height:1;padding:0 4px;flex-shrink:0" onclick="_closedBanners.add(this.parentElement.dataset.key);this.parentElement.remove()">&#x2715;</button>';
     container.appendChild(div);
   });
   // 30-Minuten-Timer: Banner wieder einblenden
   if(_shootReminderTimer)clearTimeout(_shootReminderTimer);
-  _shootReminderTimer=setTimeout(function(){updateShootReminder();},30*60*1000);
+  _shootReminderTimer=setTimeout(function(){_closedBanners.clear();updateShootReminder();},30*60*1000);
 }
 function updateTodoBadge(){
   var badge=document.getElementById('todo-nav-badge');
