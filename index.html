@@ -1128,7 +1128,7 @@ function exportMonthlyReport(){
     var autoER=calcAutoEngRate(an);
     body += '<h2>Kennzahlen</h2><div class="kpi-grid">';
     body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(an.followers||'–')+'</div><div class="kpi-d'+(((an.fdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.fdelta||'')+'</div></div>';
-    body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(an.reach||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
+    body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtNum(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
     body += '<div class="kpi kpi-eng"><div class="kpi-lbl">Engagement-Rate</div><div class="kpi-val">'+(autoER?autoER+'%':escHtml(an.eng||'–'))+'</div><div class="kpi-d'+(((an.edelt||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.edelt||'')+'</div></div>';
     body += '</div>';
   }
@@ -1252,7 +1252,7 @@ var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'📸'},{id:'facebook',label:'Facebook',icon:'👥'},{id:'linkedin',label:'LinkedIn',icon:'💼'},{id:'tiktok',label:'TikTok',icon:'🎵'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
-function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'–',linkClicksDelta:'–',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
+function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
 // ── HELPERS ──
 function cd(){return DATA[ACTIVE_CUSTOMER];}
@@ -1626,7 +1626,7 @@ async function renderAgencyOverview(){var kacheln=document.getElementById('kunde
       +'</select>'
       +'<button class="kachel-del" onclick="deleteCustomer(&quot;'+k+'&quot;)" title="Löschen">🗑</button>'
       +'</div>'
-      +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+d.analytics.reach+'</span></div>'
+      +'<div class="kachel-row"><span class="kachel-key">Reichweite (30T)</span><span class="kachel-val">'+fmtNum(d.analytics.reach)+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Offene To-Dos</span><span class="kachel-val" style="color:'+tc+'">'+open+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Nächster Post</span><span class="kachel-val">'+next+'</span></div>'
       +'<div class="kachel-row"><span class="kachel-key">Letzter Login</span><span class="kachel-val" style="font-size:9px">'+( d.lastLogin?new Date(d.lastLogin).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'–')+'</span></div>'
@@ -1753,7 +1753,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',an.reach],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtNum(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
@@ -2602,14 +2602,17 @@ function renderContentTable(){if(!ACTIVE_CUSTOMER)return;var today=getTodayISO()
       var today30=new Date();today30.setDate(today30.getDate()-30);
       var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
       var todayStr=getTodayISO();
-      var recentPieces=(cd().rows||[]).filter(function(r,i){var d=normalizeDate(r.date);return i!==ri&&d>=minDate&&d<=todayStr&&r.name;});
+      var recentPieces=(cd().rows||[]).filter(function(r,i){var d=normalizeDate(r.date);return i!==ri&&d>=minDate&&d<=todayStr&&r.art!=='Light-Ad'&&r.art!=='Hard-Ad';});
       if(!recentPieces.length){
         tb+='<td><div style="font-size:9px;color:var(--text3);padding:6px 8px;background:var(--surface2);border-radius:5px;border:1px solid var(--border)">Keine Content-Pieces der letzten 30 Tage</div></td>';
       } else {
-        var selIdx2=recentPieces.findIndex(function(r){return r.name===row.name&&r._lightAdRef!==undefined;});
         tb+='<td><select class="cell-input" onclick="event.stopPropagation()" onchange="lightAdSelect('+ri+',this.value)" style="width:100%;cursor:pointer">'
           +'<option value="">– Piece auswählen –</option>'
-          +recentPieces.map(function(r,idx2){var sel=(row._lightAdRef!==undefined&&cd().rows.indexOf(r)===row._lightAdRef)?' selected':'';return'<option value="'+idx2+'"'+sel+'>'+escHtml(r.name)+' ('+fmtISO(normalizeDate(r.date))+')</option>';}).join('')
+          +recentPieces.map(function(r,idx2){
+            var globalIdx=cd().rows.indexOf(r);
+            var sel=(row._lightAdRef!==undefined&&globalIdx===row._lightAdRef)?' selected':'';
+            return'<option value="'+idx2+'"'+sel+'>'+escHtml(r.name)+' ('+fmtISO(normalizeDate(r.date))+')</option>';
+          }).join('')
           +'</select></td>';
       }
     } else {
@@ -5032,7 +5035,7 @@ function lightAdSelect(ri,selIdx){
   var today30=new Date();today30.setDate(today30.getDate()-30);
   var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
   var todayStr=getTodayISO();
-  var recentPieces=(cd().rows||[]).filter(function(r,i){var d=normalizeDate(r.date);return i!==ri&&d>=minDate&&d<=todayStr&&r.name;});
+  var recentPieces=(cd().rows||[]).filter(function(r,i){var d=normalizeDate(r.date);return i!==ri&&d>=minDate&&d<=todayStr&&r.art!=='Light-Ad'&&r.art!=='Hard-Ad';});
   var piece=recentPieces[parseInt(selIdx)];
   if(!piece)return;
   row.name=piece.name;
