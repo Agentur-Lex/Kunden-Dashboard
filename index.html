@@ -4574,14 +4574,12 @@ function updateShootReminder(){
       }
     });
   });
-  // Abgelaufene Banner entfernen
-  Array.from(container.querySelectorAll('.shoot-reminder-item')).forEach(function(el){
-    if(el.dataset.date<today)el.remove();
-  });
-  // Neue Banner hinzufügen (immer alle – vorherige komplett ersetzen)
-  container.innerHTML='';
   shoots.sort(function(a,b){return a.date.localeCompare(b.date);});
+  // Nur nicht-geschlossene anzeigen
+  container.innerHTML='';
   shoots.forEach(function(s){
+    var key=s.date+'_'+s.title+s.custName;
+    if(_closedBanners.has(key))return;
     var diff=Math.round((new Date(s.date)-new Date(today))/(1000*60*60*24));
     var when=diff===0?'heute':diff===1?'morgen':'in '+diff+' Tagen';
     var cname=s.custName?' ('+s.custName+')':'';
