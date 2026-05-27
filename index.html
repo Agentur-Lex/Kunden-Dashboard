@@ -5119,6 +5119,27 @@ function updateRowColors(inputEl){
 
 // ── PWA Install Banner ──
 var _pwaDeferredPrompt=null;
+
+// iOS Detection
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+function isInStandaloneMode(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+
+function iosPwaDismiss(){
+  var b=document.getElementById('ios-pwa-banner');
+  if(b)b.style.display='none';
+  try{localStorage.setItem('pwa_dismissed','1');}catch(e){}
+}
+
+// iOS Banner nach 3s anzeigen
+window.addEventListener('load',function(){
+  if(isIOS()&&!isInStandaloneMode()){
+    try{if(localStorage.getItem('pwa_dismissed'))return;}catch(e){}
+    setTimeout(function(){
+      var b=document.getElementById('ios-pwa-banner');
+      if(b)b.style.display='block';
+    },3000);
+  }
+});
 window.addEventListener('beforeinstallprompt',function(e){
   e.preventDefault();
   _pwaDeferredPrompt=e;
@@ -5183,6 +5204,13 @@ if('serviceWorker' in navigator){
 }
 </script>
 
+<div id="ios-pwa-banner" style="display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 18px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-size:12px;max-width:300px;width:90%">
+  <button onclick="iosPwaDismiss()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:0">✕</button>
+  <div style="font-weight:700;margin-bottom:6px">📲 App installieren</div>
+  <div style="color:rgba(255,255,255,0.8);line-height:1.6">Tippe auf <span style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:4px;padding:1px 6px;font-size:13px">⎙</span> und dann <strong>„Zum Home-Bildschirm"</strong></div>
+  <div style="margin-top:8px;width:100%;height:1px;background:rgba(255,255,255,0.1)"></div>
+  <div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,0.4);text-align:center">Nur in Safari verfügbar</div>
+</div>
 <div id="pwa-banner">
   <div>
     <div style="font-weight:700;margin-bottom:2px">App installieren</div>
