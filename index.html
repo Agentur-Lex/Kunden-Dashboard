@@ -4973,12 +4973,14 @@ function tourShow(){
   // Tooltip positionieren
   var tt=document.getElementById('tour-tooltip');
   var ttW=280,ttH=160;
+  var isMobile=window.innerWidth<=480;
+  var mobileOffset=isMobile?75:0; // ~2cm auf Mobile
   var left=rect.right+16;
-  var top=rect.top;
+  var top=rect.top+mobileOffset;
   if(left+ttW>window.innerWidth-10)left=rect.left-ttW-16;
   if(left<10)left=10;
   if(top+ttH>window.innerHeight-10)top=window.innerHeight-ttH-10;
-  if(top<10)top=10;
+  if(top<10+mobileOffset)top=10+mobileOffset;
   tt.style.left=left+'px';
   tt.style.top=top+'px';
 
