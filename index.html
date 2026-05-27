@@ -4574,7 +4574,10 @@ function updateShootReminder(){
     var when=diff===0?'heute':diff===1?'morgen':'in '+diff+' Tagen';
     return (s.title||'Drehtermin')+' – '+when+' ('+fmtISO(d)+')';
   });
-  txt.textContent='📅 Drehtermin'+( shoots.length>1?'e':'')+' bald: '+msgs.join(' · ');
+  // Mehrere Termine untereinander
+  txt.innerHTML=msgs.map(function(m){
+    return '<div style="display:flex;align-items:center;gap:6px"><span>📅</span><span>'+m+'</span></div>';
+  }).join('');
   banner.style.display='flex';
 }
 function updateTodoBadge(){}
