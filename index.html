@@ -5026,7 +5026,7 @@ function lightAdSelect(ri,selIdx){
   var row=cd().rows[ri];
   if(selIdx===''){
     // Zurücksetzen
-    row.name='';row.spez=SPEZ_OPTS[0];row.link='';row._lightAdRef=undefined;
+    row.name='';row.spez=SPEZ_OPTS[0];row.link='';delete row._lightAdRef;
     scheduleSave();renderContentTable();buildCalendar();return;
   }
   var today30=new Date();today30.setDate(today30.getDate()-30);
@@ -5037,42 +5037,12 @@ function lightAdSelect(ri,selIdx){
   if(!piece)return;
   row.name=piece.name;
   row.spez=piece.spez||SPEZ_OPTS[0];
-  row.link='zum-piece-ref';
+  row.link='';
   row._lightAdRef=cd().rows.indexOf(piece);
   scheduleSave();
   renderContentTable();buildCalendar();
 }
-function lightAdJumpToPiece(ri){
-  var row=cd().rows[ri];
-  if(!row)return;
-  var refIdx=row._lightAdRef;
-  if(refIdx===undefined||refIdx<0)return;
-  var pieceRow=cd().rows[refIdx];
-  if(!pieceRow)return;
-  // Zur Content-Liste navigieren
-  showPage('contentlist',document.getElementById('nav-contentlist'));
-  setTimeout(function(){
-    // Vergangene Posts ausklappen falls nötig
-    var pieceDate=normalizeDate(pieceRow.date);
-    var today=getTodayISO();
-    if(pieceDate<today&&!SHOW_PAST){
-      SHOW_PAST=true;
-      renderContentTable();
-    }
-    setTimeout(function(){
-      // Zeile finden – nach globalem Index in sortierten Rows
-      var sortedRows=cd().rows;
-      var sortedIdx=sortedRows.indexOf(pieceRow);
-      var rows=document.querySelectorAll('#content-tbody tr');
-      var targetRow=rows[sortedIdx];
-      if(!targetRow)return;
-      targetRow.scrollIntoView({behavior:'smooth',block:'center'});
-      targetRow.style.transition='background .4s';
-      targetRow.style.background='rgba(255,87,87,0.18)';
-      setTimeout(function(){targetRow.style.background='';},2500);
-    },200);
-  },150);
-}
+
 
 // ── Bulk-Aktionen Content-Liste ──
 var _bulkSelected=new Set();
