@@ -4974,7 +4974,7 @@ function tourShow(){
     if(navEl){
       navEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
       // Warten bis Scroll fertig, dann Highlight neu berechnen
-      setTimeout(function(){_tourPosition();},350);
+      setTimeout(function(){_tourPosition();},200);
       return;
     }
   }
