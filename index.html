@@ -431,10 +431,7 @@ textarea{resize:vertical;line-height:1.5}
   #bulk-bar button{background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:5px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600}
   #bulk-bar button:hover{background:rgba(255,255,255,0.35)}
   .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
-  /* ── PWA-Banner ── */
-  #pwa-banner{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:12px;padding:12px 20px;display:none;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:9000;font-size:12px;min-width:280px}
-  #pwa-banner button.install{background:var(--accent);border:none;color:#fff;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
-  #pwa-banner button.dismiss{background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:0 4px;margin-left:auto}
+
 /* ── Tour ── */
   #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:none}
   #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease}
@@ -1439,8 +1436,8 @@ function resetForgotForm(){
 // ── SESSIONS ──
 function startAgencySession(){
   ACTIVE_CUSTOMER=Object.keys(DATA)[0]||'';
-  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();checkIosPwaBanner();
-  if(_pwaDeferredPrompt&&!isInStandaloneMode()){try{if(!sessionStorage.getItem('pwa_dismissed_session')){setTimeout(function(){var b=document.getElementById('pwa-banner');if(b)b.style.display='flex';},2000);}}catch(e){}}
+  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();
+  if(null&&!isInStandaloneMode()){try{if(!sessionStorage.getItem('pwa_dismissed_session')){setTimeout(function(){var b=document.getElementById('pwa-banner');if(b)b.style.display='flex';},2000);}}catch(e){}}
 }
 function startClientSession(k){
   // Passwort noch nie geändert → First-Login-Screen zeigen
@@ -1477,9 +1474,9 @@ function startClientSession(k){
   renderCustomerView();
   updateShootReminder();
   window.scrollTo({top:0,behavior:'smooth'});
-  tourCheckFirstLogin();updateUndoBtn();checkIosPwaBanner();
+  tourCheckFirstLogin();updateUndoBtn();setTimeout(function(){if(!document.getElementById('tour-overlay')||document.getElementById('tour-overlay').style.display==='none')checkInstallGuide();},3000);
   // Android: Banner anzeigen wenn Prompt verfügbar
-  if(_pwaDeferredPrompt&&!isInStandaloneMode()){
+  if(null&&!isInStandaloneMode()){
     try{if(!sessionStorage.getItem('pwa_dismissed_session')){
       setTimeout(function(){
         var b=document.getElementById('pwa-banner');
@@ -5026,6 +5023,7 @@ function tourEnd(){
   if(ov)ov.style.display='none';
   // Tour als gesehen markieren
   try{localStorage.setItem('lex_tour_done_'+ACTIVE_CUSTOMER,'1');}catch(e){}
+  checkInstallGuide();
 }
 
 function tourCheckFirstLogin(){
@@ -5130,52 +5128,25 @@ function updateRowColors(inputEl){
   });
 }
 
-// ── PWA Install Banner ──
-var _pwaDeferredPrompt=null;
-
-// iOS Detection
-function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
-function isInStandaloneMode(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
-
-function iosPwaDismiss(){
-  var b=document.getElementById('ios-pwa-banner');
-  if(b)b.style.display='none';
-  try{sessionStorage.setItem('pwa_dismissed_session','1');}catch(e){}
+catch(e){}
 }
 
-// iOS Banner anzeigen (wird nach Login aufgerufen)
-function checkIosPwaBanner(){
-  if(!isIOS()||isInStandaloneMode())return;
-  try{if(sessionStorage.getItem('pwa_dismissed_session'))return;}catch(e){}
-  setTimeout(function(){
-    var b=document.getElementById('ios-pwa-banner');
-    if(b)b.style.display='block';
-  },2000);
+// ── Installationsanleitung ──
+function showInstallGuide(){
+  var m=document.getElementById('install-guide-modal');
+  if(m)m.style.display='flex';
+  try{localStorage.setItem('install_guide_shown','1');}catch(e){}
 }
-window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault();
-  _pwaDeferredPrompt=e;
-  try{if(sessionStorage.getItem('pwa_dismissed_session'))return;}catch(ex){}
-  setTimeout(function(){
-    var b=document.getElementById('pwa-banner');
-    if(b)b.style.display='flex';
-  },1000);
-});
-function pwaBannerInstall(){
-  if(!_pwaDeferredPrompt)return;
-  _pwaDeferredPrompt.prompt();
-  _pwaDeferredPrompt.userChoice.then(function(){
-    _pwaDeferredPrompt=null;
-    var b=document.getElementById('pwa-banner');
-    if(b)b.style.display='none';
-  });
+function closeInstallGuide(){
+  var m=document.getElementById('install-guide-modal');
+  if(m)m.style.display='none';
 }
-function pwaBannerDismiss(){
-  var b=document.getElementById('pwa-banner');
-  if(b)b.style.display='none';
-  try{sessionStorage.setItem('pwa_dismissed_session','1');}catch(e){}
+function checkInstallGuide(){
+  // Nur auf Mobile, nur beim ersten Mal nach Tour
+  if(window.innerWidth>768)return;
+  try{if(localStorage.getItem('install_guide_shown'))return;}catch(e){}
+  setTimeout(showInstallGuide,1500);
 }
-
 // ── Tastaturkürzel ──
 document.addEventListener('keydown',function(e){
   // Enter auf cell-input = bestätigen (blur)
@@ -5216,20 +5187,34 @@ if('serviceWorker' in navigator){
 }
 </script>
 
-<div id="ios-pwa-banner" style="display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 18px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-size:12px;max-width:300px;width:90%">
-  <button onclick="iosPwaDismiss()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:0">✕</button>
-  <div style="font-weight:700;margin-bottom:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 2 21 6 17 10"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M3 10h4a2 2 0 012 2v8a2 2 0 01-2 2H3a2 2 0 01-2-2v-8a2 2 0 012-2z"/></svg> App installieren</div>
-  <div style="color:rgba(255,255,255,0.8);line-height:1.6">Tippe auf <span style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:4px;padding:1px 6px;font-size:13px">⎙</span> und dann <strong>„Zum Home-Bildschirm"</strong></div>
+<div style="color:rgba(255,255,255,0.8);line-height:1.6">Tippe auf <span style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:4px;padding:1px 6px;font-size:13px">⎙</span> und dann <strong>„Zum Home-Bildschirm"</strong></div>
   <div style="margin-top:8px;width:100%;height:1px;background:rgba(255,255,255,0.1)"></div>
   <div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,0.4);text-align:center">Nur in Safari verfügbar</div>
 </div>
-<div id="pwa-banner">
-  <div>
-    <div style="font-weight:700;margin-bottom:2px">App installieren</div>
-    <div style="font-size:10px;opacity:.7">Zum Homescreen hinzufügen</div>
+
+<div id="install-guide-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9500;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;position:relative;box-shadow:0 16px 48px rgba(0,0,0,0.2)">
+    <button onclick="closeInstallGuide()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3)">✕</button>
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">App installieren</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:20px">Füge das Dashboard zum Homescreen hinzu</div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:28px;height:28px;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
+        <div>
+          <div style="font-size:12px;font-weight:600">iPhone / iPad (Safari)</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Tippe auf <strong>⎙ Teilen</strong> → <strong>„Zum Home-Bildschirm"</strong></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;background:#3ddc84;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24C14.54 7.9 12.84 7.5 11 7.5c-1.84 0-3.54.4-5.06 1.09L3.99 5.27c-.18-.3-.54-.39-.83-.22-.3.16-.42.54-.26.85l1.84 3.18C3.57 10.69 2 13.27 2 16h20c0-2.73-1.57-5.31-4.4-6.52zM7 14c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm10 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div>
+        <div>
+          <div style="font-size:12px;font-weight:600">Android (Chrome)</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Tippe auf <strong>⋮ Menü</strong> → <strong>„App installieren"</strong></div>
+        </div>
+      </div>
+    </div>
+    <button onclick="closeInstallGuide()" style="width:100%;background:var(--accent);border:none;color:#fff;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Verstanden</button>
   </div>
-  <button class="install" onclick="pwaBannerInstall()">Installieren</button>
-  <button class="dismiss" onclick="pwaBannerDismiss()">✕</button>
 </div>
 </body>
 </html>
