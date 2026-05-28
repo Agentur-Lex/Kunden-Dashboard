@@ -433,8 +433,8 @@ textarea{resize:vertical;line-height:1.5}
   .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
 
 /* ── Tour ── */
-  #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:none}
-  #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease}
+  #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:all}
+  #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease;cursor:default}
   #tour-tooltip{position:fixed;z-index:8002;background:#fff;border-radius:12px;padding:18px 20px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.18);pointer-events:all;transition:all .3s ease}
   #tour-tooltip h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--text)}
   #tour-tooltip p{margin:0 0 14px;font-size:12px;color:var(--text2);line-height:1.6}
@@ -1247,7 +1247,7 @@ var SESSION={type:null,key:null},ROLE='agency',ACTIVE_CUSTOMER='',EDITING_TODO=-
 var SHOW_PAST=false,SHOW_PAST_SHOOTS=false,SHOW_ADD_FORM=false,CURRENT_SHOOT_IDX=-1,CURRENT_IDEA_IDX=-1,CAL_OFFSET=0,OB_DRAG_IDX=-1,OPEN_SHOOT_PANELS={};
 var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
-var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>'},{id:'facebook',label:'Facebook',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>'},{id:'linkedin',label:'LinkedIn',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12"/></svg>'},{id:'tiktok',label:'TikTok',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>'},{id:'youtube',label:'YouTube',icon:'▶️'}];
+var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'},{id:'facebook',label:'Facebook',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>'},{id:'linkedin',label:'LinkedIn',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>'},{id:'tiktok',label:'TikTok',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
 function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:[],freq:[],saeuleData:[{label:'Produkt & Leistungen',pct:40,color:'var(--accent)'},{label:'Behind the Scenes',pct:25,color:'var(--green)'},{label:'Kundenstimmen',pct:20,color:'#E1306C'},{label:'Tipps & Mehrwert',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
@@ -1905,7 +1905,7 @@ function renderAgencyOnboardingPage(){
       PLATFORMS.forEach(function(plat){
         var cred=sc[plat.id]||{};if(!cred.email&&!cred.pass)return;
         var tr=document.createElement('tr');
-        var td1=document.createElement('td');td1.style.cssText='font-weight:600;color:var(--text)';td1.textContent=plat.icon+' '+plat.label;
+        var td1=document.createElement('td');td1.style.cssText='font-weight:600;color:var(--text)';td1.innerHTML=plat.icon+' '+escHtml(plat.label);
         var td2=document.createElement('td');td2.style.color='var(--text2)';td2.textContent=cred.email||'–';
         var td3=document.createElement('td');
         var rs=document.createElement('span');rs.id='agsc-'+plat.id;rs.style.cssText='letter-spacing:2px;color:var(--text3)';rs.textContent='••••••••';
@@ -2949,7 +2949,7 @@ function exportOnboardingPDF() {
       var cred = sc[plat.id] || {};
       if(!cred.email && !cred.pass) return;
       html2 += '<div class="cred-box">'
-        +'<div class="cred-plat">'+escHtml(plat.icon+' '+plat.label)+'</div>'
+        +'<div class="cred-plat">'+plat.icon+' '+escHtml(plat.label)+'</div>'
         +'<div class="cred-row"><span class="cred-lbl">E-Mail</span><span>'+escHtml(cred.email||'–')+'</span></div>'
         +'<div class="cred-row"><span class="cred-lbl">Passwort</span><span>'+escHtml(cred.pass||'–')+'</span></div>'
         +'</div>';
@@ -3200,7 +3200,7 @@ function renderObPanel(){
       box.style.cssText = 'margin-bottom:14px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)';
       var ph = document.createElement('div');
       ph.style.cssText = 'font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px';
-      ph.textContent = plat.icon+' '+plat.label; box.appendChild(ph);
+      ph.innerHTML = plat.icon+' '+escHtml(plat.label); box.appendChild(ph);
       var fr = document.createElement('div'); fr.className = 'form-row';
       var eDiv=document.createElement('div');
       var eLbl=document.createElement('span');eLbl.className='flbl';eLbl.textContent='E-Mail';
@@ -4948,12 +4948,12 @@ async function doChangePasswordSB(){
 
 // ── Tour ──
 var TOUR_STEPS=[
-  {target:'nav-overview',title:'Dashboard – Deine Übersicht',text:'Hier siehst du auf einen Blick was du wissen musst: Das Wachstum deiner Accounts, offene To-Dos und nächste Drehtermine. Außerdem findest du hier das Onboarding und hast einen Bereich, in den du Ideen teilen kannst.'},
-  {target:'nav-shoots',title:'Drehtermine – Deine Aufnahmen',text:'Hier sind alle geplanten Drehtage aufgelistet. Du siehst was geplant ist, kannst eigene Content-Ideen hinzufügen und vorhandene bearbeiten.'},
-  {target:'nav-todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle deine offenen Aufgaben. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir umsetzen.'},
-  {target:'nav-calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen an Posts innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
-  {target:'nav-analytics',title:'Analysedaten – Deine Zahlen',text:'Hier werden monatlich die wichtigsten Kennzahlen eingepflegt. So behältst du immer den Überblick über dein Wachstum.'},
-  {target:'nav-strategy',title:'Strategie – Dein Fahrplan',text:'Hier findest du deine Content-Strategie: Zielgruppe, Themenfelder, Plattformen und Frequenz. Das ist die Grundlage für alle Inhalte die wir für dich erstellen.'},
+  {target:'nav-overview',page:'overview',title:'Dashboard – Deine Übersicht',text:'Hier siehst du auf einen Blick was du wissen musst: Das Wachstum deiner Accounts, offene To-Dos und nächste Drehtermine. Außerdem findest du hier das Onboarding und hast einen Bereich, in den du Ideen teilen kannst.'},
+  {target:'nav-shoots',page:'shoots',title:'Drehtermine – Deine Aufnahmen',text:'Hier sind alle geplanten Drehtage aufgelistet. Du siehst was geplant ist, kannst eigene Content-Ideen hinzufügen und vorhandene bearbeiten.'},
+  {target:'nav-todos',page:'todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle deine offenen Aufgaben. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir umsetzen.'},
+  {target:'nav-calendar',page:'calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen an Posts innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
+  {target:'nav-analytics',page:'analytics',title:'Analysedaten – Deine Zahlen',text:'Hier werden monatlich die wichtigsten Kennzahlen eingepflegt. So behältst du immer den Überblick über dein Wachstum.'},
+  {target:'nav-strategy',page:'strategy',title:'Strategie – Dein Fahrplan',text:'Hier findest du deine Content-Strategie: Zielgruppe, Themenfelder, Plattformen und Frequenz. Das ist die Grundlage für alle Inhalte die wir für dich erstellen.'},
 ];
 var TOUR_IDX=0;
 
@@ -4966,9 +4966,17 @@ function tourStart(){
 
 function tourShow(){
   var step=TOUR_STEPS[TOUR_IDX];
+  // Seite wechseln
+  if(step.page){
+    var navEl=document.getElementById(step.target);
+    showPage(step.page,navEl);
+    // Nav-Item sichtbar scrollen (Mobile)
+    if(navEl){
+      navEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    }
+  }
   var target=document.getElementById(step.target);
   if(!target){tourNext();return;}
-
   // Highlight
   var rect=target.getBoundingClientRect();
   var pad=6;
