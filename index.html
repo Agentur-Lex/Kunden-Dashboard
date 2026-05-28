@@ -622,18 +622,18 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px">
           <div class="card"><div class="card-title">Nächste Drehtermine</div><div id="ov-shoots"></div></div>
           <div id="ov-ob-inline" class="card client-only" style="display:none">
-            <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleObPanel();if(document.getElementById('ob-panel').style.display!=='none')document.getElementById('ob-panel').scrollIntoView({behavior:'smooth',block:'start'})">
+            <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleObPanel()">
               <div style="flex:1">
                 <div class="card-title" style="margin-bottom:6px">Onboarding</div>
-                <div class="prog-wrap"><div id="ov-ob-fill-inline" class="prog-fill" style="width:0%"></div></div>
-                <div id="ov-ob-lbl-inline" style="font-size:10px;color:var(--text3);margin-top:4px"></div>
+                <div class="prog-wrap"><div id="ov-ob-fill" class="prog-fill" style="width:0%"></div></div>
+                <div id="ov-ob-lbl" style="font-size:10px;color:var(--text3);margin-top:4px"></div>
               </div>
               <div style="margin-left:14px;flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5L6.5 5 3 8.5"/></svg>
               </div>
             </div>
-            <div id="ob-panel-inline" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-              <div id="ob-panel-content-inline"></div>
+            <div id="ob-panel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+              <div id="ob-panel-content"></div>
             </div>
           </div>
           <div class="card"><div class="card-title">To-Dos</div><div id="ov-todo-summary"></div></div>
@@ -669,21 +669,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div id="brainstorm-history" style="margin-top:14px"></div>
       </div>
 
-        <div class="card client-only">
-          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleObPanel()">
-            <div style="flex:1">
-              <div class="card-title" style="margin-bottom:6px">Onboarding</div>
-              <div class="prog-wrap"><div id="ov-ob-fill" class="prog-fill" style="width:0%"></div></div>
-              <div id="ov-ob-lbl" style="font-size:10px;color:var(--text3);margin-top:4px"></div>
-            </div>
-            <div id="ob-toggle-icon" style="margin-left:14px;flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;transition:transform .25s;cursor:pointer">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5L6.5 5 3 8.5"/></svg>
-            </div>
-          </div>
-          <div id="ob-panel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-            <div id="ob-panel-content"></div>
-          </div>
-        </div>
+
       </div>
 
       <!-- ANALYSE -->
@@ -1362,8 +1348,8 @@ function updateOnboardingBars(){
   // Inline OB Block: nur für Kunden, nur wenn nicht abgeschlossen
   var inlineBlock=document.getElementById('ov-ob-inline');
   if(inlineBlock&&ROLE==='client'){inlineBlock.style.display=pct<100?'block':'none';}
-  var fillInline=document.getElementById('ov-ob-fill-inline');
-  var lblInline=document.getElementById('ov-ob-lbl-inline');
+  var fillInline=document.getElementById('ov-ob-fill');
+  var lblInline=document.getElementById('ov-ob-lbl');
   if(fillInline)fillInline.style.width=pct+'%';
   var steps=cd().obSteps||[];
   var done=steps.filter(function(s){return s.done;}).length;
