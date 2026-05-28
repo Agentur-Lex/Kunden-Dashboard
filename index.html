@@ -4970,11 +4970,18 @@ function tourShow(){
   if(step.page){
     var navEl=document.getElementById(step.target);
     showPage(step.page,navEl);
-    // Nav-Item sichtbar scrollen (Mobile)
+    // Nav-Item sichtbar scrollen (Mobile), dann neu positionieren
     if(navEl){
       navEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      // Warten bis Scroll fertig, dann Highlight neu berechnen
+      setTimeout(function(){_tourPosition();},350);
+      return;
     }
   }
+  _tourPosition();
+}
+function _tourPosition(){
+  var step=TOUR_STEPS[TOUR_IDX];
   var target=document.getElementById(step.target);
   if(!target){tourNext();return;}
   // Highlight
