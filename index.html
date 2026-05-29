@@ -1327,7 +1327,7 @@ function calcProgress(k){
 function syncLinkedInQuestion(){
   if(!ACTIVE_CUSTOMER)return;
   var d=cd();
-  var hasLinkedIn=(d.strategy&&d.strategy.platforms||[]).indexOf('LinkedIn')!==-1;
+  var hasLinkedIn=((d.strategy&&d.strategy.plat)||[]).indexOf('LinkedIn')!==-1;
   var liQ='LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)';
   var idx=d.questions.indexOf(liQ);
   if(hasLinkedIn&&idx===-1){
