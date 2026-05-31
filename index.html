@@ -856,10 +856,16 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div class="page-title">Content-Strategie
           <button id="strat-edit-btn" class="btn-outline agency-only" onclick="toggleStratEdit()" style="margin-left:auto;font-size:11px;padding:5px 12px">✎ Bearbeiten</button>
         </div>
-        <div class="card">
-          <div class="card-title">Zielgruppe</div>
-          <div id="strat-audience-wrap">
-            <div style="font-size:11px;line-height:1.7;color:var(--text2)" id="strat-audience">–</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start">
+          <div class="card">
+            <div class="card-title">Zielgruppe</div>
+            <div id="strat-audience-wrap">
+              <div style="font-size:11px;line-height:1.7;color:var(--text2)" id="strat-audience">–</div>
+            </div>
+          </div>
+          <div class="card agency-only" style="min-width:200px">
+            <div class="card-title">Beginn Zusammenarbeit</div>
+            <div id="strat-beginn-wrap" style="margin-top:8px"></div>
           </div>
         </div>
         <div class="card">
@@ -869,10 +875,6 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div class="card"><div class="card-title">Plattformen</div><div id="strat-plat" style="margin-top:4px"></div></div>
           <div class="card"><div class="card-title">Frequenz</div><div id="strat-freq"></div></div>
-        </div>
-        <div class="card agency-only">
-          <div class="card-title">Beginn Zusammenarbeit</div>
-          <div id="strat-beginn-wrap" style="margin-top:8px"></div>
         </div>
         <div class="card agency-only">
           <div class="card-title">Content-Spezifikation</div>
@@ -3579,35 +3581,28 @@ function buildFollowerChart(){
   ge.innerHTML='';
   var sep=document.createElement('div');sep.style.cssText='border-top:1px solid var(--border);margin:14px 0';ge.appendChild(sep);
 
-  // Startwert-Eingabe
+  // Startmonat – aus Strategie (unbearbeitbar)
   var startSection=document.createElement('div');
   startSection.style.cssText='display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap';
   var startLbl=document.createElement('label');startLbl.textContent='Startmonat:';startLbl.style.cssText='font-size:11px;color:var(--text2);min-width:90px';
-  // Startmonat: freies Monat+Jahr Dropdown (wie Stand)
   var mNamesS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   var mShortS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-  var smParts=startMon?startMon.split(' '):['Jan','26'];
-  var smM=mShortS.indexOf(smParts[0]);if(smM===-1)smM=0;
-  var smY=smParts[1]?parseInt('20'+smParts[1]):2026;
-  var smSel=document.createElement('select');
-  smSel.style.cssText='font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
-  for(var mi2=0;mi2<12;mi2++){var o2=document.createElement('option');o2.value=mi2;o2.textContent=mNamesS[mi2];if(mi2===smM)o2.selected=true;smSel.appendChild(o2);}
-  var smYSel=document.createElement('select');
-  smYSel.style.cssText='font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
-  for(var sy=2023;sy<=2030;sy++){var oy=document.createElement('option');oy.value=sy;oy.textContent=sy;if(sy===smY)oy.selected=true;smYSel.appendChild(oy);}
-  var smErr=document.createElement('div');smErr.style.cssText='color:var(--red);font-size:10px;display:none;margin-top:4px;width:100%';smErr.textContent='Startmonat darf nicht nach Stand liegen.';
-  function updateStartMonth(){
-    var newM=parseInt(smSel.value);var newY=parseInt(smYSel.value);
-    var newLbl=mShortS[newM]+' '+String(newY).slice(2);
-    // Prüfen ob Startmonat nach Stand liegt
-    if(anchorY<newY||(anchorY===newY&&anchorM<newM)){
-      smErr.style.display='block';return;
-    }
-    smErr.style.display='none';
-    an.startMonth=newLbl;scheduleSave();buildFollowerChart();
+  var stratBZ=cd().strategy&&cd().strategy.beginnZusammenarbeit||'';
+  var smDisp=document.createElement('span');
+  if(stratBZ){
+    // Anzeige: Monat ausgeschrieben
+    var smP=stratBZ.split(' ');
+    var smI=mShortS.indexOf(smP[0]);
+    var smYY=smP[1]?parseInt('20'+smP[1]):new Date().getFullYear();
+    smDisp.textContent=(smI>=0?mNamesS[smI]:smP[0])+' '+smYY;
+    smDisp.style.cssText='font-size:11px;font-weight:600;color:var(--text)';
+    // Startmonat automatisch setzen
+    if(an.startMonth!==stratBZ){an.startMonth=stratBZ;}
+  } else {
+    smDisp.textContent='Bitte Beginn Zusammenarbeit in Strategie eintragen';
+    smDisp.style.cssText='font-size:11px;color:var(--text3);font-style:italic';
   }
-  smSel.addEventListener('change',updateStartMonth);
-  smYSel.addEventListener('change',updateStartMonth);
+  var smErr=document.createElement('div');smErr.style.cssText='display:none';
 
   var sfLbl=document.createElement('label');sfLbl.textContent='Follower:';sfLbl.style.cssText='font-size:11px;color:var(--text2);margin-left:8px';
   var sfInp=document.createElement('input');
@@ -3615,8 +3610,9 @@ function buildFollowerChart(){
   sfInp.style.cssText='width:90px;font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
   sfInp.addEventListener('change',function(){an.startFollowers=parseInt(this.value.replace(/[^0-9]/g,''))||0;scheduleSave();buildFollowerChart();});
 
-  startSection.appendChild(startLbl);startSection.appendChild(smSel);startSection.appendChild(smYSel);startSection.appendChild(sfLbl);startSection.appendChild(sfInp);
-  ge.appendChild(startSection);ge.appendChild(smErr);
+  startSection.appendChild(startLbl);startSection.appendChild(smDisp);startSection.appendChild(sfLbl);startSection.appendChild(sfInp);
+  ge.appendChild(startSection);
+  if(smErr)ge.appendChild(smErr);
 
   // Zuwachs-Tabelle (nur ab Monat nach Startmonat)
   var table=document.createElement('table');
@@ -4410,7 +4406,7 @@ function renderAnalyticsPage(){
     }
     // Jahr-Dropdown: ab createdY bis heute+2
     ySel.innerHTML='';
-    for(var y=createdY;y<=now.getFullYear()+2;y++){
+    for(var y=createdY;y<=now.getFullYear();y++){
       var opt=document.createElement('option');
       opt.value=y;opt.textContent=y;ySel.appendChild(opt);
     }
@@ -4422,13 +4418,15 @@ function renderAnalyticsPage(){
     function updateMonthOpts(selectedY,currentM){
       mSel.innerHTML='';
       var startM=(parseInt(selectedY)===createdY)?createdM:0;
-      for(var mi2=startM;mi2<12;mi2++){
+      var endM=(parseInt(selectedY)===now.getFullYear())?now.getMonth():11;
+      for(var mi2=startM;mi2<=endM;mi2++){
         var o=document.createElement('option');
         o.value=mi2+1;o.textContent=mNm[mi2];
         mSel.appendChild(o);
       }
       mSel.value=currentM;
-      if(!mSel.value||mSel.value<startM+1)mSel.value=startM+1;
+      if(!mSel.value||parseInt(mSel.value)<startM+1)mSel.value=startM+1;
+      if(parseInt(mSel.value)>endM+1)mSel.value=endM+1;
     }
     ySel.value=selY;
     updateMonthOpts(selY,selM);
