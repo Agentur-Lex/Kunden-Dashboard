@@ -871,6 +871,10 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           <div class="card"><div class="card-title">Frequenz</div><div id="strat-freq"></div></div>
         </div>
         <div class="card agency-only">
+          <div class="card-title">Beginn Zusammenarbeit</div>
+          <div id="strat-beginn-wrap" style="margin-top:8px"></div>
+        </div>
+        <div class="card agency-only">
           <div class="card-title">Content-Spezifikation</div>
           <div id="strat-spez-container" style="margin-top:6px"></div>
         </div>
@@ -1250,7 +1254,7 @@ var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'},{id:'facebook',label:'Facebook',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>'},{id:'linkedin',label:'LinkedIn',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>'},{id:'tiktok',label:'TikTok',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
-function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],startFollowers:0,startMonth:'',createdMonth:'',plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:['Instagram','Facebook'],freq:[],saeuleData:[{label:'Value',pct:40,color:'var(--accent)'},{label:'Werbend',pct:25,color:'var(--green)'},{label:'Persönlich',pct:20,color:'#E1306C'},{label:'Awareness',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
+function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],startFollowers:0,startMonth:'',createdMonth:'',plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:['Instagram','Facebook'],freq:[],beginnZusammenarbeit:'',saeuleData:[{label:'Value',pct:40,color:'var(--accent)'},{label:'Werbend',pct:25,color:'var(--green)'},{label:'Persönlich',pct:20,color:'#E1306C'},{label:'Awareness',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
 // ── HELPERS ──
 function cd(){return DATA[ACTIVE_CUSTOMER];}
@@ -1713,7 +1717,8 @@ async function addCustomer(){
   var mShortC=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   var cmLabel=mShortC[nowD.getMonth()]+' '+String(nowD.getFullYear()).slice(2);
   DATA[custId].analytics.createdMonth=cmLabel;
-  DATA[custId].analytics.startMonth=cmLabel;DATA[custId]._custId=custId;DATA[custId]._slug=user;DATA[custId]._status='active';
+  DATA[custId].analytics.startMonth=cmLabel;
+  DATA[custId].strategy.beginnZusammenarbeit=cmLabel;DATA[custId]._custId=custId;DATA[custId]._slug=user;DATA[custId]._status='active';
     CREDS[custId]={username:user,tempPw:pw,password:pw,label:name,setAt:null,resetPending:false};
     ACTIVE_CUSTOMER=custId;SHOW_ADD_FORM=false;syncDropdowns();renderCredList();renderAgencyOverview();
     hideLoading();
@@ -3457,9 +3462,11 @@ function buildFollowerChart(){
   (an.growth||[]).forEach(function(e){growthMap[e.month]=e;});
 
   // Absolute Follower berechnen: Startwert + kumulative Zuwächse
-  // Fallback für Kunden ohne createdMonth
-  if(!an.createdMonth)an.createdMonth='Mai 26';
-  if(!an.startMonth)an.startMonth=an.createdMonth;
+  // Beginn Zusammenarbeit aus Strategie als Quelle
+  var stratBeginn=cd().strategy&&cd().strategy.beginnZusammenarbeit||'';
+  if(stratBeginn&&!an.createdMonth)an.createdMonth=stratBeginn;
+  if(!an.createdMonth)an.createdMonth=''; // leer für bestehende Kunden
+  if(!an.startMonth&&an.createdMonth)an.startMonth=an.createdMonth;
   var startF=parseInt(an.startFollowers)||0;
   var startMon=an.startMonth;
   // Finde Index des Startmonats im 6-Fenster
@@ -3916,6 +3923,41 @@ function renderStrategyPage() {
     });
   }
 
+  // ── Beginn Zusammenarbeit ──
+  var beginnEl=document.getElementById('strat-beginn-wrap');
+  if(beginnEl){
+    beginnEl.innerHTML='';
+    var mShortB=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var mLongB=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var bz=s.beginnZusammenarbeit||'';
+    var bzM=0,bzY=new Date().getFullYear();
+    if(bz){var bzP=bz.split(' ');var bzi=mShortB.indexOf(bzP[0]);if(bzi>=0)bzM=bzi;if(bzP[1])bzY=parseInt('20'+bzP[1]);}
+    if(isEdit){
+      var bzRow=document.createElement('div');bzRow.style.cssText='display:flex;align-items:center;gap:8px';
+      var bzMSel=document.createElement('select');
+      bzMSel.style.cssText='font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
+      for(var bmi=0;bmi<12;bmi++){var bo=document.createElement('option');bo.value=bmi;bo.textContent=mLongB[bmi];if(bmi===bzM)bo.selected=true;bzMSel.appendChild(bo);}
+      var bzYSel=document.createElement('select');
+      bzYSel.style.cssText='font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
+      for(var by=2020;by<=new Date().getFullYear()+1;by++){var byo=document.createElement('option');byo.value=by;byo.textContent=by;if(by===bzY)byo.selected=true;bzYSel.appendChild(byo);}
+      function saveBeginn(){
+        var nm=parseInt(bzMSel.value);var ny=parseInt(bzYSel.value);
+        var newLbl=mShortB[nm]+' '+String(ny).slice(2);
+        cd().strategy.beginnZusammenarbeit=newLbl;
+        // Analyse createdMonth und startMonth synchronisieren
+        cd().analytics.createdMonth=newLbl;
+        if(!cd().analytics.startMonth||cd().analytics.startMonth===bz)cd().analytics.startMonth=newLbl;
+        scheduleSave();renderAnalyticsPage();
+      }
+      bzMSel.addEventListener('change',saveBeginn);
+      bzYSel.addEventListener('change',saveBeginn);
+      bzRow.appendChild(bzMSel);bzRow.appendChild(bzYSel);beginnEl.appendChild(bzRow);
+    } else {
+      var bzDisp=document.createElement('div');bzDisp.style.cssText='font-size:11px;color:var(--text2)';
+      bzDisp.textContent=bz?mLongB[bzM]+' '+bzY:'–';beginnEl.appendChild(bzDisp);
+    }
+  }
+
   // ── Plattformen – Checkboxen ──
   var sp = document.getElementById('strat-plat');
   if (sp) {
@@ -4355,16 +4397,43 @@ function renderAnalyticsPage(){
     var ySel=document.getElementById('analytics-stand-year');
     if(!mSel||!ySel)return;
     var now=new Date();
+    var mNm=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var mShortN=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    // Startmonat aus Strategie-Beginn (Hauptquelle) oder analytics.createdMonth
+    var created=cd().strategy&&cd().strategy.beginnZusammenarbeit||an.createdMonth||an.startMonth||'';
+    var createdM=0,createdY=2024;
+    if(created){
+      var cp=created.split(' ');
+      var ci=mShortN.indexOf(cp[0]);
+      if(ci>=0)createdM=ci;
+      if(cp[1])createdY=parseInt('20'+cp[1]);
+    }
+    // Jahr-Dropdown: ab createdY bis heute+2
     ySel.innerHTML='';
-    for(var y=now.getFullYear()-2;y<=now.getFullYear()+1;y++){
+    for(var y=createdY;y<=now.getFullYear()+2;y++){
       var opt=document.createElement('option');
       opt.value=y;opt.textContent=y;ySel.appendChild(opt);
     }
+    // Aktuell gesetzten Wert
     var sd=an.standDatum||'';
-    var mNm=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
     var selM=now.getMonth()+1,selY=now.getFullYear();
     if(sd){var pts=sd.split(' ');var mi=mNm.indexOf(pts[0]);if(mi>=0)selM=mi+1;var y2=parseInt(pts[1]);if(y2>2000)selY=y2;else if(y2>0)selY=2000+y2;}
-    mSel.value=selM;ySel.value=selY;
+    // Monat-Dropdown: filtern basierend auf gewähltem Jahr
+    function updateMonthOpts(selectedY,currentM){
+      mSel.innerHTML='';
+      var startM=(parseInt(selectedY)===createdY)?createdM:0;
+      for(var mi2=startM;mi2<12;mi2++){
+        var o=document.createElement('option');
+        o.value=mi2+1;o.textContent=mNm[mi2];
+        mSel.appendChild(o);
+      }
+      mSel.value=currentM;
+      if(!mSel.value||mSel.value<startM+1)mSel.value=startM+1;
+    }
+    ySel.value=selY;
+    updateMonthOpts(selY,selM);
+    ySel.addEventListener('change',function(){updateMonthOpts(parseInt(this.value),parseInt(mSel.value));updateStandDatum();});
+    // Alten listener nicht doppeln – onchange bleibt im HTML
   })();
   // Client display
   var standDisp = document.getElementById('analytics-stand-display');
