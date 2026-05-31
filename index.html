@@ -3514,7 +3514,14 @@ function buildFollowerChart(){
     inpF.style.cssText='width:90px;padding:3px 6px;margin:0;font-size:11px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text)';
     (function(ent){
       inpF.addEventListener('change',function(){
-        ent.f=parseInt(this.value.replace(/[^0-9]/g,''))||0;
+        var val=parseInt(this.value.replace(/[^0-9]/g,''))||0;
+        ent.f=val;
+        // Direkt ins growth-Array schreiben
+        var growthArr=cd().analytics.growth;
+        var existing=growthArr.filter(function(e){return e.month===ent.month;})[0];
+        if(existing){existing.f=val;}
+        else{growthArr.push({month:ent.month,f:val,p:0});}
+        scheduleSave();
         buildFollowerChart();
       });
     })(entry);
