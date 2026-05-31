@@ -1390,7 +1390,7 @@ async function doLogin(){
     if(isAgency){
       var allC=await sb.from('customers').select('id');
       if(allC.data&&allC.data.length){var uid=res.data.user.id;for(var ci=0;ci<allC.data.length;ci++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[ci].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
-      await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();
+      await loadAllCustomers();hideLoading();SESSION={type:'agency',key:null};startAgencySession();try{var lc2=sessionStorage.getItem('lastCustomer')||localStorage.getItem('lastCustomer');if(lc2&&DATA[lc2])agencySwitchCustomer(lc2);}catch(e){};
     }else{
       var cr=await sb.from('user_customer').select('customer_id,role').eq('user_id',res.data.user.id);
       var crRow=cr.data&&(cr.data.find(function(r){return r.role==='client';})||cr.data[0]);
@@ -1549,7 +1549,7 @@ function resetAllEditStates(){
   var obp=document.getElementById('ob-panel');
   if(obp)obp.style.display='none';
 }
-function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();renderCustomerView();updateTodoBadge();updateShootReminder();}
+function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;try{sessionStorage.setItem('lastCustomer',k);localStorage.setItem('lastCustomer',k);}catch(e){}resetAllEditStates();renderCustomerView();updateTodoBadge();updateShootReminder();}
 function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});;var hideCustSel=['overview','settings','agency-overview'];var custSel=document.getElementById('cust-dropdown');var custLbl=document.querySelector('#agency-tb span');if(custSel){custSel.style.display=hideCustSel.indexOf(id)!==-1?'none':'';if(custLbl)custLbl.style.display=hideCustSel.indexOf(id)!==-1?'none':'';};
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
   var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
@@ -5176,7 +5176,7 @@ async function doChangePasswordSB(){
         if(isAg){
           var allC=await sb.from('customers').select('id');
           if(allC.data&&allC.data.length){for(var i2=0;i2<allC.data.length;i2++){await sb.from('user_customer').upsert({user_id:uid,customer_id:allC.data[i2].id,role:'agency'},{onConflict:'user_id,customer_id'});}}
-          await loadAllCustomers();SESSION={type:'agency',key:null};startAgencySession();
+          await loadAllCustomers();SESSION={type:'agency',key:null};startAgencySession();try{var lc=sessionStorage.getItem('lastCustomer')||localStorage.getItem('lastCustomer');if(lc&&DATA[lc])agencySwitchCustomer(lc);}catch(e){};
         }else{
           var cr2=await sb.from('user_customer').select('customer_id,role').eq('user_id',uid);
           if(cr2.data&&cr2.data.length){var cId2=(cr2.data.find(function(r){return r.role==='client';})||cr2.data[0]).customer_id;await loadCustomerData(cId2);SESSION={type:'client',key:cId2};startClientSession(cId2);}
