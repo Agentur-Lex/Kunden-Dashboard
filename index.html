@@ -4051,6 +4051,20 @@ function updateStandDatum(){
   var y=parseInt(ySel.value);
   if(m&&y){
     cd().analytics.standDatum=mNames[m-1]+' '+y;
+    // Fehlende Monate im growth-Array anlegen (letzten 6 Monate ab standDatum)
+    var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var anchorM=m-1;var anchorY=y;
+    var growthMap={};
+    (cd().analytics.growth||[]).forEach(function(e){growthMap[e.month]=e;});
+    for(var wi=5;wi>=0;wi--){
+      var wm=((anchorM-wi)%12+12)%12;
+      var wy=anchorY+Math.floor((anchorM-wi)/12);
+      var lbl=mShort[wm]+' '+String(wy).slice(2);
+      if(!growthMap[lbl]){
+        cd().analytics.growth.push({month:lbl,f:0,p:0});
+        growthMap[lbl]={month:lbl,f:0,p:0};
+      }
+    }
     buildFollowerChart();
     renderAnalyticsPage();
     scheduleSave();
