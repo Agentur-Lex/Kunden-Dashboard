@@ -283,7 +283,8 @@ textarea{resize:vertical;line-height:1.5}
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ── MOBILE ── */
-@media (max-width:480px){  .cp-counter{display:none!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}  .col-del-btn{display:none!important}  #todo-badge{display:none!important}  .kachel-status-sel{display:none!important}}
+@media (max-width:480px){  .cp-counter{display:none!important}
+  .strat-ziel-beginn{grid-template-columns:1fr!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}  .col-del-btn{display:none!important}  #todo-badge{display:none!important}  .kachel-status-sel{display:none!important}}
 @media (min-width:481px){  #todo-nav-badge{display:none!important}}
 @media (max-width:768px){
   /* ── Layout ── */
@@ -856,14 +857,14 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div class="page-title">Content-Strategie
           <button id="strat-edit-btn" class="btn-outline agency-only" onclick="toggleStratEdit()" style="margin-left:auto;font-size:11px;padding:5px 12px">✎ Bearbeiten</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start">
+        <div class="strat-ziel-beginn" style="display:grid;grid-template-columns:1fr 350px;gap:14px;align-items:start">
           <div class="card">
             <div class="card-title">Zielgruppe</div>
             <div id="strat-audience-wrap">
               <div style="font-size:11px;line-height:1.7;color:var(--text2)" id="strat-audience">–</div>
             </div>
           </div>
-          <div class="card agency-only" style="min-width:200px">
+          <div class="card agency-only">
             <div class="card-title">Beginn Zusammenarbeit</div>
             <div id="strat-beginn-wrap" style="margin-top:8px"></div>
           </div>
@@ -3507,7 +3508,7 @@ function buildFollowerChart(){
   var numRow=document.createElement('div');
   numRow.style.cssText='display:flex;align-items:baseline;gap:10px;flex-wrap:wrap';
   var numSpan=document.createElement('span');
-  numSpan.style.cssText='font-size:28px;font-weight:600;color:var(--text);line-height:1';
+  numSpan.style.cssText='font-size:28px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.02em;font-family:var(--font-sans,inherit)';
   numSpan.textContent=currentF!==null?currentF.toLocaleString('de-DE'):'–';
   numRow.appendChild(numSpan);
   if(totalGrowth!==null){
