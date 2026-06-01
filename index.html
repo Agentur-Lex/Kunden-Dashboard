@@ -284,6 +284,7 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── MOBILE ── */
 @media (max-width:480px){  .cp-counter{display:none!important}
+  #analytics-tc{grid-template-columns:1fr!important;width:100%!important}
   #f-bars{max-height:none}
   #f-sparkline{height:40px!important}
   .analytics-kpi-grid .kpi{padding:8px 6px!important}
@@ -444,8 +445,13 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── Fachbegriff-Tooltips ── */
   .term-tip{position:relative;border-bottom:1px dotted var(--text3);cursor:help;display:inline}
-  .term-tip::after{content:attr(data-tip);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:10px 14px;border-radius:10px;white-space:normal;width:260px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999999;font-weight:400;font-style:normal;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-  @media (min-width:481px){.term-tip::after{position:absolute;top:calc(100% + 8px);left:0;transform:none;width:220px}}
+  .term-tip::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:0;transform:none;background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:8px;white-space:normal;width:220px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:9999;font-weight:400;font-style:normal;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+  .term-tip:hover::after{opacity:1;z-index:9999}
+  .term-tip:hover{z-index:9999;position:relative}
+  @media (max-width:480px){.term-tip::after{display:none}}
+  .kpi,.metric-card{overflow:visible!important;position:relative;z-index:auto}
+  .kpi:hover,.metric-card:hover{z-index:100}
+  #mob-tooltip{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;color:#fff;font-size:12px;line-height:1.6;padding:12px 16px;border-radius:10px;white-space:normal;width:260px;z-index:999999;font-weight:400;box-shadow:0 8px 32px rgba(0,0,0,.4);display:none;text-align:center}
   .term-tip:hover::after{opacity:1}
   .term-tip{position:relative;overflow:visible!important;isolation:auto}
   .term-tip:hover{position:relative;z-index:999998}
@@ -1351,12 +1357,21 @@ function calcProgress(k){
   return Math.round((done/steps.length)*100);
 }
 var TERM_TIPS={'Reichweite':'Wie viele verschiedene Personen deine Posts gesehen haben.','Reichweite (30T)':'Wie viele unterschiedliche Personen deine Posts in den letzten 30 Tagen gesehen haben – unabhängig davon ob sie dir folgen.','Engagement':'Summe aller Interaktionen: Likes, Kommentare, Shares und Saves.','Engagement-Rate':'Engagement geteilt durch Reichweite – zeigt wie gut dein Content beim Publikum ankommt. Gut ab 3-5%.','Engagement (letzte 30T)':'Alle Interaktionen der letzten 30 Tage: Likes, Kommentare, Shares und Saves.','Impressionen':'Wie oft deine Posts insgesamt angezeigt wurden. Ein Nutzer kann mehrere Impressionen erzeugen.','Follower':'Gesamtzahl deiner Abonnenten auf dieser Plattform.','Follower gesamt':'Aktuelle Gesamtzahl deiner Abonnenten.','Followerentwicklung':'Wie sich deine Followerzahl über die Zeit verändert hat.','Link-Klicks (letzte 30T)':'Wie viele Personen in den letzten 30 Tagen auf einen Link in deinem Profil oder deinen Posts geklickt haben.','Link-Klicks':'Klicks auf Links in deinem Profil oder deinen Posts.','Klicks auf Website (30T)':'Wie viele Personen in den letzten 30 Tagen über Social Media auf deine Website gelangt sind.','Ø Aufrufe pro Video':'Durchschnittliche Aufrufe pro Video in den letzten 30 Tagen.','Beste Posting-Zeit':'Der Zeitraum in dem deine Zielgruppe am aktivsten ist – idealer Zeitpunkt für neue Posts.','Reichweite nach Plattform':'Wie sich deine Gesamtreichweite auf die einzelnen Plattformen verteilt.','Voraussichtl. Kundenanfragen (30T)':'Geschätzte Anzahl an Anfragen die durch deine Social-Media-Aktivität entstehen – basierend auf deiner Conversion-Rate.','Reach-Content':'Content der neue Menschen erreichen soll – oft Trends, Unterhaltung oder breite Themen.','Trust-Content':'Content der Vertrauen aufbaut und deine Expertise zeigt – Tipps, Behind-the-Scenes, Erfahrungen.','Light-Ad':'Ein bestehender organischer Post wird zusätzlich als Werbeanzeige beworben.','Hard-Ad':'Klassische Werbeanzeige die direkt auf ein Produkt oder eine Dienstleistung aufmerksam macht.','CPM':'Kosten per Mille – Kosten pro 1.000 Impressionen. Maß für die Effizienz von Werbeanzeigen.','CTR':'Click-Through-Rate – Anteil der Personen die auf deine Anzeige geklickt haben.','CPC':'Cost per Click – was ein einzelner Klick auf deine Werbeanzeige kostet.'};
+var _mobTipTimer=null;
+function showMobTip(text){
+  var el=document.getElementById('mob-tooltip');
+  if(!el)return;
+  el.textContent=text;
+  el.style.display='block';
+  clearTimeout(_mobTipTimer);
+  _mobTipTimer=setTimeout(function(){el.style.display='none';},4000);
+}
 function applyTermTips(container){
   if(!container)return;
   container.querySelectorAll('.kpi-lbl,.metric-lbl,.kachel-key,.card-title').forEach(function(el){
     var t=(el.textContent||'').trim();
     if(TERM_TIPS[t]&&!el.querySelector('.term-tip')){
-      el.innerHTML='<span class="term-tip" data-tip="'+TERM_TIPS[t]+'">'+t+'</span>';
+      el.innerHTML='<span class="term-tip" data-tip="'+TERM_TIPS[t]+'" onclick="if(window.innerWidth<=480)showMobTip(this.dataset.tip)">'+t+'</span>';
     }
   });
 }
@@ -3530,6 +3545,7 @@ function buildFollowerChart(){
 
   // ── Sparkline Card neu aufbauen ──
   var gc=document.getElementById('f-bars').parentElement;
+  gc.style.width='100%';gc.style.boxSizing='border-box';
   gc.innerHTML='';
 
   // Großzahl + Badge
@@ -4641,7 +4657,7 @@ function renderAnalyticsPage(){
   var sg=bv.growth!==false,sp2=bv.plat!==false;
   if(sg||sp2){
     var tc=document.createElement('div');
-    tc.style.cssText='display:grid;grid-template-columns:'+(sg&&sp2?'1fr 1fr':'1fr')+';gap:14px;margin-bottom:14px';
+    tc.style.cssText='display:grid;grid-template-columns:'+(sg&&sp2&&window.innerWidth>480?'1fr 1fr':'1fr')+';gap:14px;margin-bottom:14px';tc.id='analytics-tc';
     if(sg){
       var gc=document.createElement('div');gc.className='card';
       var gt=document.createElement('div');gt.className='card-title';
@@ -5482,6 +5498,7 @@ if('serviceWorker' in navigator){
   <div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,0.4);text-align:center">Nur in Safari verfügbar</div>
 </div>
 
+<div id="mob-tooltip"></div>
 <div id="install-guide-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9500;align-items:center;justify-content:center;padding:16px">
   <div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;position:relative;box-shadow:0 16px 48px rgba(0,0,0,0.2)">
     <button onclick="closeInstallGuide()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3)">✕</button>
