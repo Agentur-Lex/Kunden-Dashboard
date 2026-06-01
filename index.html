@@ -285,9 +285,12 @@ textarea{resize:vertical;line-height:1.5}
 /* ── MOBILE ── */
 @media (max-width:480px){  .cp-counter{display:none!important}
   #f-bars{max-height:none}
-  #f-sparkline{height:45px!important}
-  .analytics-kpi-grid .kpi{padding:10px 8px!important}
-  .kpi-val{font-size:18px!important}
+  #f-sparkline{height:40px!important}
+  .analytics-kpi-grid .kpi{padding:8px 6px!important}
+  .kpi-val{font-size:16px!important}
+  .chart-bars{overflow-x:auto!important}
+  #plat-bars-container{overflow-x:auto!important}
+  .plat-bar-wrap{min-width:0!important}
   .strat-ziel-beginn{grid-template-columns:1fr!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}  .col-del-btn{display:none!important}  #todo-badge{display:none!important}  .kachel-status-sel{display:none!important}}
 @media (min-width:481px){  #todo-nav-badge{display:none!important}}
 @media (max-width:768px){
@@ -439,7 +442,8 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── Fachbegriff-Tooltips ── */
   .term-tip{position:relative;border-bottom:1px dotted var(--text3);cursor:help;display:inline}
-  .term-tip::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:8px;white-space:normal;width:220px;min-width:180px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:99999;font-weight:400;font-style:normal;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+  .term-tip::after{content:attr(data-tip);position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:10px 14px;border-radius:10px;white-space:normal;width:260px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999999;font-weight:400;font-style:normal;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+  @media (min-width:481px){.term-tip::after{position:absolute;top:calc(100% + 8px);left:0;transform:none;width:220px}}
   .term-tip:hover::after{opacity:1}
   .term-tip{position:relative;overflow:visible!important}
 /* ── Onboarding Fortschrittsbalken Animation ── */
@@ -3527,7 +3531,7 @@ function buildFollowerChart(){
 
   // Großzahl + Badge
   var topRow=document.createElement('div');
-  topRow.style.cssText='margin-bottom:10px';
+  topRow.style.cssText='margin-bottom:8px';
   var bigNum=document.createElement('div');
   bigNum.style.cssText='font-size:11px;color:var(--text2);margin-bottom:2px';
   bigNum.textContent='Follower';
