@@ -284,6 +284,10 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── MOBILE ── */
 @media (max-width:480px){  .cp-counter{display:none!important}
+  #f-bars{max-height:none}
+  #f-sparkline{height:45px!important}
+  .analytics-kpi-grid .kpi{padding:10px 8px!important}
+  .kpi-val{font-size:18px!important}
   .strat-ziel-beginn{grid-template-columns:1fr!important}  .upc-time{display:none!important}  .upc-anzahl{font-size:9px!important;padding:1px 5px!important}  .col-del-btn{display:none!important}  #todo-badge{display:none!important}  .kachel-status-sel{display:none!important}}
 @media (min-width:481px){  #todo-nav-badge{display:none!important}}
 @media (max-width:768px){
@@ -435,7 +439,7 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── Fachbegriff-Tooltips ── */
   .term-tip{position:relative;border-bottom:1px dotted var(--text3);cursor:help;display:inline}
-  .term-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:8px;white-space:normal;width:220px;min-width:180px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:99999;font-weight:400;font-style:normal;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+  .term-tip::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:8px;white-space:normal;width:220px;min-width:180px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:99999;font-weight:400;font-style:normal;box-shadow:0 4px 20px rgba(0,0,0,.3)}
   .term-tip:hover::after{opacity:1}
   .term-tip{position:relative;overflow:visible!important}
 /* ── Onboarding Fortschrittsbalken Animation ── */
@@ -3523,14 +3527,14 @@ function buildFollowerChart(){
 
   // Großzahl + Badge
   var topRow=document.createElement('div');
-  topRow.style.cssText='margin-bottom:14px';
+  topRow.style.cssText='margin-bottom:10px';
   var bigNum=document.createElement('div');
   bigNum.style.cssText='font-size:11px;color:var(--text2);margin-bottom:2px';
   bigNum.textContent='Follower';
   var numRow=document.createElement('div');
   numRow.style.cssText='display:flex;align-items:baseline;gap:10px;flex-wrap:wrap';
   var numSpan=document.createElement('span');
-  numSpan.style.cssText='font-size:28px;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.02em;font-family:var(--font-sans,inherit)';
+  numSpan.style.cssText='font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);line-height:1;letter-spacing:-.02em;font-family:var(--font-sans,inherit)';
   numSpan.textContent=currentF!==null?currentF.toLocaleString('de-DE'):'–';
   numRow.appendChild(numSpan);
   if(totalGrowth!==null){
