@@ -433,6 +433,13 @@ textarea{resize:vertical;line-height:1.5}
   #bulk-bar button:hover{background:rgba(255,255,255,0.35)}
   .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
 
+/* ── Fachbegriff-Tooltips ── */
+  .term-tip{position:relative;border-bottom:1px dotted var(--text3);cursor:help;display:inline}
+  .term-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:10px;line-height:1.5;padding:6px 10px;border-radius:6px;white-space:normal;width:200px;max-width:220px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:9999;font-weight:400;font-style:normal;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+  .term-tip:hover::after{opacity:1}
+/* ── Onboarding Fortschrittsbalken Animation ── */
+  @keyframes prog-grow {from{width:0%} to{width:var(--prog-target)}}
+  .prog-fill{transition:width .8s cubic-bezier(.4,0,.2,1)!important}
 /* ── Tour ── */
   #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:all}
   #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease;cursor:default}
@@ -1331,6 +1338,16 @@ function calcProgress(k){
   var done=steps.filter(function(s){return s.done;}).length;
   return Math.round((done/steps.length)*100);
 }
+var TERM_TIPS={'Reichweite':'Wie viele verschiedene Personen deine Posts gesehen haben.','Reichweite (30T)':'Wie viele verschiedene Personen deine Posts in den letzten 30 Tagen gesehen haben.','Engagement':'Likes, Kommentare, Shares und Saves zusammen.','Engagement-Rate':'Engagement geteilt durch Reichweite zeigt wie gut dein Content ankommt.','Impressionen':'Wie oft deine Posts insgesamt angezeigt wurden.','Follower':'Gesamtzahl deiner Abonnenten.','Reach-Content':'Content der neue Menschen erreichen soll.','Trust-Content':'Content der Vertrauen aufbaut – Tipps, Expertise, Behind-the-Scenes.','Light-Ad':'Ein bestehender Post wird als Werbeanzeige beworben.','Hard-Ad':'Klassische Werbeanzeige für Produkt oder Dienstleistung.','CPM':'Kosten pro 1.000 Impressionen.','CTR':'Wie viele Personen auf die Werbeanzeige geklickt haben.'};
+function applyTermTips(container){
+  if(!container)return;
+  container.querySelectorAll('.kpi-lbl,.metric-lbl,.kachel-key,.card-title').forEach(function(el){
+    var t=(el.textContent||'').trim();
+    if(TERM_TIPS[t]&&!el.querySelector('.term-tip')){
+      el.innerHTML='<span class="term-tip" data-tip="'+TERM_TIPS[t]+'">'+t+'</span>';
+    }
+  });
+}
 function syncLinkedInQuestion(){
   if(!ACTIVE_CUSTOMER)return;
   var d=cd();
@@ -1805,7 +1822,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
