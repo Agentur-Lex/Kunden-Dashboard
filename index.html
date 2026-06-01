@@ -54,7 +54,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden}
 .card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .analytics-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .2s,transform .2s;cursor:default;position:relative;overflow:hidden}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .2s,transform .2s;cursor:default;position:relative;overflow:hidden;overflow:visible}
 .analytics-kpi-grid .metric-card{padding:12px 14px}
 .metric-card:hover{border-color:var(--border2);transform:translateY(-1px)}
 .metric-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:12px}
@@ -435,8 +435,9 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── Fachbegriff-Tooltips ── */
   .term-tip{position:relative;border-bottom:1px dotted var(--text3);cursor:help;display:inline}
-  .term-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:10px;line-height:1.5;padding:6px 10px;border-radius:6px;white-space:normal;width:200px;max-width:220px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:9999;font-weight:400;font-style:normal;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+  .term-tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:8px;white-space:normal;width:220px;min-width:180px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:99999;font-weight:400;font-style:normal;box-shadow:0 4px 20px rgba(0,0,0,.3)}
   .term-tip:hover::after{opacity:1}
+  .term-tip{position:relative;overflow:visible!important}
 /* ── Onboarding Fortschrittsbalken Animation ── */
   @keyframes prog-grow {from{width:0%} to{width:var(--prog-target)}}
   .prog-fill{transition:width .8s cubic-bezier(.4,0,.2,1)!important}
@@ -1098,7 +1099,7 @@ function exportMonthlyReport(){
     '    h2{font-size:12px;font-weight:700;color:#8A8FA8;text-transform:uppercase;letter-spacing:.08em;margin:24px 0 10px}',
     '    .card{background:#fff;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}',
     '    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}',
-    '    .kpi{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}',
+    '    .kpi{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:visible}',
     '    .kpi-lbl{font-size:9px;font-weight:600;color:#8A8FA8;text-transform:uppercase;letter-spacing:.07em}',
     '    .kpi-val{font-size:24px;font-weight:800;color:#1A1D2E;margin:4px 0 2px;letter-spacing:-.02em}',
     '    .kpi-d{font-size:10px;font-weight:600;color:#34D399}',
@@ -1338,7 +1339,7 @@ function calcProgress(k){
   var done=steps.filter(function(s){return s.done;}).length;
   return Math.round((done/steps.length)*100);
 }
-var TERM_TIPS={'Reichweite':'Wie viele verschiedene Personen deine Posts gesehen haben.','Reichweite (30T)':'Wie viele verschiedene Personen deine Posts in den letzten 30 Tagen gesehen haben.','Engagement':'Likes, Kommentare, Shares und Saves zusammen.','Engagement-Rate':'Engagement geteilt durch Reichweite zeigt wie gut dein Content ankommt.','Impressionen':'Wie oft deine Posts insgesamt angezeigt wurden.','Follower':'Gesamtzahl deiner Abonnenten.','Reach-Content':'Content der neue Menschen erreichen soll.','Trust-Content':'Content der Vertrauen aufbaut – Tipps, Expertise, Behind-the-Scenes.','Light-Ad':'Ein bestehender Post wird als Werbeanzeige beworben.','Hard-Ad':'Klassische Werbeanzeige für Produkt oder Dienstleistung.','CPM':'Kosten pro 1.000 Impressionen.','CTR':'Wie viele Personen auf die Werbeanzeige geklickt haben.'};
+var TERM_TIPS={'Reichweite':'Wie viele verschiedene Personen deine Posts gesehen haben.','Reichweite (30T)':'Wie viele unterschiedliche Personen deine Posts in den letzten 30 Tagen gesehen haben – unabhängig davon ob sie dir folgen.','Engagement':'Summe aller Interaktionen: Likes, Kommentare, Shares und Saves.','Engagement-Rate':'Engagement geteilt durch Reichweite – zeigt wie gut dein Content beim Publikum ankommt. Gut ab 3-5%.','Engagement (letzte 30T)':'Alle Interaktionen der letzten 30 Tage: Likes, Kommentare, Shares und Saves.','Impressionen':'Wie oft deine Posts insgesamt angezeigt wurden. Ein Nutzer kann mehrere Impressionen erzeugen.','Follower':'Gesamtzahl deiner Abonnenten auf dieser Plattform.','Follower gesamt':'Aktuelle Gesamtzahl deiner Abonnenten.','Followerentwicklung':'Wie sich deine Followerzahl über die Zeit verändert hat.','Link-Klicks (letzte 30T)':'Wie viele Personen in den letzten 30 Tagen auf einen Link in deinem Profil oder deinen Posts geklickt haben.','Link-Klicks':'Klicks auf Links in deinem Profil oder deinen Posts.','Klicks auf Website (30T)':'Wie viele Personen in den letzten 30 Tagen über Social Media auf deine Website gelangt sind.','Ø Aufrufe pro Video':'Durchschnittliche Aufrufe pro Video in den letzten 30 Tagen.','Beste Posting-Zeit':'Der Zeitraum in dem deine Zielgruppe am aktivsten ist – idealer Zeitpunkt für neue Posts.','Reichweite nach Plattform':'Wie sich deine Gesamtreichweite auf die einzelnen Plattformen verteilt.','Voraussichtl. Kundenanfragen (30T)':'Geschätzte Anzahl an Anfragen die durch deine Social-Media-Aktivität entstehen – basierend auf deiner Conversion-Rate.','Reach-Content':'Content der neue Menschen erreichen soll – oft Trends, Unterhaltung oder breite Themen.','Trust-Content':'Content der Vertrauen aufbaut und deine Expertise zeigt – Tipps, Behind-the-Scenes, Erfahrungen.','Light-Ad':'Ein bestehender organischer Post wird zusätzlich als Werbeanzeige beworben.','Hard-Ad':'Klassische Werbeanzeige die direkt auf ein Produkt oder eine Dienstleistung aufmerksam macht.','CPM':'Kosten per Mille – Kosten pro 1.000 Impressionen. Maß für die Effizienz von Werbeanzeigen.','CTR':'Click-Through-Rate – Anteil der Personen die auf deine Anzeige geklickt haben.','CPC':'Cost per Click – was ein einzelner Klick auf deine Werbeanzeige kostet.'};
 function applyTermTips(container){
   if(!container)return;
   container.querySelectorAll('.kpi-lbl,.metric-lbl,.kachel-key,.card-title').forEach(function(el){
