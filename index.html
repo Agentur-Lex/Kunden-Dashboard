@@ -3494,9 +3494,10 @@ function buildFollowerChart(){
   var growthMap={};(an.growth||[]).forEach(function(e){growthMap[e.month]=e;});
   var curEntry=growthMap[currentMonLbl]||{month:currentMonLbl,f:0,p:0};
   if(!growthMap[currentMonLbl]){an.growth.push(curEntry);growthMap[currentMonLbl]=curEntry;}
-  // KPI-Box neu aufbauen
+  // KPI-Box neu aufbauen – gleicher Stil wie andere KPIs
   var gc=document.getElementById('f-bars').parentElement;
-  gc.style.cssText='width:100%;box-sizing:border-box;min-width:0;max-width:100%';
+  gc.className='kpi';
+  gc.style.cssText='';
   gc.innerHTML='';
   var lbl=document.createElement('div');lbl.className='kpi-lbl';lbl.textContent='Followerentwicklung (letzte 30T)';gc.appendChild(lbl);
   var val=document.createElement('div');val.className='kpi-val';
