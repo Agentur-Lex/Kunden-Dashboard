@@ -1387,6 +1387,9 @@ function updateOnboardingBars(){
   if(!ACTIVE_CUSTOMER)return;
   var wasComplete=cd()._obWasComplete||false;
   var pct=calcProgress(ACTIVE_CUSTOMER);
+  // Onboarding-Reiter bei 100% für Kunden ausblenden
+  var navOb=document.getElementById('nav-onboarding');
+  if(navOb&&ROLE==='client'){navOb.parentElement.style.display=pct<100?'':'none';}
   // Inline OB Block: nur für Kunden, nur wenn nicht abgeschlossen
   var inlineBlock=document.getElementById('ov-ob-inline');
   if(inlineBlock&&ROLE==='client'){inlineBlock.style.display=pct<100?'block':'none';}
@@ -1440,7 +1443,7 @@ async function doLogin(){
   }catch(e){hideLoading();console.error('LOGIN ERROR:',e);err.textContent='Fehler: '+e.message;err.style.display='block';}
 }
 
-async function doLogout(){var sb=getSB();await sb.auth.signOut();SESSION={type:null,key:null};ROLE='agency';ACTIVE_CUSTOMER='';DATA={};CREDS={};showScreen('screen-login');}
+async function doLogout(){var sb=getSB();await sb.auth.signOut();SESSION={type:null,key:null};ROLE='agency';var _ns=document.getElementById('nav-strategy');if(_ns)_ns.style.display='';ACTIVE_CUSTOMER='';DATA={};CREDS={};showScreen('screen-login');}
 
 async function doForgot(){
   var u=(document.getElementById('forgot-user')||{}).value.trim();
@@ -1840,7 +1843,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var navStrat=document.getElementById('nav-strategy');if(navStrat)navStrat.style.display=ROLE==='client'?'none':'';var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',an.fdelta],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',an.rdelta],['ov-eng',an.eng],['ov-edelta',an.edelt],['ov-posts',an.posts],['ov-pdelta',an.pdelta]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
@@ -3473,235 +3476,51 @@ function formatFollowers(n){
 function buildFollowerChart(){
   if(!ACTIVE_CUSTOMER)return;
   var an=cd().analytics;
-  var bars=document.getElementById('f-bars');
-  var fl=document.getElementById('f-lbls');
-  var editContainer=document.getElementById('growth-edit-table');
-  if(!bars||!fl||!editContainer)return;
   var isEdit=ANALYTICS_EDIT_MODE&&ROLE==='agency';
   var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   var mLong=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-
-  // standDatum → Ankerpunkt
-  var sd=an.standDatum||'';
-  var anchorM,anchorY;
-  if(sd){
-    var sdParts=sd.split(' ');
-    var mi=mLong.indexOf(sdParts[0]);if(mi===-1)mi=mShort.indexOf(sdParts[0]);
-    anchorM=mi>=0?mi:new Date().getMonth();
-    var y2=parseInt(sdParts[1]);anchorY=y2>2000?y2:(y2>0?2000+y2:new Date().getFullYear());
-  }else{anchorM=new Date().getMonth();anchorY=new Date().getFullYear();}
-
-  // 6-Monats-Fenster
-  var window6=[];
-  for(var wi=5;wi>=0;wi--){
-    var wm=((anchorM-wi)%12+12)%12;
-    var wy=anchorY+Math.floor((anchorM-wi)/12);
-    window6.push(mShort[wm]+' '+String(wy).slice(2));
-  }
-
-  // growth-Map
-  var growthMap={};
-  (an.growth||[]).forEach(function(e){growthMap[e.month]=e;});
-
-  // Absolute Follower berechnen: Startwert + kumulative Zuwächse
-  // Beginn Zusammenarbeit aus Strategie als Quelle
+  // Startmonat aus Strategie
   var stratBeginn=cd().strategy&&cd().strategy.beginnZusammenarbeit||'';
   if(stratBeginn&&!an.createdMonth)an.createdMonth=stratBeginn;
-  if(!an.createdMonth)an.createdMonth=''; // leer für bestehende Kunden
+  if(!an.createdMonth)an.createdMonth='';
   if(!an.startMonth&&an.createdMonth)an.startMonth=an.createdMonth;
-  var startF=parseInt(an.startFollowers)||0;
-  var startMon=an.startMonth;
-  // Finde Index des Startmonats im 6-Fenster
-  var startIdx=window6.indexOf(startMon);
-  if(startIdx===-1)startIdx=0;
-
-  var absolutes=[];
-  for(var i=0;i<6;i++){
-    var lbl=window6[i];
-    var entry=growthMap[lbl]||{month:lbl,f:0,p:0};
-    if(i<startIdx){
-      // Vor Startmonat: kein Wert
-      absolutes.push(null);
-    } else if(i===startIdx){
-      absolutes.push(startF);
-    } else {
-      var prev=absolutes[i-1]||startF;
-      absolutes.push(prev+(parseInt(entry.f)||0));
-    }
-  }
-
-  var currentF=null;
-  for(var j=absolutes.length-1;j>=0;j--){if(absolutes[j]!==null){currentF=absolutes[j];break;}}
-  var totalGrowth=currentF!==null&&startF>0?currentF-startF:null;
-
-  // ── Sparkline Card neu aufbauen ──
+  // Stand
+  var sd=an.standDatum||'';
+  var anchorM,anchorY;
+  if(sd){var sdP=sd.split(' ');var mi=mLong.indexOf(sdP[0]);if(mi===-1)mi=mShort.indexOf(sdP[0]);anchorM=mi>=0?mi:new Date().getMonth();var y2=parseInt(sdP[1]);anchorY=y2>2000?y2:(y2>0?2000+y2:new Date().getFullYear());}
+  else{anchorM=new Date().getMonth();anchorY=new Date().getFullYear();}
+  var currentMonLbl=mShort[anchorM]+' '+String(anchorY).slice(2);
+  // Aktueller Zuwachs
+  var growthMap={};(an.growth||[]).forEach(function(e){growthMap[e.month]=e;});
+  var curEntry=growthMap[currentMonLbl]||{month:currentMonLbl,f:0,p:0};
+  if(!growthMap[currentMonLbl]){an.growth.push(curEntry);growthMap[currentMonLbl]=curEntry;}
+  // KPI-Box neu aufbauen
   var gc=document.getElementById('f-bars').parentElement;
   gc.style.cssText='width:100%;box-sizing:border-box;min-width:0;max-width:100%';
   gc.innerHTML='';
-
-  // Großzahl + Badge
-  var topRow=document.createElement('div');
-  topRow.style.cssText='margin-bottom:8px';
-  var bigNum=document.createElement('div');
-  bigNum.style.cssText='font-size:11px;color:var(--text2);margin-bottom:2px';
-  bigNum.textContent='Follower';
-  var numRow=document.createElement('div');
-  numRow.style.cssText='display:flex;align-items:baseline;gap:10px;flex-wrap:wrap';
-  var numSpan=document.createElement('span');
-  numSpan.style.cssText='font-size:clamp(20px,5vw,28px);font-weight:800;color:var(--text);line-height:1;letter-spacing:-.02em;font-family:var(--font-sans,inherit)';
-  numSpan.textContent=currentF!==null?currentF.toLocaleString('de-DE'):'–';
-  numRow.appendChild(numSpan);
-  if(totalGrowth!==null){
-    var badge=document.createElement('span');
-    var pos=totalGrowth>=0;
-    badge.style.cssText='font-size:12px;font-weight:600;color:'+(pos?'#0F6E56':'#993C1D')+';background:'+(pos?'#E1F5EE':'#FAECE7')+';padding:2px 10px;border-radius:20px';
-    badge.textContent=(pos?'+':'')+totalGrowth.toLocaleString('de-DE')+' seit '+startMon;
-    numRow.appendChild(badge);
-  }
-  topRow.appendChild(bigNum);topRow.appendChild(numRow);
-  gc.appendChild(topRow);
-
-  // Sparkline Canvas
-  var canvasWrap=document.createElement('div');
-  canvasWrap.style.cssText='position:relative;height:60px;width:100%;max-width:100%';
-  var canvas=document.createElement('canvas');
-  canvas.id='f-sparkline';
-  canvas.setAttribute('role','img');
-  canvas.setAttribute('aria-label','Follower-Verlauf der letzten 6 Monate');
-  canvasWrap.appendChild(canvas);gc.appendChild(canvasWrap);
-
-  // Monatslabels
-  var lblRow=document.createElement('div');
-  lblRow.style.cssText='display:flex;justify-content:space-between;margin-top:6px';
-  window6.forEach(function(m,i){
-    var l=document.createElement('span');
-    l.style.cssText='font-size:10px;color:var(--text3)';
-    l.textContent=m.split(' ')[0];
-    lblRow.appendChild(l);
-  });
-  gc.appendChild(lblRow);
-
-  // Chart.js Sparkline
-  if(window._sparkChart)window._sparkChart.destroy();
-  var validData=absolutes.map(function(v){return v!==null?v:NaN;});
-  var minVal=Math.min.apply(null,absolutes.filter(function(v){return v!==null;}))||0;
-  window._sparkChart=new Chart(canvas,{
-    type:'line',
-    data:{
-      labels:window6,
-      datasets:[{
-        data:validData,
-        borderColor:'#1D9E75',
-        borderWidth:2,
-        pointRadius:3,
-        pointBackgroundColor:'#1D9E75',
-        pointBorderColor:'#1D9E75',
-        fill:true,
-        backgroundColor:'rgba(29,158,117,0.08)',
-        tension:0.3,
-        spanGaps:false
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.y?ctx.parsed.y.toLocaleString('de-DE')+' Follower':'';}}}},
-      scales:{
-        x:{display:false},
-        y:{display:false,min:Math.max(0,minVal-Math.round(minVal*0.05))}
-      }
-    }
-  });
-
-  // ── Bearbeitungsmodus ──
-  var ge=document.createElement('div');
-  ge.id='growth-edit-table';
-  ge.style.display=isEdit?'block':'none';
-  gc.appendChild(ge);
-  if(!isEdit)return;
-
-  ge.innerHTML='';
-  var sep=document.createElement('div');sep.style.cssText='border-top:1px solid var(--border);margin:14px 0';ge.appendChild(sep);
-
-  // Startmonat – aus Strategie (unbearbeitbar)
-  var startSection=document.createElement('div');
-  startSection.style.cssText='display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap';
-  var startLbl=document.createElement('label');startLbl.textContent='Startmonat:';startLbl.style.cssText='font-size:11px;color:var(--text2);min-width:90px';
-  var mNamesS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  var mShortS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-  var stratBZ=cd().strategy&&cd().strategy.beginnZusammenarbeit||'';
-  var smDisp=document.createElement('span');
-  if(stratBZ){
-    // Anzeige: Monat ausgeschrieben
-    var smP=stratBZ.split(' ');
-    var smI=mShortS.indexOf(smP[0]);
-    var smYY=smP[1]?parseInt('20'+smP[1]):new Date().getFullYear();
-    smDisp.textContent=(smI>=0?mNamesS[smI]:smP[0])+' '+smYY;
-    smDisp.style.cssText='font-size:11px;font-weight:600;color:var(--text)';
-    // Startmonat automatisch setzen
-    if(an.startMonth!==stratBZ){an.startMonth=stratBZ;}
-  } else {
-    smDisp.textContent='Bitte Beginn Zusammenarbeit in Strategie eintragen';
-    smDisp.style.cssText='font-size:11px;color:var(--text3);font-style:italic';
-  }
-  var smErr=document.createElement('div');smErr.style.cssText='display:none';
-
-  var sfLbl=document.createElement('label');sfLbl.textContent='Follower:';sfLbl.style.cssText='font-size:11px;color:var(--text2);margin-left:8px';
-  var sfInp=document.createElement('input');
-  sfInp.type='text';sfInp.value=startF||'';sfInp.placeholder='z.B. 11600';
-  sfInp.style.cssText='width:90px;font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
-  sfInp.addEventListener('change',function(){an.startFollowers=parseInt(this.value.replace(/[^0-9]/g,''))||0;scheduleSave();buildFollowerChart();});
-
-  startSection.appendChild(startLbl);startSection.appendChild(smDisp);startSection.appendChild(sfLbl);startSection.appendChild(sfInp);
-  ge.appendChild(startSection);
-  if(smErr)ge.appendChild(smErr);
-
-  // Zuwachs-Tabelle (nur ab Monat nach Startmonat)
-  var table=document.createElement('table');
-  table.style.cssText='width:100%;border-collapse:collapse;font-size:10px;margin-top:4px';
-  var thead=document.createElement('thead');
-  var hr=document.createElement('tr');
-  ['Monat','Zuwachs','Gesamt','Δ %'].forEach(function(hdr){
-    var th=document.createElement('th');th.textContent=hdr;
-    th.style.cssText='text-align:left;padding:4px 6px;color:var(--text3);font-size:9px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border)';
-    hr.appendChild(th);
-  });
-  thead.appendChild(hr);table.appendChild(thead);
-  var tbody=document.createElement('tbody');
-
-  window6.forEach(function(lbl,i){
-    if(i<=startIdx)return; // Nur Monate nach Start
-    var entry=growthMap[lbl]||{month:lbl,f:0,p:0};
-    if(!growthMap[lbl]){an.growth.push(entry);growthMap[lbl]=entry;}
-    var tr=document.createElement('tr');
-    tr.style.borderBottom='1px solid var(--border)';
-    var tdM=document.createElement('td');tdM.style.cssText='padding:5px 6px;color:var(--text2);font-weight:600';tdM.textContent=lbl;tr.appendChild(tdM);
-    var tdZ=document.createElement('td');tdZ.style.padding='3px 6px';
-    var inpZ=document.createElement('input');
-    inpZ.type='text';inpZ.value=entry.f||'';inpZ.placeholder='+0';
-    inpZ.style.cssText='width:70px;padding:3px 6px;font-size:11px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text)';
-    (function(ent,lbl2){inpZ.addEventListener('change',function(){
-      var val=parseInt(this.value.replace(/[^0-9\-]/g,''))||0;
-      ent.f=val;
-      var existing=an.growth.filter(function(e){return e.month===lbl2;})[0];
-      if(existing)existing.f=val;else an.growth.push({month:lbl2,f:val,p:0});
+  var lbl=document.createElement('div');lbl.className='kpi-lbl';lbl.textContent='Followerentwicklung (letzte 30T)';gc.appendChild(lbl);
+  var val=document.createElement('div');val.className='kpi-val';
+  if(isEdit){
+    var wrap=document.createElement('div');wrap.style.cssText='display:flex;align-items:center;gap:4px;margin-top:6px';
+    var plus=document.createElement('span');plus.textContent='+';plus.style.cssText='font-size:16px;font-weight:700;color:var(--text)';
+    var inp=document.createElement('input');inp.type='text';inp.value=curEntry.f||'';inp.placeholder='0';
+    inp.style.cssText='width:80px;padding:4px 8px;border:1px solid var(--border2);border-radius:6px;font-size:14px;font-weight:600;background:var(--surface2);color:var(--text);font-family:inherit';
+    inp.addEventListener('change',function(){
+      var v=parseInt(this.value.replace(/[^0-9]/g,''))||0;
+      curEntry.f=v;
+      var ex=an.growth.filter(function(e){return e.month===currentMonLbl;})[0];
+      if(ex)ex.f=v;else an.growth.push({month:currentMonLbl,f:v,p:0});
       scheduleSave();buildFollowerChart();
-    });})(entry,lbl);
-    tdZ.appendChild(inpZ);tr.appendChild(tdZ);
-    // Gesamt
-    var tdG=document.createElement('td');tdG.style.cssText='padding:5px 6px;font-size:11px;color:var(--text)';
-    tdG.textContent=absolutes[i]!==null?absolutes[i].toLocaleString('de-DE'):'–';tr.appendChild(tdG);
-    // Delta %
-    var tdP=document.createElement('td');tdP.style.cssText='padding:5px 6px;font-size:11px';
-    var prevAbs=i>0?absolutes[i-1]:null;
-    if(prevAbs&&prevAbs>0&&absolutes[i]!==null){
-      var pct3=Math.round(((absolutes[i]-prevAbs)/prevAbs)*100);
-      tdP.textContent=(pct3>=0?'+':'')+pct3+'%';
-      tdP.style.color=pct3>=0?'var(--green)':'#e53e3e';
-    }else{tdP.textContent='–';tdP.style.color='var(--text3)';}
-    tr.appendChild(tdP);
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);ge.appendChild(table);
+    });
+    wrap.appendChild(plus);wrap.appendChild(inp);gc.appendChild(wrap);
+  } else {
+    var delta=parseInt(curEntry.f)||0;
+    val.textContent=(delta>=0?'+':'')+delta.toLocaleString('de-DE');
+    val.style.color=delta>0?'var(--green)':delta<0?'#e53e3e':'var(--text)';
+    gc.appendChild(val);
+  }
+  // Bearbeitungs-Container (für Kompatibilität)
+  var ge=document.createElement('div');ge.id='growth-edit-table';ge.style.display='none';gc.appendChild(ge);
 }
 
 // ── SYNC STRATEGY PLATFORMS → ANALYTICS BARS ──
@@ -4833,6 +4652,27 @@ function renderAnalyticsPage(){
   container.appendChild(bcCard);
 
   setTimeout(function(){buildFollowerChart();renderPlatBars();},0);
+  // Strategie-Card für Kunden am Ende
+  if(ROLE==='client'){
+    var existStrat=document.getElementById('client-strat-card');
+    if(existStrat)existStrat.remove();
+    var sc=document.createElement('div');sc.className='card';sc.id='client-strat-card';sc.style.marginTop='14px';
+    var sh=document.createElement('div');sh.style.cssText='display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+    sh.onclick=function(){var body=document.getElementById('client-strat-body');var icon=document.getElementById('client-strat-icon');var open=body.style.display!=='none';body.style.display=open?'none':'block';icon.style.transform=open?'':'rotate(90deg)';};
+    var stitle=document.createElement('div');stitle.className='card-title';stitle.textContent='Strategie';stitle.style.margin='0';
+    var sicon=document.createElement('div');sicon.id='client-strat-icon';sicon.style.cssText='transition:transform .25s;flex-shrink:0';
+    sicon.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5L6.5 5 3 8.5"/></svg>';
+    sh.appendChild(stitle);sh.appendChild(sicon);sc.appendChild(sh);
+    var sbody=document.createElement('div');sbody.id='client-strat-body';sbody.style.cssText='display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px';
+    var s=cd().strategy||{};
+    function sRow(label,val){var r=document.createElement('div');r.style.marginBottom='12px';var l=document.createElement('div');l.style.cssText='font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px';l.textContent=label;var v=document.createElement('div');v.style.cssText='font-size:12px;color:var(--text2);line-height:1.6';v.innerHTML=val||'–';r.appendChild(l);r.appendChild(v);return r;}
+    sbody.appendChild(sRow('Zielgruppe',escHtml(s.audience||'')));
+    if(s.plat&&s.plat.length)sbody.appendChild(sRow('Plattformen',s.plat.join(', ')));
+    if(s.saeuleData&&s.saeuleData.length)sbody.appendChild(sRow('Content-Säulen',s.saeuleData.map(function(x){return escHtml(x.label)+' '+x.pct+'%';}).join(' · ')));
+    if(s.spezOptions&&s.spezOptions.length)sbody.appendChild(sRow('Content-Spezifikation',s.spezOptions.map(function(x){return escHtml(x);}).join(', ')));
+    if(s.freq&&s.freq.length)sbody.appendChild(sRow('Frequenz',s.freq.map(function(x){return escHtml(x);}).join(', ')));
+    sc.appendChild(sbody);container.appendChild(sc);
+  }
 }
 
 // ── LEGAL ──
