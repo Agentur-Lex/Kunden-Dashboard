@@ -284,6 +284,12 @@ textarea{resize:vertical;line-height:1.5}
 
 /* ── MOBILE ── */
 @media (max-width:480px){  .cp-counter{display:none!important}
+  /* Content-Modal: Vorschau unter Felder */
+  .modal-split{flex-direction:column!important;max-height:95vh!important;overflow-y:auto!important}
+  .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border)}
+  .modal-right{background:#111!important;min-height:200px}
+  /* Shoot-Detail-Modal: Buttons unten fixiert */
+  .shoot-modal-foot{position:sticky!important;bottom:0!important;background:var(--surface)!important;z-index:10!important}
   #analytics-tc{grid-template-columns:1fr!important;width:100%!important;max-width:100%!important}
   #f-bars{max-height:none}
   #f-sparkline{height:40px!important}
@@ -1010,7 +1016,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           </div>
         </div>
       </div>
-    <div class="modal-foot" style="padding:8px 16px;border-top:1px solid var(--border);flex-shrink:0"><button class="btn-outline" style="font-size:10px;padding:4px 12px" onclick="saveShootDetail()">Speichern</button><button class="btn-outline" style="font-size:10px;padding:4px 12px" onclick="closeModal('shoot-detail-modal')">Schließen</button></div>
+    <div class="modal-foot shoot-modal-foot" style="padding:8px 16px;border-top:1px solid var(--border);flex-shrink:0"><button class="btn-outline" style="font-size:10px;padding:4px 12px" onclick="saveShootDetail()">Speichern</button><button class="btn-outline" style="font-size:10px;padding:4px 12px" onclick="closeModal('shoot-detail-modal')">Schließen</button></div>
   </div>
 </div>
 
