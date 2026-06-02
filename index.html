@@ -4312,7 +4312,7 @@ function renderAnalyticsPage(){
       lbl.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:11px;color:var(--text)';
       var cb=document.createElement('input');cb.type='checkbox';cb.checked=bv[key]!==false;
       cb.style.cssText='accent-color:var(--accent);width:14px;height:14px';
-      (function(k){cb.addEventListener('change',function(){var bv2=getBlockVis();bv2[k]=this.checked;renderAnalyticsPage();});})(key);
+      (function(k){cb.addEventListener('change',function(){var bv2=getBlockVis();bv2[k]=this.checked;scheduleSave();renderAnalyticsPage();});})(key);
       lbl.appendChild(cb);lbl.appendChild(document.createTextNode(blockLabels[key]));
       cr.appendChild(lbl);
     });
