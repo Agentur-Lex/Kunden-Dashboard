@@ -1222,9 +1222,8 @@ function exportMonthlyReport(){
   }
 
   // Content-Psychologie
-  if(bv.contentPsych!==false){
-    var cp=an.contentPsych||{};
-    if(cp.avgViews||cp.topTime){
+    if(bv.contentPsych!==false||isAgency){
+    var cp=an.contentPsych||{};   if(cp.avgViews||cp.topTime){
       body += '<h2>Content-Psychologie</h2><div class="card"><div class="cp-grid">';
       if(cp.avgViews) body+='<div class="kpi"><div class="kpi-lbl">Ø Aufrufe pro Video</div><div class="kpi-val" style="font-size:18px">'+escHtml(String(cp.avgViews))+'</div></div>';
       if(cp.topTime)  body+='<div class="kpi"><div class="kpi-lbl">Beste Posting-Zeit</div><div class="kpi-val" style="font-size:18px">'+escHtml(cp.topTime)+'</div></div>';
@@ -1291,7 +1290,7 @@ var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'},{id:'facebook',label:'Facebook',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>'},{id:'linkedin',label:'LinkedIn',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>'},{id:'tiktok',label:'TikTok',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
-function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],startFollowers:0,startMonth:'',createdMonth:'',plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:['Instagram','Facebook'],freq:[],beginnZusammenarbeit:'',saeuleData:[{label:'Value',pct:40,color:'var(--accent)'},{label:'Werbend',pct:25,color:'var(--green)'},{label:'Persönlich',pct:20,color:'#E1306C'},{label:'Awareness',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
+function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],startFollowers:0,startMonth:'',createdMonth:'',plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,bestContent:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:['Instagram','Facebook'],freq:[],beginnZusammenarbeit:'',saeuleData:[{label:'Value',pct:40,color:'var(--accent)'},{label:'Werbend',pct:25,color:'var(--green)'},{label:'Persönlich',pct:20,color:'#E1306C'},{label:'Awareness',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
 var DEFAULT_QUESTIONS=['Name eurer Brandingschriftart(-en)','HEX-Code eurer Brandingfarben','Wie soll eure Wirkung nach außen sein? (z.B. humorvoll)','Gibt es saisonale Angebote/Besonderheiten?','LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)','Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)'];var DATA = {};
 // ── HELPERS ──
 function cd(){return DATA[ACTIVE_CUSTOMER];}
@@ -4059,7 +4058,7 @@ function renderBrainstormHistory() {
 var AN_BLOCK_LABELS = {kpis:'KPI-Übersicht', growth:'Follower-Wachstum', plat:'Reichweite nach Plattform', linkClicks:'Link-Klicks', contentPsych:'Content-Psychologie'};
 function getBlockVis() {
   var d=cd();
-  var def={kpis:true,kpi_lc:true,kpi_anfragen:true,kpi_eng:true,kpi_reach:true,kpi_er:true,growth:true,plat:true,linkClicks:true,contentPsych:true};
+  var def={kpis:true,kpi_lc:true,kpi_anfragen:true,kpi_eng:true,kpi_reach:true,kpi_er:true,growth:true,plat:true,linkClicks:true,contentPsych:true,bestContent:true};
   if(!d.analytics.blockVis) d.analytics.blockVis={};
   // Ensure all keys exist with default true
   Object.keys(def).forEach(function(k){
@@ -4307,7 +4306,7 @@ function renderAnalyticsPage(){
     var cc=document.createElement('div');cc.className='card';cc.style.marginBottom='14px';
     var ct=document.createElement('div');ct.className='card-title';ct.textContent='Blöcke für Kunden ein-/ausblenden';cc.appendChild(ct);
     var cr=document.createElement('div');cr.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
-    var blockLabels={kpi_lc:'KPI: Link-Klicks',kpi_anfragen:'KPI: Kundenanfragen',kpi_eng:'KPI: Engagement',kpi_reach:'KPI: Reichweite',kpi_er:'KPI: Engagementrate',growth:'Follower-Wachstum',plat:'Reichweite/Plattform',contentPsych:'Content-Psychologie'};
+    var blockLabels={kpi_lc:'KPI: Link-Klicks',kpi_anfragen:'KPI: Kundenanfragen',kpi_eng:'KPI: Engagement',kpi_reach:'KPI: Reichweite',kpi_er:'KPI: Engagementrate',growth:'Follower-Wachstum',plat:'Reichweite/Plattform',contentPsych:'Content-Psychologie',bestContent:'Best Content des Monats'};
     Object.keys(blockLabels).forEach(function(key){
       var lbl=document.createElement('label');
       lbl.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:11px;color:var(--text)';
@@ -4474,7 +4473,7 @@ function renderAnalyticsPage(){
   }
 
   // Growth + Plat
-  var sg=false,sp2=bv.plat!==false; // growth jetzt in metrics-grid
+  var sg=false,sp2=bv.plat!==false||(isAgency&&bv.plat===false); // Agentur: immer zeigen (grau wenn false)
   if(sg||sp2){
     var tc=document.createElement('div');
     tc.style.cssText='display:grid;grid-template-columns:'+(sg&&sp2?'1fr 1fr':'1fr')+';gap:14px;margin-bottom:14px';tc.id='analytics-tc';
@@ -4499,8 +4498,9 @@ function renderAnalyticsPage(){
       var ge=document.createElement('div');ge.id='growth-edit-table';ge.style.display='none';
       gc.appendChild(gt);gc.appendChild(fb);gc.appendChild(fl);gc.appendChild(ge);tc.appendChild(gc);
     }
-    if(sp2){
+    if(bv.plat!==false||isAgency){
       var pc=document.createElement('div');pc.className='card';
+      if(isAgency&&bv.plat===false)pc.classList.add('kpi-card-hidden-agency');
       var pt=document.createElement('div');pt.className='card-title';pt.textContent='Reichweite nach Plattform';
       var pb=document.createElement('div');pb.id='plat-bars-container';pb.style.marginTop='8px';
       pc.appendChild(pt);pc.appendChild(pb);tc.appendChild(pc);
@@ -4513,7 +4513,8 @@ function renderAnalyticsPage(){
   // Link-Klicks + Content-Psychologie in 1 row
   var showLC=false; // LC moved to KPI grid
   var showCP=bv.contentPsych!==false;
-  if(showLC||showCP){
+  var showCPAg=isAgency&&bv.contentPsych===false; // Agentur: grau
+  if(showLC||showCP||showCPAg){
     var lcpGrid=document.createElement('div');
     lcpGrid.style.cssText='display:grid;grid-template-columns:'+(showLC&&showCP?'auto 1fr':'1fr')+';gap:14px;margin-bottom:14px;align-items:start';
 
@@ -4539,9 +4540,9 @@ function renderAnalyticsPage(){
       lcard.appendChild(lbox);lcpGrid.appendChild(lcard);
     }
 
-    if(showCP){
+    if(showCP||showCPAg){
       var cp=an.contentPsych||{emotional:0,faktenbasiert:0,behindScenes:0};
-      var cpCard=document.createElement('div');cpCard.className='card';
+      var cpCard=document.createElement('div');cpCard.className='card';if(showCPAg)cpCard.classList.add('kpi-card-hidden-agency');
       var cpTitle=document.createElement('div');cpTitle.className='card-title';cpTitle.style.marginBottom='2px';cpTitle.textContent='Content-Psychologie';
       var cpSub=document.createElement('div');cpSub.style.cssText='font-size:10px;color:var(--text3);margin-bottom:14px';cpSub.textContent='durchschnittliche Aufrufe pro Video';
       cpCard.appendChild(cpTitle);cpCard.appendChild(cpSub);
@@ -4580,9 +4581,12 @@ function renderAnalyticsPage(){
 
 
   // ── BEST CONTENT DES MONATS ──
+  var bcVis=getBlockVis().bestContent!==false;
+  if(bcVis||isAgency){
   var bcCard = document.createElement('div');
   bcCard.className = 'card';
   bcCard.style.marginTop = '14px';
+  if(isAgency&&!bcVis)bcCard.classList.add('kpi-card-hidden-agency');
 
   var bcTitle = document.createElement('div');
   bcTitle.className = 'card-title';
@@ -4660,6 +4664,7 @@ function renderAnalyticsPage(){
   bcInner.appendChild(rightDiv);
   bcCard.appendChild(bcInner);
   container.appendChild(bcCard);
+  } // end bcVis
 
   setTimeout(function(){buildFollowerChart();renderPlatBars();},0);
   // Strategie-Card für Kunden am Ende (aufklappbar, mit Kacheln)
