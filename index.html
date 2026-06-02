@@ -4160,28 +4160,17 @@ function importAnalyticsData(){
   var anchorY=parseInt(fullYear);
   var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
-  // ── Step 2: Follower-Wachstum ──
+  // ── Step 2: Follower-Zuwachs direkt speichern ──
   var growthArr=an.growth;if(!growthArr){growthArr=[];an.growth=growthArr;}
+  var deltaRaw=val(1).replace(/[^0-9\-]/g,'');
+  var delta=parseInt(deltaRaw)||0;
   var curIdx=growthArr.findIndex(function(g){
     return g.month===canonLabel||g.month===fullLabel||g.month===longMG+' '+yearG;
   });
-  var deltaRaw=val(1).replace(/[^0-9\-]/g,'');
-  var delta=parseInt(deltaRaw)||0;
-  // Look up PREVIOUS month by label (anchorM-1)
-  var prevM=((anchorM-1)%12+12)%12;
-  var prevY=anchorY+(anchorM===0?-1:0);
-  var prevLabel=mShort[prevM]+' '+String(prevY).slice(2);
-  var prevEntry=growthArr.find(function(g){return g.month===prevLabel;});
-  // Fallback: if not found, use array position before current
-  if(!prevEntry&&curIdx>0)prevEntry=growthArr[curIdx-1];
-  var prevF=prevEntry?parseVal(String(prevEntry.f)):0;
-  var newFollowers=prevF+delta;
   if(curIdx>=0){
-    if(newFollowers>0)growthArr[curIdx].f=newFollowers;
-    if(curIdx<growthArr.length-1){var ent=growthArr.splice(curIdx,1)[0];growthArr.push(ent);}
+    growthArr[curIdx].f=delta;
   }else{
-    growthArr.push({month:canonLabel,f:newFollowers||0,p:0});
-    if(growthArr.length>6)growthArr.splice(0,growthArr.length-6);
+    growthArr.push({month:canonLabel,f:delta,p:0});
   }
   if(newFollowers>0)an.followers=String(newFollowers);
   if(val(1))an.fdelta=val(1);
