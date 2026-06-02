@@ -4664,26 +4664,79 @@ function renderAnalyticsPage(){
   container.appendChild(bcCard);
 
   setTimeout(function(){buildFollowerChart();renderPlatBars();},0);
-  // Strategie-Card für Kunden am Ende
+  // Strategie-Card für Kunden am Ende (aufklappbar, mit Kacheln)
   if(ROLE==='client'){
     var existStrat=document.getElementById('client-strat-card');
     if(existStrat)existStrat.remove();
+    var s=cd().strategy||{};
+    // Outer Card
     var sc=document.createElement('div');sc.className='card';sc.id='client-strat-card';sc.style.marginTop='14px';
-    var sh=document.createElement('div');sh.style.cssText='display:flex;align-items:center;justify-content:space-between;cursor:pointer';
-    sh.onclick=function(){var body=document.getElementById('client-strat-body');var icon=document.getElementById('client-strat-icon');var open=body.style.display!=='none';body.style.display=open?'none':'block';icon.style.transform=open?'':'rotate(90deg)';};
+    // Header (Klick-Bereich)
+    var sh=document.createElement('div');
+    sh.style.cssText='display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none';
+    sh.onclick=function(){
+      var body=document.getElementById('client-strat-body');
+      var icon=document.getElementById('client-strat-icon');
+      var open=body.style.display!=='none';
+      body.style.display=open?'none':'block';
+      icon.style.transform=open?'':'rotate(90deg)';
+    };
     var stitle=document.createElement('div');stitle.className='card-title';stitle.textContent='Strategie';stitle.style.margin='0';
-    var sicon=document.createElement('div');sicon.id='client-strat-icon';sicon.style.cssText='transition:transform .25s;flex-shrink:0';
+    var sicon=document.createElement('div');sicon.id='client-strat-icon';
+    sicon.style.cssText='transition:transform .25s;flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center';
     sicon.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5L6.5 5 3 8.5"/></svg>';
     sh.appendChild(stitle);sh.appendChild(sicon);sc.appendChild(sh);
-    var sbody=document.createElement('div');sbody.id='client-strat-body';sbody.style.cssText='display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px';
-    var s=cd().strategy||{};
-    function sRow(label,val){var r=document.createElement('div');r.style.marginBottom='12px';var l=document.createElement('div');l.style.cssText='font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px';l.textContent=label;var v=document.createElement('div');v.style.cssText='font-size:12px;color:var(--text2);line-height:1.6';v.innerHTML=val||'–';r.appendChild(l);r.appendChild(v);return r;}
-    sbody.appendChild(sRow('Zielgruppe',escHtml(s.audience||'')));
-    if(s.plat&&s.plat.length)sbody.appendChild(sRow('Plattformen',s.plat.join(', ')));
-    if(s.saeuleData&&s.saeuleData.length)sbody.appendChild(sRow('Content-Säulen',s.saeuleData.map(function(x){return escHtml(x.label)+' '+x.pct+'%';}).join(' · ')));
-    if(s.spezOptions&&s.spezOptions.length)sbody.appendChild(sRow('Content-Spezifikation',s.spezOptions.map(function(x){return escHtml(x);}).join(', ')));
-    if(s.freq&&s.freq.length)sbody.appendChild(sRow('Frequenz',s.freq.map(function(x){return escHtml(x);}).join(', ')));
-    sc.appendChild(sbody);container.appendChild(sc);
+    // Body
+    var sbody=document.createElement('div');sbody.id='client-strat-body';
+    sbody.style.cssText='display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px';
+    // Grid für Kacheln
+    var sgrid=document.createElement('div');
+    sgrid.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:14px';
+    // Kachel-Funktion
+    function mkKachel(title,bodyEl){
+      var k=document.createElement('div');k.className='card';k.style.margin='0';
+      var kt=document.createElement('div');kt.className='card-title';kt.textContent=title;
+      k.appendChild(kt);k.appendChild(bodyEl);return k;
+    }
+    // ── Zielgruppe ──
+    var zDiv=document.createElement('div');zDiv.style.cssText='font-size:11px;line-height:1.7;color:var(--text2)';
+    zDiv.textContent=s.audience||'–';
+    sgrid.appendChild(mkKachel('Zielgruppe',zDiv));
+    // ── Plattformen ──
+    var pDiv=document.createElement('div');pDiv.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:4px';
+    (s.plat||[]).forEach(function(p){
+      var badge=document.createElement('span');
+      badge.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)';
+      badge.textContent=p;pDiv.appendChild(badge);
+    });
+    if(!s.plat||!s.plat.length)pDiv.textContent='–';
+    sgrid.appendChild(mkKachel('Plattformen',pDiv));
+    // ── Content-Säulen ──
+    var saeulen=s.saeuleData||[];
+    var sdDiv=document.createElement('div');sdDiv.style.cssText='margin-top:6px';
+    if(saeulen.length){
+      saeulen.forEach(function(x){
+        var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px';
+        var bar=document.createElement('div');bar.style.cssText='height:8px;flex:1;background:var(--surface3);border-radius:4px;overflow:hidden';
+        var fill=document.createElement('div');fill.style.cssText='height:100%;border-radius:4px;background:'+(x.color||'var(--accent)')+';width:'+x.pct+'%;transition:width .4s';
+        bar.appendChild(fill);
+        var lbl2=document.createElement('span');lbl2.style.cssText='font-size:10px;color:var(--text2);white-space:nowrap;min-width:90px';lbl2.textContent=x.label;
+        var pct2=document.createElement('span');pct2.style.cssText='font-size:10px;font-weight:700;color:var(--text);min-width:30px;text-align:right';pct2.textContent=x.pct+'%';
+        row.appendChild(lbl2);row.appendChild(bar);row.appendChild(pct2);
+        sdDiv.appendChild(row);
+      });
+    } else {sdDiv.textContent='–';}
+    sgrid.appendChild(mkKachel('Content-Säulen',sdDiv));
+    // ── Frequenz ──
+    var fDiv=document.createElement('div');fDiv.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:4px';
+    (s.freq||[]).forEach(function(f2){
+      var badge=document.createElement('span');
+      badge.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)';
+      badge.textContent=f2;fDiv.appendChild(badge);
+    });
+    if(!s.freq||!s.freq.length)fDiv.textContent='–';
+    sgrid.appendChild(mkKachel('Frequenz',fDiv));
+    sbody.appendChild(sgrid);sc.appendChild(sbody);container.appendChild(sc);
   }
 }
 
