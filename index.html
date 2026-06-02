@@ -3494,18 +3494,18 @@ function buildFollowerChart(){
   var growthMap={};(an.growth||[]).forEach(function(e){growthMap[e.month]=e;});
   var curEntry=growthMap[currentMonLbl]||{month:currentMonLbl,f:0,p:0};
   if(!growthMap[currentMonLbl]){an.growth.push(curEntry);growthMap[currentMonLbl]=curEntry;}
-  // KPI-Box neu aufbauen – gleicher Stil wie andere KPIs
+  // KPI-Box – gleicher Stil wie metric-card (Engagement etc.)
   var gc=document.getElementById('f-bars').parentElement;
-  gc.className='kpi';
+  gc.className='metric-card';
   gc.style.cssText='';
   gc.innerHTML='';
-  var lbl=document.createElement('div');lbl.className='kpi-lbl';lbl.textContent='Followerentwicklung (letzte 30T)';gc.appendChild(lbl);
-  var val=document.createElement('div');val.className='kpi-val';
+  var lbl=document.createElement('div');lbl.className='metric-lbl';lbl.textContent='Followerentwicklung (letzte 30T)';gc.appendChild(lbl);
+  var val=document.createElement('div');val.className='metric-val';
   if(isEdit){
     var wrap=document.createElement('div');wrap.style.cssText='display:flex;align-items:center;gap:4px;margin-top:6px';
     var plus=document.createElement('span');plus.textContent='+';plus.style.cssText='font-size:16px;font-weight:700;color:var(--text)';
     var inp=document.createElement('input');inp.type='text';inp.value=curEntry.f||'';inp.placeholder='0';
-    inp.style.cssText='width:80px;padding:4px 8px;border:1px solid var(--border2);border-radius:6px;font-size:14px;font-weight:600;background:var(--surface2);color:var(--text);font-family:inherit';
+    inp.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:inherit;font-weight:inherit;width:100px;padding:2px 6px;font-family:inherit';
     inp.addEventListener('change',function(){
       var v=parseInt(this.value.replace(/[^0-9]/g,''))||0;
       curEntry.f=v;
