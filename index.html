@@ -2696,15 +2696,20 @@ function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).
 function goToOnboarding(){
   showPage('overview',document.getElementById('nav-overview'));
   setTimeout(function(){
+    // Panel öffnen falls geschlossen
     var ob=document.getElementById('ob-panel');
-    var icon=document.getElementById('ob-toggle-icon');
     if(ob&&ob.style.display==='none'){
-      ob.style.display='block';
-      if(icon)icon.style.transform='rotate(90deg)';
+      OB_PANEL_OPEN=false; // damit toggleObPanel es öffnet
+      toggleObPanel();
+    } else if(!ob||ob.style.display==='none'){
+      toggleObPanel();
     }
-    var bloc=document.getElementById('ov-ob-inline');
-    if(bloc)bloc.scrollIntoView({behavior:'smooth',block:'start'});
-  },200);
+    // Zur Onboarding-Box scrollen
+    setTimeout(function(){
+      var bloc=document.getElementById('ov-ob-inline');
+      if(bloc)bloc.scrollIntoView({behavior:'smooth',block:'start'});
+    },100);
+  },250);
 }
 function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});var isAgency=ROLE==='agency';var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);var visible;if(isAgency){visible=todos;}else{visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}}
   var open=visible.filter(function(t){return!t.done;}).map(function(t){return{t:t,i:todos.indexOf(t)};});var done2=visible.filter(function(t){return t.done&&!t.isOnboarding;}).map(function(t){return{t:t,i:todos.indexOf(t)};});
