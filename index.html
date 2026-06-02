@@ -3479,28 +3479,31 @@ function buildFollowerChart(){
   var isEdit=ANALYTICS_EDIT_MODE&&ROLE==='agency';
   var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   var mLong=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  // Startmonat aus Strategie
   var stratBeginn=cd().strategy&&cd().strategy.beginnZusammenarbeit||'';
   if(stratBeginn&&!an.createdMonth)an.createdMonth=stratBeginn;
   if(!an.createdMonth)an.createdMonth='';
   if(!an.startMonth&&an.createdMonth)an.startMonth=an.createdMonth;
-  // Stand
   var sd=an.standDatum||'';
   var anchorM,anchorY;
   if(sd){var sdP=sd.split(' ');var mi=mLong.indexOf(sdP[0]);if(mi===-1)mi=mShort.indexOf(sdP[0]);anchorM=mi>=0?mi:new Date().getMonth();var y2=parseInt(sdP[1]);anchorY=y2>2000?y2:(y2>0?2000+y2:new Date().getFullYear());}
   else{anchorM=new Date().getMonth();anchorY=new Date().getFullYear();}
   var currentMonLbl=mShort[anchorM]+' '+String(anchorY).slice(2);
-  // Aktueller Zuwachs
   var growthMap={};(an.growth||[]).forEach(function(e){growthMap[e.month]=e;});
   var curEntry=growthMap[currentMonLbl]||{month:currentMonLbl,f:0,p:0};
-  if(!growthMap[currentMonLbl]){an.growth.push(curEntry);growthMap[currentMonLbl]=curEntry;}
-  // KPI-Box – gleicher Stil wie metric-card (Engagement etc.)
-  var gc=document.getElementById('f-bars').parentElement;
-  gc.className='metric-card';
-  gc.style.cssText='';
-  gc.innerHTML='';
-  var lbl=document.createElement('div');lbl.className='metric-lbl';lbl.textContent='Followerentwicklung (letzte 30T)';gc.appendChild(lbl);
-  var val=document.createElement('div');val.className='metric-val';
+  if(!growthMap[currentMonLbl]){an.growth.push(curEntry);}
+  var delta=parseInt(curEntry.f)||0;
+
+  // f-bars Container (legacy – für Kompatibilität leer lassen)
+  var fbEl=document.getElementById('f-bars');
+  if(fbEl){var gc=fbEl.parentElement;gc.style.display='none';}
+
+  // Follower-Kachel befüllen
+  var fkv=document.getElementById('follower-kachel-val');
+  var fkac=document.getElementById('follower-kachel');
+  if(!fkv||!fkac)return;
+  fkac.innerHTML='';
+  var lbl=document.createElement('div');lbl.className='metric-lbl';lbl.textContent='Followerentwicklung (letzte 30T)';
+  fkac.appendChild(lbl);
   if(isEdit){
     var wrap=document.createElement('div');wrap.style.cssText='display:flex;align-items:center;gap:4px;margin-top:6px';
     var plus=document.createElement('span');plus.textContent='+';plus.style.cssText='font-size:16px;font-weight:700;color:var(--text)';
@@ -3513,15 +3516,15 @@ function buildFollowerChart(){
       if(ex)ex.f=v;else an.growth.push({month:currentMonLbl,f:v,p:0});
       scheduleSave();buildFollowerChart();
     });
-    wrap.appendChild(plus);wrap.appendChild(inp);gc.appendChild(wrap);
+    wrap.appendChild(plus);wrap.appendChild(inp);fkac.appendChild(wrap);
   } else {
-    var delta=parseInt(curEntry.f)||0;
+    var val=document.createElement('div');val.className='metric-val';
     val.textContent=(delta>=0?'+':'')+delta.toLocaleString('de-DE');
     val.style.color=delta>0?'var(--green)':delta<0?'#e53e3e':'var(--text)';
-    gc.appendChild(val);
+    fkac.appendChild(val);
   }
-  // Bearbeitungs-Container (für Kompatibilität)
-  var ge=document.createElement('div');ge.id='growth-edit-table';ge.style.display='none';gc.appendChild(ge);
+  // growth-edit-table leer lassen
+  var ge=document.getElementById('growth-edit-table');if(ge)ge.style.display='none';
 }
 
 // ── SYNC STRATEGY PLATFORMS → ANALYTICS BARS ──
@@ -4461,6 +4464,14 @@ function renderAnalyticsPage(){
         mc.classList.add('kpi-card-hidden-agency');kg.appendChild(mc);
       } else { kg.appendChild(mc); }
     });
+    // Follower-Kachel direkt in kg einfügen
+    if(bv.growth!==false){
+      var fkac=document.createElement('div');fkac.className='metric-card';fkac.id='follower-kachel';
+      var fkl=document.createElement('div');fkl.className='metric-lbl';fkl.textContent='Followerentwicklung (letzte 30T)';
+      var fkv=document.createElement('div');fkv.className='metric-val';fkv.id='follower-kachel-val';fkv.textContent='–';
+      fkac.appendChild(fkl);fkac.appendChild(fkv);
+      kg.appendChild(fkac);
+    }
     container.appendChild(kg);
   }
 
@@ -4468,7 +4479,7 @@ function renderAnalyticsPage(){
   var sg=false,sp2=bv.plat!==false; // growth jetzt in metrics-grid
   if(sg||sp2){
     var tc=document.createElement('div');
-    tc.style.cssText='display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px';tc.id='analytics-tc';
+    tc.style.cssText='display:grid;grid-template-columns:'+(sg&&sp2?'1fr 1fr':'1fr')+';gap:14px;margin-bottom:14px';tc.id='analytics-tc';
     if(sg){
       var gc=document.createElement('div');gc.className='card';
       var gt=document.createElement('div');gt.className='card-title';
@@ -4488,9 +4499,7 @@ function renderAnalyticsPage(){
       var fb=document.createElement('div');fb.className='chart-bars';fb.id='f-bars';
       var fl=document.createElement('div');fl.className='chart-lbls';fl.id='f-lbls';
       var ge=document.createElement('div');ge.id='growth-edit-table';ge.style.display='none';
-      gc.appendChild(gt);gc.appendChild(fb);gc.appendChild(fl);gc.appendChild(ge);
-      // gc in kg einfügen – neben Engagement-Rate
-      if(typeof kg!=='undefined'&&kg)kg.appendChild(gc);
+      gc.appendChild(gt);gc.appendChild(fb);gc.appendChild(fl);gc.appendChild(ge);tc.appendChild(gc);
     }
     if(sp2){
       var pc=document.createElement('div');pc.className='card';
