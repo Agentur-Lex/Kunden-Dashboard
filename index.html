@@ -4172,8 +4172,8 @@ function importAnalyticsData(){
   }else{
     growthArr.push({month:canonLabel,f:delta,p:0});
   }
-  if(newFollowers>0)an.followers=String(newFollowers);
-  if(val(1))an.fdelta=val(1);
+  if(delta!==0)an.fdelta=(delta>=0?'+':'')+delta;
+  if(val(1))an.followers=String(delta);
 
   // ── Step 3: Reichweite nach Plattform (cols 2-6) ──
   var PLAT_COLORS={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
