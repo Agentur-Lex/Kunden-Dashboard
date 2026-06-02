@@ -1651,7 +1651,7 @@ function renderUpcomingShoots(){
     if(filled===0){contentColor='#dc2626';contentBg='rgba(220,38,38,0.08)';contentBorder='rgba(220,38,38,0.25)';}
     else if(s.target>0&&filled>=s.target){contentColor='#16a34a';contentBg='rgba(22,163,74,0.08)';contentBorder='rgba(22,163,74,0.25)';}
     else{contentColor='#f59e0b';contentBg='rgba(245,158,11,0.10)';contentBorder='rgba(245,158,11,0.30)';}
-    html+='<tr style="border-bottom:1px solid var(--border2)">'
+    html+='<tr style="border-bottom:1px solid var(--border2);cursor:pointer" onclick="agencyOpenShoot(\''+s.custId+'\')" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">'
       +'<td style="padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)">'+fmtISO(s.date)+'<span class="upc-time">'+(s.time?' · '+s.time+' Uhr':'')+'</span>'+'</td>'
       +'<td style="padding:6px 10px;font-weight:600;color:var(--text)">'+escHtml(s.title||'–')+'</td>'
       +'<td style="padding:6px 10px;color:var(--text2)">'+escHtml(s.custName)+'</td>'
@@ -1662,6 +1662,17 @@ function renderUpcomingShoots(){
   el.innerHTML=html;
 }
 
+function agencyOpenShoot(custId){
+  if(!DATA[custId])return;
+  agencySwitchCustomer(custId);
+  // Dropdown aktualisieren
+  var dd=document.getElementById('cust-dropdown');
+  if(dd)dd.value=custId;
+  // Zur Drehtermin-Seite navigieren
+  setTimeout(function(){
+    showPage('shoots',document.getElementById('nav-shoots'));
+  },100);
+}
 function toggleDoneCustomers(){SHOW_DONE_CUSTOMERS=!SHOW_DONE_CUSTOMERS;renderAgencyOverview();}
 async function setCustomerStatus(k,status){
   DATA[k]._status=status;
