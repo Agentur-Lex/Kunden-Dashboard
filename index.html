@@ -4462,8 +4462,9 @@ function renderAnalyticsPage(){
       } else { kg.appendChild(mc); }
     });
     // Follower-Kachel direkt in kg einfügen
-    if(bv.growth!==false){
+    if(bv.growth!==false||isAgency){
       var fkac=document.createElement('div');fkac.className='metric-card';fkac.id='follower-kachel';
+      if(isAgency&&bv.growth===false)fkac.classList.add('kpi-card-hidden-agency');
       var fkl=document.createElement('div');fkl.className='metric-lbl';fkl.textContent='Followerentwicklung (letzte 30T)';
       var fkv=document.createElement('div');fkv.className='metric-val';fkv.id='follower-kachel-val';fkv.textContent='–';
       fkac.appendChild(fkl);fkac.appendChild(fkv);
