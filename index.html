@@ -286,6 +286,8 @@ textarea{resize:vertical;line-height:1.5}
 /* ── MOBILE ── */
 @media (max-width:480px){  .cp-counter{display:none!important}
   #shoot-ideas-table td:nth-child(2),#shoot-ideas-table th:nth-child(2){padding-left:20px!important}
+  #shoot-ideas-table td:nth-child(3),#shoot-ideas-table th:nth-child(3){display:none!important}
+  .shoot-col-link{display:none!important}
   /* Content-Modal: Vorschau unter Felder */
   .modal-split{flex-direction:column!important;max-height:95vh!important;overflow-y:auto!important}
   .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border)}
@@ -2362,7 +2364,7 @@ function renderShootsList(){
     ];
     if(customCol){thDefs.push({l:customCol,w:'100px',cls:'shoot-ideas-custom',isCustomCol:true});}
     else if(ROLE==='agency'){thDefs.push({l:'+',w:'36px',isAddCol:true});}
-    thDefs.push({l:'Link',w:'44px'});
+    thDefs.push({l:'Link',w:'44px',cls:'shoot-col-link'});
     thDefs.push({l:'Spez.',w:'80px',cls:'shoot-ideas-spez'});
     thDefs.push({l:'',w:'36px'});
     thDefs.forEach(function(th){
@@ -2491,7 +2493,7 @@ function renderShootsList(){
         sel.addEventListener('click',function(e){e.stopPropagation();});
       })(ri);
       // Link-Icon zwischen Erledigt und Spez.
-      var tdL=document.createElement('td');tdL.style.cssText='text-align:center;padding:4px 6px';
+      var tdL=document.createElement('td');tdL.className='shoot-col-link';tdL.style.cssText='text-align:center;padding:4px 6px';
       var linkBtn=document.createElement('button');
       linkBtn.className='btn-icon';
       linkBtn.title=idea.link?'Link öffnen: '+idea.link:'Link hinzufügen';
