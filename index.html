@@ -4465,7 +4465,7 @@ function renderAnalyticsPage(){
   }
 
   // Growth + Plat
-  var sg=bv.growth!==false,sp2=bv.plat!==false;
+  var sg=false,sp2=bv.plat!==false; // growth jetzt in metrics-grid
   if(sg||sp2){
     var tc=document.createElement('div');
     tc.style.cssText='display:grid;grid-template-columns:'+(sg&&sp2?'1fr 1fr':'1fr')+';gap:14px;margin-bottom:14px';tc.id='analytics-tc';
@@ -4488,7 +4488,9 @@ function renderAnalyticsPage(){
       var fb=document.createElement('div');fb.className='chart-bars';fb.id='f-bars';
       var fl=document.createElement('div');fl.className='chart-lbls';fl.id='f-lbls';
       var ge=document.createElement('div');ge.id='growth-edit-table';ge.style.display='none';
-      gc.appendChild(gt);gc.appendChild(fb);gc.appendChild(fl);gc.appendChild(ge);tc.appendChild(gc);
+      gc.appendChild(gt);gc.appendChild(fb);gc.appendChild(fl);gc.appendChild(ge);
+      // gc wird in kg (metrics-grid) eingefügt – nach Engagement-Rate
+      if(kg)kg.appendChild(gc);else tc.appendChild(gc);
     }
     if(sp2){
       var pc=document.createElement('div');pc.className='card';
