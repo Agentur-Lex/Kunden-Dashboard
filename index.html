@@ -455,6 +455,11 @@ textarea{resize:vertical;line-height:1.5}
   #bulk-bar button:hover{background:rgba(255,255,255,0.35)}
   .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
 
+/* ── Page-Transition ── */
+  .page{opacity:0;transition:opacity .15s ease}
+  .page.page-visible{opacity:1}
+/* ── Analyse-Badge ── */
+  .analytics-badge{display:none;position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--accent);border:1.5px solid var(--surface)}
 /* ── Fachbegriff-Tooltips ── */
   .term-tip{position:relative;border-bottom:1px dotted var(--text3);cursor:help;display:inline}
   .term-tip::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:0;transform:none;background:#1a1a2e;color:#fff;font-size:11px;line-height:1.5;padding:8px 12px;border-radius:8px;white-space:normal;width:220px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:9999;font-weight:400;font-style:normal;box-shadow:0 4px 20px rgba(0,0,0,.3)}
@@ -582,7 +587,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
     <div id="nav-contentlist" class="nav-item agency-only" onclick="showPage('contentlist',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10.5h6M7 14h4"/></svg> Content-Liste</div>
     <div class="nav-item" id="nav-calendar" onclick="showPage('calendar',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2.5" y="4" width="15" height="14" rx="1.5"/><path d="M2.5 8.5h15"/><path d="M7 2.5v3M13 2.5v3"/><rect x="6" y="11" width="2" height="2" rx=".4"/><rect x="9" y="11" width="2" height="2" rx=".4"/><rect x="12" y="11" width="2" height="2" rx=".4"/></svg> Kalender</div>
     <div class="nav-label" style="margin-top:8px">Analyse</div>
-    <div class="nav-item" id="nav-analytics" onclick="showPage('analytics',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="2,15 7,9 11,12 16,6 18,8"/><path d="M2 18h16"/></svg> Analysedaten</div>
+    <div class="nav-item" id="nav-analytics" onclick="showPage('analytics',this);clearAnalyticsBadge()" style="position:relative"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="2,15 7,9 11,12 16,6 18,8"/><path d="M2 18h16"/></svg> Analysedaten<span class="analytics-badge" id="analytics-badge"></span></div>
     <div class="nav-item" id="nav-strategy" onclick="showPage('strategy',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r=".8" fill="currentColor"/></svg> Strategie</div>
     <div class="nav-item agency-only" onclick="showPage('settings',this)"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="7.5" cy="10" r="4"/><path d="M11 8.5l7 7"/><path d="M15 12.5l2-2"/><path d="M13.5 14l2-2"/></svg> Zugangsdaten</div>
     <div class="sidebar-bottom">
@@ -1533,7 +1538,7 @@ function startAgencySession(){
   try{_lc=sessionStorage.getItem('lastCustomer')||localStorage.getItem('lastCustomer')||'';}catch(e){}
   ACTIVE_CUSTOMER=(_lc&&DATA[_lc])?_lc:(Object.keys(DATA)[0]||'');
   var _savedAC=ACTIVE_CUSTOMER;
-  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=_savedAC||getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();
+  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=_savedAC||getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();checkAnalyticsReminder();
   if(null&&!isInStandaloneMode()){try{if(!sessionStorage.getItem('pwa_dismissed_session')){setTimeout(function(){var b=document.getElementById('pwa-banner');if(b)b.style.display='flex';},2000);}}catch(e){}}
 }
 function startClientSession(k){
@@ -1615,7 +1620,7 @@ function resetAllEditStates(){
 function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;try{sessionStorage.setItem('lastCustomer',k);localStorage.setItem('lastCustomer',k);}catch(e){}resetAllEditStates();renderCustomerView();updateTodoBadge();updateShootReminder();}
 function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});;var hideCustSel=['overview','settings','agency-overview'];var custSel=document.getElementById('cust-dropdown');var custLbl=document.querySelector('#agency-tb span');if(custSel){custSel.style.display=hideCustSel.indexOf(id)!==-1?'none':'';if(custLbl)custLbl.style.display=hideCustSel.indexOf(id)!==-1?'none':'';};
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
-  var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
+  var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg){pg.classList.add('active');pg.classList.remove('page-visible');requestAnimationFrame(function(){requestAnimationFrame(function(){pg.classList.add('page-visible');});});}if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
 function openModal(id){var e=document.getElementById(id);if(e)e.style.display='flex';}
 function closeModal(id){var e=document.getElementById(id);if(e){e.style.display='none';if(id==='content-modal'){var ps=document.getElementById('phone-screen');if(ps)ps.innerHTML='<div class="phone-placeholder"><span style="font-size:32px;display:block;margin-bottom:10px">▶</span>Drive-Link<br>für Vorschau</div>';renderContentTable();}}}
 
@@ -1875,7 +1880,7 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var navStrat=document.getElementById('nav-strategy');if(navStrat)navStrat.style.display=ROLE==='client'?'none':'';var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',fmtDelta(an.fdelta)],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',fmtDelta(an.rdelta)],['ov-eng',an.eng],['ov-edelta',fmtDelta(an.edelt)],['ov-posts',an.posts],['ov-pdelta',fmtDelta(an.pdelta)]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var navStrat=document.getElementById('nav-strategy');if(navStrat)navStrat.style.display=ROLE==='client'?'none':'';updateAnalyticsBadge();var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',fmtDelta(an.fdelta)],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',fmtDelta(an.rdelta)],['ov-eng',an.eng],['ov-edelta',fmtDelta(an.edelt)],['ov-posts',an.posts],['ov-pdelta',fmtDelta(an.pdelta)]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
@@ -2693,6 +2698,65 @@ function startEdit(idx){EDITING_TODO=idx;renderTodos();}
 function cancelEdit(){EDITING_TODO=-1;renderTodos();}
 function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var t=cd().todos[idx];t.text=txt;t.due=(document.getElementById('edit-due-'+idx)||{}).value;t.prio=(document.getElementById('edit-prio-'+idx)||{}).value;t.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;scheduleSave();renderTodos();}
 // doAgencyReset → weiter unten implementiert
+// ── Analytics Badge ──
+var ANALYTICS_BADGE_KEY='analytics_badge_';
+function updateAnalyticsBadge(){
+  if(ROLE!=='client'||!ACTIVE_CUSTOMER)return;
+  var an=cd().analytics||{};
+  var key=ANALYTICS_BADGE_KEY+ACTIVE_CUSTOMER;
+  var lastSeen='';
+  try{lastSeen=localStorage.getItem(key)||'';}catch(e){}
+  var lastUpdate=an.lastUpdated||'';
+  var badge=document.getElementById('analytics-badge');
+  if(!badge)return;
+  if(lastUpdate&&lastUpdate!==lastSeen){
+    badge.style.display='block';
+  } else {
+    badge.style.display='none';
+  }
+}
+function clearAnalyticsBadge(){
+  if(ROLE!=='client'||!ACTIVE_CUSTOMER)return;
+  var an=cd().analytics||{};
+  var lastUpdate=an.lastUpdated||getTodayISO();
+  var key=ANALYTICS_BADGE_KEY+ACTIVE_CUSTOMER;
+  try{localStorage.setItem(key,lastUpdate);}catch(e){}
+  var badge=document.getElementById('analytics-badge');
+  if(badge)badge.style.display='none';
+}
+
+// ── Monatlicher Analyse-Reminder ──
+function checkAnalyticsReminder(){
+  if(ROLE!=='agency')return;
+  var now=new Date();
+  if(now.getDate()!==1)return; // nur am 1. des Monats
+  var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  var curMon=mShort[now.getMonth()]+' '+String(now.getFullYear()).slice(2);
+  var reminderKey='analytics_reminder_'+curMon;
+  try{if(localStorage.getItem(reminderKey))return;}catch(e){}
+  // Aktive Kunden ohne Analyse-Daten für aktuellen Monat
+  var missing=[];
+  Object.keys(DATA).forEach(function(k){
+    var d=DATA[k];
+    if((d.status||'aktiv')==='aktiv'){
+      var an=d.analytics||{};
+      var gm={};(an.growth||[]).forEach(function(e){gm[e.month]=e;});
+      var hasData=gm[curMon]&&parseInt(gm[curMon].f);
+      if(!hasData)missing.push(d.name||k);
+    }
+  });
+  if(!missing.length)return;
+  // Banner anzeigen
+  var banner=document.createElement('div');
+  banner.style.cssText='position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:10px;padding:12px 20px;z-index:9000;font-size:12px;max-width:420px;width:90%;box-shadow:0 8px 24px rgba(0,0,0,.3)';
+  banner.innerHTML='<div style="font-weight:700;margin-bottom:6px">Analyse-Reminder '+curMon+'</div>'
+    +'<div style="color:rgba(255,255,255,.75);font-size:11px">Noch keine Follower-Daten:<br>'+missing.map(function(n){return '• '+n;}).join('<br>')+'</div>'
+    +'<button id="ar-dismiss-btn" style="margin-top:10px;background:var(--accent);border:none;color:#fff;border-radius:6px;padding:5px 14px;font-size:11px;cursor:pointer;font-family:inherit">Verstanden</button>';
+  banner.querySelector('#ar-dismiss-btn').onclick=function(){banner.remove();try{localStorage.setItem(reminderKey,'1');}catch(e){}};
+  document.body.appendChild(banner);
+  setTimeout(function(){if(banner.parentElement)banner.remove();try{localStorage.setItem(reminderKey,'1');}catch(e){}},30000);
+}
+
 function goToOnboarding(){
   showPage('overview',document.getElementById('nav-overview'));
   setTimeout(function(){
