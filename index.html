@@ -1430,24 +1430,26 @@ function updateOnboardingBars(){
     ob.forEach(function(s,i){if(s.done)lastDoneIdx=i;});
     var fillPct=lastDoneIdx>=0?((lastDoneIdx+1)/(total+1))*100:0;
     fill.style.width=fillPct+'%';
-    // Alte Punkte + Labels entfernen
-    wrap.querySelectorAll('.ob-dot,.ob-dot-lbl').forEach(function(d){d.remove();});
-    if(isMob)return; // Mobile: nur Balken
-    wrap.style.position='relative';
-    wrap.style.marginBottom='28px'; // Platz für Labels
+    // Stepper-Container (außerhalb prog-wrap)
+    var stepperParent=wrap.parentElement;
+    if(!stepperParent)return;
+    var oldStepper=stepperParent.querySelector('.ob-stepper');
+    if(oldStepper)oldStepper.remove();
+    if(isMob)return;
+    var stepper=document.createElement('div');
+    stepper.className='ob-stepper';
+    stepper.style.cssText='position:relative;height:24px;margin-top:-4px;margin-bottom:18px';
     ob.forEach(function(step,i){
-      var dotPct=((i+1)/(total+1))*100; // gleichmäßig mit Rand
+      var dotPct=((i+1)/(total+1))*100;
       var dot=document.createElement('div');
-      dot.className='ob-dot';
-      dot.style.cssText='position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;border:2px solid '+(step.done?'var(--accent)':'var(--border2)')+';background:'+(step.done?'var(--accent)':'#fff')+';left:'+dotPct+'%;z-index:2;transition:all .4s;box-shadow:0 0 0 2px #fff';
-      wrap.appendChild(dot);
+      dot.style.cssText='position:absolute;top:0;left:'+dotPct+'%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;border:2px solid '+(step.done?'var(--accent)':'var(--border2)')+';background:'+(step.done?'var(--accent)':'#fff')+';transition:all .4s;box-shadow:0 0 0 2px var(--surface)';
+      stepper.appendChild(dot);
       var lbl=document.createElement('div');
-      lbl.className='ob-dot-lbl';
-      lbl.style.cssText='position:absolute;top:calc(100% + 6px);left:'+dotPct+'%;transform:translateX(-50%);font-size:9px;color:'+(step.done?'var(--accent)':'var(--text3)')+';white-space:nowrap;font-weight:'+(step.done?'600':'400')+';transition:color .4s;max-width:80px;text-align:center;overflow:hidden;text-overflow:ellipsis';
-      lbl.textContent=step.label;
-      lbl.title=step.label;
-      wrap.appendChild(lbl);
+      lbl.style.cssText='position:absolute;top:17px;left:'+dotPct+'%;transform:translateX(-50%);font-size:9px;color:'+(step.done?'var(--accent)':'var(--text3)')+';white-space:nowrap;font-weight:'+(step.done?'600':'400')+';max-width:90px;text-align:center;overflow:hidden;text-overflow:ellipsis';
+      lbl.textContent=step.label;lbl.title=step.label;
+      stepper.appendChild(lbl);
     });
+    stepperParent.insertBefore(stepper,wrap.nextSibling);
   });
   var fillInline=document.getElementById('ov-ob-fill');
   var lblInline=document.getElementById('ov-ob-lbl');
