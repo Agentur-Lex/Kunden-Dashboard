@@ -1438,15 +1438,10 @@ function updateOnboardingBars(){
     var wrap=fill.parentElement;
     if(!wrap)return;
     // Balken bis zum letzten erledigten Punkt
-    // Stepper: Fragebogen und Zugangsdaten tauschen für Anzeige
-    var obDisplay=ob.slice();
-    var iF2=obDisplay.findIndex(function(s){return s.id==='fixed-2';});
-    var iF3=obDisplay.findIndex(function(s){return s.id==='fixed-3';});
-    if(iF2!==-1&&iF3!==-1){var _t=obDisplay[iF2];obDisplay[iF2]=obDisplay[iF3];obDisplay[iF3]=_t;}
-    // Fill bis zum letzten erledigten Punkt (in obDisplay-Reihenfolge)
+    var obDisplay=ob;
     var lastDoneD=-1;
     obDisplay.forEach(function(s,i){if(s.done)lastDoneD=i;});
-    var fillPct=lastDoneD>=0?((lastDoneD+1)/(total+1))*100:0;
+    var fillPct=lastDoneD>=0?(total>1?(lastDoneD/(total-1))*100:100):0;
     fill.style.width=fillPct+'%';
     // Stepper-Container (außerhalb prog-wrap)
     var stepperParent=wrap.parentElement;
@@ -1458,7 +1453,7 @@ function updateOnboardingBars(){
     stepper.className='ob-stepper';
     stepper.style.cssText='position:relative;height:24px;margin-top:-4px;margin-bottom:18px';
     obDisplay.forEach(function(step,i){
-      var dotPct=((i+1)/(total+1))*100;
+      var dotPct=total>1?(i/(total-1))*100:50;
       var dot=document.createElement('div');
       dot.style.cssText='position:absolute;top:0;left:'+dotPct+'%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;border:2px solid '+(step.done?'var(--accent)':'var(--border2)')+';background:'+(step.done?'var(--accent)':'#fff')+';transition:all .4s;box-shadow:0 0 0 2px var(--surface)';
       stepper.appendChild(dot);
@@ -3311,6 +3306,13 @@ function ensureFixedSteps(){
   fixed.forEach(function(f){
     if(ids.indexOf(f.id) === -1) d.obSteps.unshift(f);
   });
+  // Reihenfolge erzwingen: fixed-2 vor fixed-3
+  var i2=d.obSteps.findIndex(function(s){return s.id==='fixed-2';});
+  var i3=d.obSteps.findIndex(function(s){return s.id==='fixed-3';});
+  if(i2!==-1&&i3!==-1&&i2>i3){
+    var moved=d.obSteps.splice(i2,1)[0];
+    d.obSteps.splice(i3,0,moved);
+  }
 }
 
 function renderObPanel(){
