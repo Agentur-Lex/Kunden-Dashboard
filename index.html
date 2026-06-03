@@ -5138,7 +5138,8 @@ async function sbSaveCustomer(){
   var anRes=await sb.from('analytics').select('id').eq('customer_id',cId).limit(1);
   if(anRes.data&&anRes.data.length){
     console.log('Analytics save DEBUG:', JSON.stringify(d.analytics).slice(0,200));
-    var upRes=await sb.from('analytics').update({data:d.analytics,stand_datum:d.analytics&&d.analytics.standDatum}).eq('customer_id',cId);
+    var upRes=await sb.from('analytics').update({data:d.analytics,stand_datum:(d.analytics&&d.analytics.standDatum)||null}).eq('customer_id',cId);
+    console.log('UPDATE result:', JSON.stringify(upRes));
     if(upRes.error)console.error('Analytics UPDATE Fehler:',upRes.error);
   } else {
     var inRes=await sb.from('analytics').insert({customer_id:cId,stand_datum:d.analytics&&d.analytics.standDatum,data:d.analytics});
