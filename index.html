@@ -1629,7 +1629,9 @@ function startClientSession(k){
   renderCustomerView();
   updateShootReminder();
   window.scrollTo({top:0,behavior:'smooth'});
-  tourCheckFirstLogin();updateUndoBtn();setTimeout(function(){if(!document.getElementById('tour-overlay')||document.getElementById('tour-overlay').style.display==='none')checkInstallGuide();},3000);
+  tourCheckFirstLogin();updateUndoBtn();
+  // Badge alle 2 Minuten prüfen
+  setInterval(function(){if(ROLE==='client'&&ACTIVE_CUSTOMER)updateAnalyticsBadge();},120000);setTimeout(function(){if(!document.getElementById('tour-overlay')||document.getElementById('tour-overlay').style.display==='none')checkInstallGuide();},3000);
   // Android: Banner anzeigen wenn Prompt verfügbar
   if(null&&!isInStandaloneMode()){
     try{if(!sessionStorage.getItem('pwa_dismissed_session')){
@@ -5266,7 +5268,14 @@ function undoLast(){
   showToast('Änderung rückgängig gemacht');
 }
 
-function scheduleSave(){clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);}
+function scheduleSave(){
+  // lastUpdated bei jeder Agentur-Änderung setzen
+  if(ROLE==='agency'&&ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
+    if(!DATA[ACTIVE_CUSTOMER].analytics)DATA[ACTIVE_CUSTOMER].analytics={};
+    DATA[ACTIVE_CUSTOMER].analytics.lastUpdated=getTodayISO();
+  }
+  clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);
+}
 
 async function doSetPassword(){
   var p1=(document.getElementById('first-pw1')||{}).value||'';
