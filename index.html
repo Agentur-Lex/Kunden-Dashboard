@@ -672,11 +672,11 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
                 <div class="prog-wrap"><div id="ov-ob-fill" class="prog-fill" style="width:0%"></div></div>
                 <div id="ov-ob-lbl" style="font-size:10px;color:var(--text3);margin-top:4px"></div>
               </div>
-              <div style="margin-left:14px;flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center">
+              <div id="ob-toggle-icon" style="margin-left:14px;flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;transition:transform .25s">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5L6.5 5 3 8.5"/></svg>
               </div>
             </div>
-            <div id="ob-panel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+            <div id="ob-panel" style="max-height:0;overflow:hidden;transition:max-height .35s ease;margin-top:0;border-top:0 solid var(--border);padding-top:0">
               <div id="ob-panel-content"></div>
             </div>
           </div>
@@ -3293,11 +3293,17 @@ function toggleObPanel(){
   var icon  = document.getElementById('ob-toggle-icon');
   if(!panel) return;
   if(OB_PANEL_OPEN){
-    panel.style.display = 'block';
-    if(icon) icon.style.transform = 'rotate(90deg)';
     renderObPanel();
+    panel.style.maxHeight = panel.scrollHeight + 2000 + 'px';
+    panel.style.marginTop = '16px';
+    panel.style.borderTopWidth = '1px';
+    panel.style.paddingTop = '16px';
+    if(icon) icon.style.transform = 'rotate(90deg)';
   } else {
-    panel.style.display = 'none';
+    panel.style.maxHeight = '0';
+    panel.style.marginTop = '0';
+    panel.style.borderTopWidth = '0';
+    panel.style.paddingTop = '0';
     if(icon) icon.style.transform = '';
   }
 }
