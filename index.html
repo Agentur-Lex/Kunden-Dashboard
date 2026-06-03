@@ -3721,7 +3721,7 @@ function buildFollowerChart(){
     var wrap=document.createElement('div');wrap.style.cssText='display:flex;align-items:center;gap:4px;margin-top:6px';
     var plus=document.createElement('span');plus.textContent='+';plus.style.cssText='font-size:16px;font-weight:700;color:var(--text)';
     var inp=document.createElement('input');inp.type='text';inp.value=curEntry.f||'';inp.placeholder='0';
-    inp.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:inherit;font-weight:700;width:100px;padding:2px 6px;font-family:inherit';
+    inp.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:22px;font-weight:800;width:120px;padding:2px 6px;font-family:inherit;letter-spacing:-.02em';
     inp.addEventListener('change',function(){
       var v=parseInt(this.value.replace(/[^0-9]/g,''))||0;
       curEntry.f=v;
