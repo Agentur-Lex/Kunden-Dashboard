@@ -3734,7 +3734,7 @@ function buildFollowerChart(){
       curEntry.f=v;
       var ex=an.growth.filter(function(e){return e.month===currentMonLbl;})[0];
       if(ex)ex.f=v;else an.growth.push({month:currentMonLbl,f:v,p:0});
-      scheduleSave();buildFollowerChart();
+      scheduleAnalyticsSave();buildFollowerChart();
     });
     wrap.appendChild(plus);wrap.appendChild(inp);fkac.appendChild(wrap);
   } else {
@@ -4324,10 +4324,10 @@ function updateStandDatum(){
         growthMap[lbl]={month:lbl,f:0,p:0};
       }
     }
-    if(ROLE==='agency'&&ACTIVE_CUSTOMER){if(!cd().analytics)cd().analytics={};cd().analytics.lastUpdated=getTodayISO();}
+    if(ROLE==='agency'&&ACTIVE_CUSTOMER){if(!cd().analytics)cd().analytics={};}
     buildFollowerChart();
     renderAnalyticsPage();
-    scheduleSave();
+    scheduleAnalyticsSave();
   }
 }
 function toggleAnalyticsImport(){
@@ -4442,10 +4442,10 @@ function importAnalyticsData(){
   inp.value='';
   var st=document.getElementById('analytics-import-status');
   if(st){st.style.display='inline';setTimeout(function(){st.style.display='none';},3000);}
-  if(ROLE==='agency'&&ACTIVE_CUSTOMER){if(!cd().analytics)cd().analytics={};cd().analytics.lastUpdated=getTodayISO();}
+  if(ROLE==='agency'&&ACTIVE_CUSTOMER){if(!cd().analytics)cd().analytics={};}
   renderAnalyticsPage();
   syncAnalyticsDisplay();
-  scheduleSave();
+  scheduleAnalyticsSave();
 }
 
 function renderAnalyticsPage(){
@@ -4547,10 +4547,10 @@ function renderAnalyticsPage(){
       if(isEdit){
         var lkvi=document.createElement('input');lkvi.type='text';lkvi.value=an.linkClicks||'';lkvi.placeholder='z.B. 3.246';
         lkvi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:inherit;font-weight:inherit;width:166px;padding:2px 6px;font-family:inherit';
-        (function(){lkvi.addEventListener('change',function(){cd().analytics.linkClicks=this.value;scheduleSave();renderAnalyticsPage();});})();
+        (function(){lkvi.addEventListener('change',function(){cd().analytics.linkClicks=this.value;scheduleAnalyticsSave();renderAnalyticsPage();});})();
         var lkdi=document.createElement('input');lkdi.type='text';lkdi.value=an.linkClicksDelta||'';lkdi.placeholder='+15.3%';
         lkdi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-weight:normal;width:80px;padding:2px 4px;font-family:inherit';
-        (function(){lkdi.addEventListener('change',function(){cd().analytics.linkClicksDelta=this.value;scheduleSave();renderAnalyticsPage();});})();
+        (function(){lkdi.addEventListener('change',function(){cd().analytics.linkClicksDelta=this.value;scheduleAnalyticsSave();renderAnalyticsPage();});})();
         lkv.appendChild(lkvi);lkd.appendChild(lkdi);
       }else{
         lkv.textContent=fmtThousands(an.linkClicks||'–');
@@ -4579,7 +4579,7 @@ function renderAnalyticsPage(){
         var cfi=document.createElement('input');cfi.type='number';cfi.min='0';cfi.max='1';cfi.step='0.01';
         cfi.value=convFactor2||'';cfi.placeholder='0.03';
         cfi.style.cssText='width:70px;padding:3px 6px;margin:0;font-size:11px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit';
-        (function(){cfi.addEventListener('change',function(){cd().analytics.convFactor=parseFloat(this.value)||0;renderAnalyticsPage();scheduleSave();});})();
+        (function(){cfi.addEventListener('change',function(){cd().analytics.convFactor=parseFloat(this.value)||0;renderAnalyticsPage();scheduleAnalyticsSave();});})();
         cfRow.appendChild(cfLbl);cfRow.appendChild(cfi);kac.appendChild(cfRow);
       }
       var bvAnf=getBlockVis().kpiCards||{};
@@ -4778,7 +4778,7 @@ function renderAnalyticsPage(){
         if(isEdit){
           var cpInp=document.createElement('input');cpInp.type='text';cpInp.value=val||'';cpInp.placeholder='0';
           cpInp.style.cssText='width:80px;padding:2px 6px;margin:0;font-size:11px;font-weight:700;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:'+bar.color+';text-align:right;font-family:"DM Mono",monospace';
-          (function(k){cpInp.addEventListener('change',function(){if(!cd().analytics.contentPsych)cd().analytics.contentPsych={};cd().analytics.contentPsych[k]=parseInt(this.value.replace(/[^0-9]/g,''))||0;scheduleSave();renderAnalyticsPage();});})(bar.key);
+          (function(k){cpInp.addEventListener('change',function(){if(!cd().analytics.contentPsych)cd().analytics.contentPsych={};cd().analytics.contentPsych[k]=parseInt(this.value.replace(/[^0-9]/g,''))||0;scheduleAnalyticsSave();renderAnalyticsPage();});})(bar.key);
           valSpan.appendChild(cpInp);
         }else{valSpan.textContent=val?val.toLocaleString('de-DE'):'–';}
         rowTop.appendChild(lbl2);rowTop.appendChild(valSpan);
@@ -5269,12 +5269,15 @@ function undoLast(){
 }
 
 function scheduleSave(){
-  // lastUpdated bei jeder Agentur-Änderung setzen
+  clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);
+}
+function scheduleAnalyticsSave(){
+  // Nur für Analytics-Änderungen: lastUpdated setzen
   if(ROLE==='agency'&&ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
     if(!DATA[ACTIVE_CUSTOMER].analytics)DATA[ACTIVE_CUSTOMER].analytics={};
     DATA[ACTIVE_CUSTOMER].analytics.lastUpdated=getTodayISO();
   }
-  clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);
+  scheduleSave();
 }
 
 async function doSetPassword(){
