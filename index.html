@@ -1441,7 +1441,7 @@ function updateOnboardingBars(){
     var obDisplay=ob;
     var lastDoneD=-1;
     obDisplay.forEach(function(s,i){if(s.done)lastDoneD=i;});
-    var fillPct=lastDoneD>=0?(total>1?(lastDoneD/(total-1))*100:100):0;
+    var fillPct=lastDoneD>=0?((lastDoneD+1)/total)*100:0;
     fill.style.width=fillPct+'%';
     // Stepper-Container (außerhalb prog-wrap)
     var stepperParent=wrap.parentElement;
@@ -1453,7 +1453,7 @@ function updateOnboardingBars(){
     stepper.className='ob-stepper';
     stepper.style.cssText='position:relative;height:24px;margin-top:-4px;margin-bottom:18px';
     obDisplay.forEach(function(step,i){
-      var dotPct=total>1?(i/(total-1))*100:50;
+      var dotPct=((i+1)/total)*100;
       var dot=document.createElement('div');
       dot.style.cssText='position:absolute;top:0;left:'+dotPct+'%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;border:2px solid '+(step.done?'var(--accent)':'var(--border2)')+';background:'+(step.done?'var(--accent)':'#fff')+';transition:all .4s;box-shadow:0 0 0 2px var(--surface)';
       stepper.appendChild(dot);
