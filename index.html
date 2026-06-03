@@ -2755,18 +2755,31 @@ function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).
 var ANALYTICS_BADGE_KEY='analytics_badge_';
 function updateAnalyticsBadge(){
   if(ROLE!=='client'||!ACTIVE_CUSTOMER)return;
-  var an=cd().analytics||{};
+  var badge=document.getElementById('analytics-badge');
+  if(!badge)return;
   var key=ANALYTICS_BADGE_KEY+ACTIVE_CUSTOMER;
   var lastSeen='';
   try{lastSeen=localStorage.getItem(key)||'';}catch(e){}
-  var lastUpdate=an.lastUpdated||'';
-  var badge=document.getElementById('analytics-badge');
-  if(!badge)return;
-  if(lastUpdate&&lastUpdate!==lastSeen){
-    badge.style.display='block';
-  } else {
-    badge.style.display='none';
-  }
+  // Frisch aus Supabase laden um aktuellen lastUpdated zu bekommen
+  var sb=getSB();
+  sb.from('analytics').select('data').eq('customer_id',ACTIVE_CUSTOMER).limit(1).then(function(res){
+    var lastUpdate='';
+    if(res.data&&res.data.length&&res.data[0].data){
+      lastUpdate=res.data[0].data.lastUpdated||'';
+      // Lokales DATA auch aktualisieren
+      if(cd().analytics)cd().analytics.lastUpdated=lastUpdate;
+    }
+    if(lastUpdate&&lastUpdate!==lastSeen){
+      badge.style.display='block';
+    } else {
+      badge.style.display='none';
+    }
+  }).catch(function(){
+    // Fallback: lokale Daten
+    var an=cd().analytics||{};
+    var lastUpdate=an.lastUpdated||'';
+    badge.style.display=(lastUpdate&&lastUpdate!==lastSeen)?'block':'none';
+  });
 }
 function clearAnalyticsBadge(){
   if(ROLE!=='client'||!ACTIVE_CUSTOMER)return;
