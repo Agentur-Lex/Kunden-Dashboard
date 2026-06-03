@@ -3287,8 +3287,8 @@ function ensureFixedSteps(){
   if(!d.obSteps) d.obSteps = [];
   var ids = d.obSteps.map(function(s){ return s.id; });
   var fixed = [
-    {id:'fixed-3', label:'Onboarding-Fragebogen', desc:'', done:false},
     {id:'fixed-2', label:'Zugangsdaten Social-Media', desc:'', done:false},
+    {id:'fixed-3', label:'Onboarding-Fragebogen', desc:'', done:false},
   ];
   fixed.forEach(function(f){
     if(ids.indexOf(f.id) === -1) d.obSteps.unshift(f);
