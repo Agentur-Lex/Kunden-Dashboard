@@ -2779,7 +2779,7 @@ function updateAnalyticsBadge(){
 function clearAnalyticsBadge(){
   if(ROLE!=='client'||!ACTIVE_CUSTOMER)return;
   var an=cd().analytics||{};
-  var lastUpdate=an.lastUpdated||getTodayISO();
+  var lastUpdate=an.lastUpdated||new Date().toISOString();
   var key=ANALYTICS_BADGE_KEY+ACTIVE_CUSTOMER;
   try{localStorage.setItem(key,lastUpdate);}catch(e){}
   var badge=document.getElementById('analytics-badge');
@@ -5273,7 +5273,7 @@ function scheduleAnalyticsSave(){
   // Nur für Analytics-Änderungen: lastUpdated setzen
   if(ROLE==='agency'&&ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
     if(!DATA[ACTIVE_CUSTOMER].analytics)DATA[ACTIVE_CUSTOMER].analytics={};
-    DATA[ACTIVE_CUSTOMER].analytics.lastUpdated=getTodayISO();
+    DATA[ACTIVE_CUSTOMER].analytics.lastUpdated=new Date().toISOString();
   }
   scheduleSave();
 }
