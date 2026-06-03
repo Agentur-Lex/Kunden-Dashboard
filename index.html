@@ -1428,7 +1428,7 @@ function updateOnboardingBars(){
     // Balken bis zum letzten erledigten Punkt
     var lastDoneIdx=-1;
     ob.forEach(function(s,i){if(s.done)lastDoneIdx=i;});
-    var fillPct=lastDoneIdx>=0?((lastDoneIdx+1)/total)*100:0;
+    var fillPct=lastDoneIdx>=0?((lastDoneIdx+1)/(total+1))*100:0;
     fill.style.width=fillPct+'%';
     // Alte Punkte + Labels entfernen
     wrap.querySelectorAll('.ob-dot,.ob-dot-lbl').forEach(function(d){d.remove();});
@@ -1436,7 +1436,7 @@ function updateOnboardingBars(){
     wrap.style.position='relative';
     wrap.style.marginBottom='28px'; // Platz für Labels
     ob.forEach(function(step,i){
-      var dotPct=((i+1)/total)*100;
+      var dotPct=((i+1)/(total+1))*100; // gleichmäßig mit Rand
       var dot=document.createElement('div');
       dot.className='ob-dot';
       dot.style.cssText='position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;border:2px solid '+(step.done?'var(--accent)':'var(--border2)')+';background:'+(step.done?'var(--accent)':'#fff')+';left:'+dotPct+'%;z-index:2;transition:all .4s;box-shadow:0 0 0 2px #fff';
