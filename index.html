@@ -1438,8 +1438,14 @@ function updateOnboardingBars(){
     var wrap=fill.parentElement;
     if(!wrap)return;
     // Balken bis zum letzten erledigten Punkt
-    // Reihenfolge umkehren: letzter Schritt links, erster rechts
-    var obDisplay=ob.slice().reverse();
+    // Reihenfolge: fixed-3, fixed-2, dann custom
+    var obDisplay=[];
+    var _f3=ob.find(function(s){return s.id==='fixed-3';});
+    var _f2=ob.find(function(s){return s.id==='fixed-2';});
+    var _custom=ob.filter(function(s){return s.id!=='fixed-2'&&s.id!=='fixed-3';});
+    if(_f3)obDisplay.push(_f3);
+    if(_f2)obDisplay.push(_f2);
+    obDisplay=obDisplay.concat(_custom);
     var lastDoneD=-1;
     obDisplay.forEach(function(s,i){if(s.done)lastDoneD=i;});
     var fillPct=lastDoneD>=0?((lastDoneD+1)/total)*100:0;
