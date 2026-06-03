@@ -5136,8 +5136,13 @@ async function loadCustomerData(custId,custObj){
 async function sbSaveCustomer(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var d=cd();var cId=ACTIVE_CUSTOMER;
   var anRes=await sb.from('analytics').select('id').eq('customer_id',cId).limit(1);
-  if(anRes.data&&anRes.data.length){await sb.from('analytics').update({data:d.analytics,stand_datum:d.analytics.standDatum}).eq('customer_id',cId);}
-  else{await sb.from('analytics').insert({customer_id:cId,stand_datum:d.analytics.standDatum,data:d.analytics});}
+  if(anRes.data&&anRes.data.length){
+    var upRes=await sb.from('analytics').update({data:d.analytics,stand_datum:d.analytics&&d.analytics.standDatum}).eq('customer_id',cId);
+    if(upRes.error)console.error('Analytics UPDATE Fehler:',upRes.error);
+  } else {
+    var inRes=await sb.from('analytics').insert({customer_id:cId,stand_datum:d.analytics&&d.analytics.standDatum,data:d.analytics});
+    if(inRes.error)console.error('Analytics INSERT Fehler:',inRes.error);
+  }
   var stRes=await sb.from('strategy').select('customer_id').eq('customer_id',cId).limit(1);
   if(stRes.data&&stRes.data.length){await sb.from('strategy').update({data:d.strategy}).eq('customer_id',cId);}
   else{await sb.from('strategy').insert({customer_id:cId,data:d.strategy});}
