@@ -1420,6 +1420,18 @@ function updateOnboardingBars(){
   var ob=cd().obSteps||[];
   var total=ob.length;
   var isMob=window.innerWidth<=480;
+  // fixed-2 und fixed-3 done-Status evaluieren
+  var _d=cd();
+  var _strat=(_d.strategy&&_d.strategy.plat)||[];
+  var _plats=_strat.length?PLATFORMS.filter(function(p){return _strat.indexOf(p.label)!==-1;}):PLATFORMS;
+  var _sc=_d.socialCreds||{};
+  var _credsOk=_plats.length>0&&_plats.every(function(p){return _sc[p.id]&&_sc[p.id].email&&_sc[p.id].pass;});
+  var _qs=_d.questions||[];
+  var _questOk=_qs.length>0&&_qs.every(function(q,i){return _d.answers&&_d.answers[i]&&String(_d.answers[i]).trim();});
+  ob.forEach(function(s){
+    if(s.id==='fixed-2')s.done=_credsOk;
+    if(s.id==='fixed-3')s.done=_questOk;
+  });
   ['ov-ob-fill','ag-ob-fill'].forEach(function(fid){
     var fill=document.getElementById(fid);
     if(!fill)return;
