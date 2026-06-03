@@ -1444,6 +1444,11 @@ function updateOnboardingBars(){
     var i2=obDisplay.findIndex(function(s){return s.id==='fixed-2';});
     var i3=obDisplay.findIndex(function(s){return s.id==='fixed-3';});
     if(i2!==-1&&i3!==-1){var tmp=obDisplay[i2];obDisplay[i2]=obDisplay[i3];obDisplay[i3]=tmp;}
+    // Fill neu berechnen basierend auf getauschter Reihenfolge
+    var lastDoneIdxD=-1;
+    obDisplay.forEach(function(s,i){if(s.done)lastDoneIdxD=i;});
+    var fillPctD=lastDoneIdxD>=0?((lastDoneIdxD+1)/(total+1))*100:0;
+    fill.style.width=fillPctD+'%';
     obDisplay.forEach(function(step,i){
       var dotPct=((i+1)/(total+1))*100;
       var dot=document.createElement('div');
