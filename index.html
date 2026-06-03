@@ -1439,7 +1439,12 @@ function updateOnboardingBars(){
     var stepper=document.createElement('div');
     stepper.className='ob-stepper';
     stepper.style.cssText='position:relative;height:24px;margin-top:-4px;margin-bottom:18px';
-    ob.forEach(function(step,i){
+    // Zugangsdaten und Fragebogen tauschen für Stepper-Anzeige
+    var obDisplay=ob.slice();
+    var i2=obDisplay.findIndex(function(s){return s.id==='fixed-2';});
+    var i3=obDisplay.findIndex(function(s){return s.id==='fixed-3';});
+    if(i2!==-1&&i3!==-1&&i2>i3){var tmp=obDisplay[i2];obDisplay[i2]=obDisplay[i3];obDisplay[i3]=tmp;}
+    obDisplay.forEach(function(step,i){
       var dotPct=((i+1)/(total+1))*100;
       var dot=document.createElement('div');
       dot.style.cssText='position:absolute;top:0;left:'+dotPct+'%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;border:2px solid '+(step.done?'var(--accent)':'var(--border2)')+';background:'+(step.done?'var(--accent)':'#fff')+';transition:all .4s;box-shadow:0 0 0 2px var(--surface)';
