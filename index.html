@@ -1438,7 +1438,8 @@ function updateOnboardingBars(){
     var wrap=fill.parentElement;
     if(!wrap)return;
     // Balken bis zum letzten erledigten Punkt
-    var obDisplay=ob;
+    // Reihenfolge umkehren: letzter Schritt links, erster rechts
+    var obDisplay=ob.slice().reverse();
     var lastDoneD=-1;
     obDisplay.forEach(function(s,i){if(s.done)lastDoneD=i;});
     var fillPct=lastDoneD>=0?((lastDoneD+1)/total)*100:0;
