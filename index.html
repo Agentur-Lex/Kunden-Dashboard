@@ -1425,7 +1425,11 @@ function updateOnboardingBars(){
     if(!fill)return;
     var wrap=fill.parentElement;
     if(!wrap)return;
-    fill.style.width=pct+'%';
+    // Balken bis zum letzten erledigten Punkt
+    var lastDoneIdx=-1;
+    ob.forEach(function(s,i){if(s.done)lastDoneIdx=i;});
+    var fillPct=lastDoneIdx>=0?((lastDoneIdx+1)/total)*100:0;
+    fill.style.width=fillPct+'%';
     // Alte Punkte + Labels entfernen
     wrap.querySelectorAll('.ob-dot,.ob-dot-lbl').forEach(function(d){d.remove();});
     if(isMob)return; // Mobile: nur Balken
@@ -3371,7 +3375,7 @@ function renderObPanel(){
         var cbI=document.createElement('input');cbI.type='checkbox';cbI.id='ob-cb-'+qi;cbI.style.cssText='width:16px;height:16px;accent-color:var(--accent);cursor:pointer';cbI.checked=(d.answers&&d.answers[qi])==='1';
         (function(i2){cbI.addEventListener('change',function(){if(!cd().answers)cd().answers={};cd().answers[i2]=this.checked?'1':'0';scheduleSave();});})(qi);
         var cbL=document.createElement('span');cbL.style.cssText='font-size:11px;color:var(--text)';cbL.textContent='Ja';
-        cbW.appendChild(cbI);cbW.appendChild(cbL);qw.appendChild(ql);qw.appendChild(cbW);con.appendChild(qw);
+        cbW.appendChild(cbI);cbW.appendChild(cbL);qw.appendChild(ql);qw.appendChild(cbW);questBody.appendChild(qw);
       }else{
         var qt=document.createElement('textarea');qt.rows=2;qt.id='ob-q-'+qi;qt.style.cssText='margin:0;width:100%;box-sizing:border-box;font-size:11px';
         qt.placeholder='Deine Antwort...';qt.value=(d.answers&&d.answers[qi])||'';
