@@ -1426,9 +1426,15 @@ function updateOnboardingBars(){
     var wrap=fill.parentElement;
     if(!wrap)return;
     // Balken bis zum letzten erledigten Punkt
-    var lastDoneIdx=-1;
-    ob.forEach(function(s,i){if(s.done)lastDoneIdx=i;});
-    var fillPct=lastDoneIdx>=0?((lastDoneIdx+1)/(total+1))*100:0;
+    // Stepper: Fragebogen und Zugangsdaten tauschen für Anzeige
+    var obDisplay=ob.slice();
+    var iF2=obDisplay.findIndex(function(s){return s.id==='fixed-2';});
+    var iF3=obDisplay.findIndex(function(s){return s.id==='fixed-3';});
+    if(iF2!==-1&&iF3!==-1){var _t=obDisplay[iF2];obDisplay[iF2]=obDisplay[iF3];obDisplay[iF3]=_t;}
+    // Fill bis zum letzten erledigten Punkt (in obDisplay-Reihenfolge)
+    var lastDoneD=-1;
+    obDisplay.forEach(function(s,i){if(s.done)lastDoneD=i;});
+    var fillPct=lastDoneD>=0?((lastDoneD+1)/(total+1))*100:0;
     fill.style.width=fillPct+'%';
     // Stepper-Container (außerhalb prog-wrap)
     var stepperParent=wrap.parentElement;
@@ -1439,16 +1445,6 @@ function updateOnboardingBars(){
     var stepper=document.createElement('div');
     stepper.className='ob-stepper';
     stepper.style.cssText='position:relative;height:24px;margin-top:-4px;margin-bottom:18px';
-    // Zugangsdaten und Fragebogen tauschen für Stepper-Anzeige
-    var obDisplay=ob.slice();
-    var i2=obDisplay.findIndex(function(s){return s.id==='fixed-2';});
-    var i3=obDisplay.findIndex(function(s){return s.id==='fixed-3';});
-    if(i2!==-1&&i3!==-1){var tmp=obDisplay[i2];obDisplay[i2]=obDisplay[i3];obDisplay[i3]=tmp;}
-    // Fill neu berechnen basierend auf getauschter Reihenfolge
-    var lastDoneIdxD=-1;
-    obDisplay.forEach(function(s,i){if(s.done)lastDoneIdxD=i;});
-    var fillPctD=lastDoneIdxD>=0?((lastDoneIdxD+1)/(total+1))*100:0;
-    fill.style.width=fillPctD+'%';
     obDisplay.forEach(function(step,i){
       var dotPct=((i+1)/(total+1))*100;
       var dot=document.createElement('div');
