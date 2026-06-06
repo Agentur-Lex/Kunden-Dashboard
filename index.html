@@ -2922,11 +2922,9 @@ function goToOnboarding(){
   },250);
 }
 function getTodoOnclick(t,i){
-  if(t._autoKey&&(t._autoKey.indexOf('auto_caption_')===0||t._autoKey.indexOf('auto_link_')===0)){
-    var parts=t._autoKey.split('_');
-    // Format: auto_caption_CUSTID_DATE_TITLE oder auto_link_CUSTID_DATE_TITLE
-    var titleEnc=parts.slice(3).join('_');
-    var title=decodeURIComponent(titleEnc);
+  if(t._autoKey&&(t._autoKey.indexOf('autocap|')===0||t._autoKey.indexOf('autolink|')===0)){
+    var parts=t._autoKey.split('|');
+    var title=parts[3]||'';
     return 'jumpToContentRow('+JSON.stringify(title)+')';
   }
   return '';
@@ -5121,45 +5119,46 @@ function checkMissingCaptionAndLink(){
     rows.forEach(function(row){
       var date=normalizeDate(row.date);
       if(!date||date<todayStr||date>fiveStr)return;
-      var title=row.name||'(kein Titel)';
+      var title=(row.name||'').trim();
+      if(!title)return; // Zeilen ohne Titel ignorieren
+      var safeTitle=title.replace(/[^a-zA-Z0-9äöüÄÖÜß\-]/g,'_');
       // Caption fehlt
       if(!row.caption||!row.caption.trim()){
-        var captKey='auto_caption_'+custId+'_'+date+'_'+encodeURIComponent(title);
+        var captKey='autocap|'+custId+'|'+date+'|'+title;
         var exists=(d.todos||[]).some(function(t){return t._autoKey===captKey;});
         if(!exists){
           if(!d.todos)d.todos=[];
-          d.todos.unshift({text:'Caption für „'+title+'" fehlt noch',due:date,prio:'high',assign:'agency',done:false,createdAt:Date.now(),_autoKey:captKey});
+          d.todos.unshift({text:'Caption für „'+title+'“ fehlt noch',due:date,prio:'high',assign:'agency',done:false,createdAt:Date.now(),_autoKey:captKey});
         }
       }
       // Drive-Link fehlt
       if(!row.link||!row.link.trim()){
-        var linkKey='auto_link_'+custId+'_'+date+'_'+encodeURIComponent(title);
+        var linkKey='autolink|'+custId+'|'+date+'|'+title;
         var existsL=(d.todos||[]).some(function(t){return t._autoKey===linkKey;});
         if(!existsL){
           if(!d.todos)d.todos=[];
-          d.todos.unshift({text:'Drive-Link für „'+title+'" fehlt noch',due:date,prio:'high',assign:'agency',done:false,createdAt:Date.now(),_autoKey:linkKey});
+          d.todos.unshift({text:'Drive-Link für „'+title+'“ fehlt noch',due:date,prio:'high',assign:'agency',done:false,createdAt:Date.now(),_autoKey:linkKey});
         }
       }
     });
-    // Veraltete auto-Todos entfernen (Post schon vergangen oder befüllt)
+    // Veraltete auto-Todos entfernen
     if(d.todos){
       d.todos=d.todos.filter(function(t){
         if(!t._autoKey)return true;
-        // Auto-Todo für Caption
-        if(t._autoKey.indexOf('auto_caption_')===0){
-          var parts=t._autoKey.split('_');
-          var dateP=parts[2];
-          var titleP=decodeURIComponent(parts.slice(3).join('_'));
-          var row2=rows.find(function(r){return normalizeDate(r.date)===dateP&&(r.name||'(kein Titel)')===titleP;});
-          if(!row2||normalizeDate(row2.date)<todayStr)return false;
+        if(t._autoKey.indexOf('autocap|')===0){
+          var p=t._autoKey.split('|');
+          var dateP=p[2];var titleP=p[3];
+          if(dateP<todayStr||dateP>fiveStr)return false;
+          var row2=rows.find(function(r){return normalizeDate(r.date)===dateP&&(r.name||'').trim()===titleP;});
+          if(!row2)return false;
           if(row2.caption&&row2.caption.trim())return false;
         }
-        if(t._autoKey.indexOf('auto_link_')===0){
-          var parts2=t._autoKey.split('_');
-          var dateP2=parts2[2];
-          var titleP2=decodeURIComponent(parts2.slice(3).join('_'));
-          var row3=rows.find(function(r){return normalizeDate(r.date)===dateP2&&(r.name||'(kein Titel)')===titleP2;});
-          if(!row3||normalizeDate(row3.date)<todayStr)return false;
+        if(t._autoKey.indexOf('autolink|')===0){
+          var p2=t._autoKey.split('|');
+          var dateP2=p2[2];var titleP2=p2[3];
+          if(dateP2<todayStr||dateP2>fiveStr)return false;
+          var row3=rows.find(function(r){return normalizeDate(r.date)===dateP2&&(r.name||'').trim()===titleP2;});
+          if(!row3)return false;
           if(row3.link&&row3.link.trim())return false;
         }
         return true;
