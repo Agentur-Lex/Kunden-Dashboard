@@ -680,7 +680,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
               <div id="ob-panel-content"></div>
             </div>
           </div>
-          <div class="card"><div class="card-title">To-Dos</div><div id="ov-todo-summary"></div></div>
+          <div class="card" id="ov-todo-card"><div class="card-title">To-Dos</div><div id="ov-todo-summary"></div></div>
         </div>
 
       <!-- BRAINSTORMING (nur Kunden) -->
@@ -1935,7 +1935,9 @@ function showDeleteUserHint(custName, authUserId){
 function jumpToCustomer(k){ACTIVE_CUSTOMER=k;resetAllEditStates();document.getElementById('cust-dropdown').value=k;showPage('overview',document.getElementById('nav-overview'));}
 
 // ── CUSTOMER VIEW ──
-function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var navStrat=document.getElementById('nav-strategy');if(navStrat)navStrat.style.display=ROLE==='client'?'none':'';setTimeout(function(){updateAnalyticsBadge();},500);var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',fmtDelta(an.fdelta)],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',fmtDelta(an.rdelta)],['ov-eng',an.eng],['ov-edelta',fmtDelta(an.edelt)],['ov-posts',an.posts],['ov-pdelta',fmtDelta(an.pdelta)]].forEach(function(p){setTxt(p[0],p[1]);
+function renderCustomerView(){if(!ACTIVE_CUSTOMER||!DATA[ACTIVE_CUSTOMER])return;setTimeout(function(){applyTermTips(document.getElementById('page-overview'));applyTermTips(document.getElementById('page-analytics'));},200);var navStrat=document.getElementById('nav-strategy');if(navStrat)navStrat.style.display=ROLE==='client'?'none':'';
+var navTodos=document.getElementById('nav-todos');if(navTodos)navTodos.style.display=ROLE==='client'?'none':'';setTimeout(function(){updateAnalyticsBadge();},500);
+  if(ROLE==='client')renderClientTodosOnOverview();var d=cd();var an=d.analytics||{};setTxt('ov-title',d.name+' – Dashboard');[['ov-fdelta',fmtDelta(an.fdelta)],['ov-reach',fmtThousands(an.reach)],['ov-rdelta',fmtDelta(an.rdelta)],['ov-eng',an.eng],['ov-edelta',fmtDelta(an.edelt)],['ov-posts',an.posts],['ov-pdelta',fmtDelta(an.pdelta)]].forEach(function(p){setTxt(p[0],p[1]);
   (function(){var today=getTodayISO();var d7=new Date();d7.setDate(d7.getDate()+7);var d7s=d7.toISOString().split('T')[0];var posts=(cd().rows||[]).filter(function(r){var nd=normalizeDate(r.date);return nd>=today&&nd<=d7s;}).sort(function(a,b){return(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||'');});var el=document.getElementById('ov-posts-7d');if(!el)return;if(!posts.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Posts geplant.</div>';return;}el.innerHTML=posts.map(function(r){return'<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="color:var(--text);font-weight:500">'+escHtml(r.name||'–')+'</span><span style="color:var(--text3);flex-shrink:0;margin-left:6px">'+fmtISO(normalizeDate(r.date))+'</span></div>';}).join('');})();});renderAnalyticsPage();renderStrategyPage();ensureFixedSteps();updateOnboardingBars();if(OB_PANEL_OPEN&&document.getElementById('ob-panel-content'))renderObPanel();renderShootsList();renderTodos();renderContentTable();buildCalendar();renderBrainstormHistory();if(ROLE==='agency')renderAgencyOnboardingPage();}
 
 // ── AGENCY ONBOARDING PAGE ──
@@ -2747,6 +2749,7 @@ function toggleTodo(idx){
   }
   scheduleSave();
   renderTodos();
+  if(ROLE==='client')renderClientTodosOnOverview();
 }
 function deleteTodo(idx){pushUndo();cd().todos.splice(idx,1);scheduleSave();renderTodos();}
 function startEdit(idx){EDITING_TODO=idx;renderTodos();}
@@ -2818,6 +2821,44 @@ function checkAnalyticsReminder(){
   setTimeout(function(){if(banner.parentElement)banner.remove();try{localStorage.setItem(reminderKey,'1');}catch(e){}},30000);
 }
 
+function renderClientTodosOnOverview(){
+  var container=document.getElementById('ov-todo-summary');
+  if(!container||ROLE!=='client'||!ACTIVE_CUSTOMER)return;
+  var todos=cd().todos||[];
+  var now=Date.now();
+  var threeDays=3*24*60*60*1000;
+  // Offene + erledigte (nur letzte 3 Tage)
+  var visible=todos.filter(function(t){
+    if(!t.done)return true;
+    var doneAt=t.completedAt||t.doneAt||0;
+    return doneAt&&(now-doneAt)<threeDays;
+  });
+  if(!visible.length){
+    container.innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px 0">Keine offenen To-Dos</div>';
+    return;
+  }
+  var html='';
+  visible.forEach(function(t,i){
+    var isDone=t.done;
+    var prioColor=t.prio==='high'?'var(--accent)':t.prio==='med'?'var(--amber)':'var(--text3)';
+    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);opacity:'+(isDone?'0.5':'1')+'">';
+    // Checkbox (nur ansehen, nicht klicken für Kunden)
+    html+='<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(isDone?'var(--accent)':'var(--border2)')+';background:'+(isDone?'var(--accent)':'#fff')+';flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center">';
+    if(isDone)html+='<svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5"/></svg>';
+    html+='</div>';
+    // Text
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div style="font-size:12px;font-weight:500;color:var(--text);text-decoration:'+(isDone?'line-through':'none')+'">'+escHtml(t.text||'')+'</div>';
+    if(t.due&&!isDone)html+='<div style="font-size:10px;color:var(--text3);margin-top:2px">Fällig: '+fmtISO(t.due)+'</div>';
+    html+='</div>';
+    // Prio-Badge
+    if(!isDone&&t.prio&&t.prio!=='low'){
+      html+='<span style="font-size:9px;font-weight:700;color:#fff;background:'+prioColor+';border-radius:4px;padding:2px 6px;flex-shrink:0">'+(t.prio==='high'?'Hoch':'Mittel')+'</span>';
+    }
+    html+='</div>';
+  });
+  container.innerHTML=html;
+}
 function goToOnboarding(){
   showPage('overview',document.getElementById('nav-overview'));
   setTimeout(function(){
