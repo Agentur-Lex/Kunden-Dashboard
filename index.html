@@ -5267,7 +5267,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   var base=makeEmptyCustomer(cust.name);
   if(an&&Object.keys(an).length)Object.assign(base.analytics,an);
   if(strat&&strat.data&&Object.keys(strat.data).length)Object.assign(base.strategy,strat.data);
-  base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id};});
+  base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id,_autoKey:t.auto_key||null};});
   var shootArr=Array.isArray(shoots)?shoots:(shoots&&shoots.data?shoots.data:[]);
   base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces!=null?s.target_pieces:12};});
   base.shoots.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
@@ -5334,7 +5334,7 @@ async function sbSaveAllTodos(){
   // Einzelne Todos upserten statt delete+insert (RLS-sicher für Kunden)
   for(var i=0;i<todos.length;i++){
     var t=todos[i];
-    var row={customer_id:cId,text:t.text,due:t.due||null,prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,created_at:t.createdAt||Date.now(),completed_at:t.completedAt||null,shoot_ref:t.shootRef!==undefined?t.shootRef:null,is_reset:t.isReset||false,is_brainstorm:t.isBrainstorm||false,bs_category:t.bsCategory||null};
+    var row={customer_id:cId,text:t.text,due:t.due||null,prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,created_at:t.createdAt||Date.now(),completed_at:t.completedAt||null,shoot_ref:t.shootRef!==undefined?t.shootRef:null,is_reset:t.isReset||false,is_brainstorm:t.isBrainstorm||false,bs_category:t.bsCategory||null,auto_key:t._autoKey||null};
     if(t._id){
       // Update bestehenden Eintrag
       await sb.from('todos').update(row).eq('id',t._id);
