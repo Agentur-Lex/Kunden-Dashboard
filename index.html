@@ -2823,6 +2823,25 @@ function checkAnalyticsReminder(){
   setTimeout(function(){if(banner.parentElement)banner.remove();try{localStorage.setItem(reminderKey,'1');}catch(e){}},30000);
 }
 
+function jumpToContentRow(rowTitle){
+  showPage('content',document.getElementById('nav-content'));
+  setTimeout(function(){
+    var found=null;
+    // Suche in content-tbody nach Zeile mit dem Titel
+    var trs=document.querySelectorAll('#content-tbody tr');
+    trs.forEach(function(tr){
+      var tds=tr.querySelectorAll('td');
+      // Titel ist in der 2. td (nach Checkbox)
+      if(tds.length>1&&tds[1].textContent.trim()===rowTitle)found=tr;
+    });
+    if(found){
+      found.scrollIntoView({behavior:'smooth',block:'center'});
+      found.style.transition='background .6s';
+      found.style.background='rgba(255,87,87,0.2)';
+      setTimeout(function(){found.style.background='';},2500);
+    }
+  },400);
+}
 function clientToggleTodoFromOverview(idx){
   var t=cd().todos[idx];
   if(!t)return;
@@ -2859,7 +2878,8 @@ function renderClientTodosOnOverview(){
     var isDone=t.done;
     var prioColor=t.prio==='high'?'var(--accent)':t.prio==='med'?'var(--amber)':'var(--text3)';
     var isOb=t.isOnboarding;
-    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);opacity:'+(isDone?'0.5':'1')+';cursor:'+(isOb?'pointer':'default')+'" '+(isOb?'onclick="goToOnboarding()"':'')+'>';
+    var isLast=(i===visible.length-1);
+    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;'+(isLast?'':' border-bottom:1px solid var(--border);')+';opacity:'+(isDone?'0.5':'1')+';cursor:'+(isOb?'pointer':'default')+'" '+(isOb?'onclick="goToOnboarding()"':'')+'>';
     // Checkbox (nur ansehen, nicht klicken für Kunden)
     var realIdx=(cd().todos||[]).indexOf(t);
     var canCheck=!t.isOnboarding&&realIdx>=0;
@@ -2901,6 +2921,16 @@ function goToOnboarding(){
     },100);
   },250);
 }
+function getTodoOnclick(t,i){
+  if(t._autoKey&&(t._autoKey.indexOf('auto_caption_')===0||t._autoKey.indexOf('auto_link_')===0)){
+    var parts=t._autoKey.split('_');
+    // Format: auto_caption_CUSTID_DATE_TITLE oder auto_link_CUSTID_DATE_TITLE
+    var titleEnc=parts.slice(3).join('_');
+    var title=decodeURIComponent(titleEnc);
+    return 'jumpToContentRow('+JSON.stringify(title)+')';
+  }
+  return '';
+}
 function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});var isAgency=ROLE==='agency';var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);var visible;if(isAgency){visible=todos;}else{visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}}
   var open=visible.filter(function(t){return!t.done;}).map(function(t){return{t:t,i:todos.indexOf(t)};});var done2=visible.filter(function(t){return t.done&&!t.isOnboarding;}).map(function(t){return{t:t,i:todos.indexOf(t)};});
   var badge=document.getElementById('todo-badge');if(badge){badge.style.display=open.length?'inline':'none';badge.textContent=open.length;}
@@ -2921,7 +2951,9 @@ function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();Object.keys(
   function buildItem(entry,isDone){var t=entry.t;var i=entry.i;if(t.isOnboarding){return'<div class="todo-item" style="cursor:pointer" onclick="goToOnboarding()">'+chk(false,'')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--accent)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Onboarding abschließen</div><div style="margin-top:6px"><div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;background:var(--accent);border-radius:2px;width:'+t._pct+'%"></div></div></div></div><span class="priority-pill p-high">Hoch</span></div>';}
   if(EDITING_TODO===i&&isAgency){return'<div class="todo-edit-form"><span class="flbl">Aufgabe</span><input type="text" id="edit-text-'+i+'" value="'+t.text.replace(/"/g,'&quot;')+'" style="margin-bottom:8px"><div class="form-row"><div><span class="flbl">Fällig</span><input type="date" id="edit-due-'+i+'" value="'+(t.due||'')+'" style="margin:0"></div><div><span class="flbl">Priorität</span><select id="edit-prio-'+i+'" style="margin:0"><option value="high"'+(t.prio==='high'?' selected':'')+'>Hoch</option><option value="med"'+(t.prio==='med'?' selected':'')+'>Mittel</option><option value="low"'+(t.prio==='low'?' selected':'')+'>Niedrig</option></select></div></div><div style="margin-top:8px"><span class="flbl">Zugewiesen an</span><select id="edit-assign-'+i+'" style="margin:0"><option value="agency"'+(t.assign==='agency'?' selected':'')+'>Agentur</option><option value="client"'+(t.assign==='client'?' selected':'')+'>Kunde</option><option value="both"'+(t.assign==='both'?' selected':'')+'>Beide</option></select></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn-primary" onclick="saveEdit('+i+')">Speichern</button><button class="btn-outline" onclick="cancelEdit()">Abbrechen</button></div></div>';}
   var al=t.assign==='agency'?'Agentur':t.assign==='client'?'Kunde':'Beide';var rb=(t.isReset&&isAgency)?'<button class="btn-outline" style="margin:0 0 0 8px;font-size:10px;padding:2px 9px;color:var(--accent);border-color:rgba(255,87,87,0.4)" onclick="agencySwitchCustomer(\''+t.resetKey+'\');showPage(\'settings\',document.getElementById(\'nav-settings\'))">Zurücksetzen →</button>':'';
-  return'<div class="todo-item" style="position:relative">'+(!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+chk(isDone,'toggleTodo('+i+')')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div><div style="display:flex;gap:8px;margin-top:2px">'+(t.due?'<span style="font-size:10px;color:var(--text3)">Fällig: '+fmtISO(t.due)+'</span>':'')+(isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+(t.createdAt&&(t.isReset||t.shootRef!==undefined||t.isBrainstorm)?'<span style="font-size:10px;color:var(--text3)">Erstellt: '+new Date(t.createdAt).toLocaleDateString('de-DE')+'</span>':'')+'</div></div><span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+(isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+'</div>';}
+  var todoOnclick=getTodoOnclick(t,i);
+  return'<div class="todo-item" style="position:relative;'+(todoOnclick?'cursor:pointer':'')+'" '+(todoOnclick?'onclick="'+todoOnclick+'"':'')+'>'+
+  (!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+chk(isDone,'toggleTodo('+i+')')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div><div style="display:flex;gap:8px;margin-top:2px">'+(t.due?'<span style="font-size:10px;color:var(--text3)">Fällig: '+fmtISO(t.due)+'</span>':'')+(isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+(t.createdAt&&(t.isReset||t.shootRef!==undefined||t.isBrainstorm)?'<span style="font-size:10px;color:var(--text3)">Erstellt: '+new Date(t.createdAt).toLocaleDateString('de-DE')+'</span>':'')+'</div></div><span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+(isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+'</div>';}
   var oel=document.getElementById('todo-open');var oem=document.getElementById('todo-empty');var del=document.getElementById('todo-done');var dem=document.getElementById('done-empty');
   if(oel){oel.innerHTML=open.map(function(e){return buildItem(e,false);}).join('');if(oem)oem.style.display=open.length?'none':'block';}
   if(del){del.innerHTML=done2.map(function(e){return buildItem(e,true);}).join('');if(dem)dem.style.display=done2.length?'none':'block';}}
@@ -2936,7 +2968,7 @@ function captionKeydown(e,el){
 function renderContentTable(){if(ROLE==='agency')setTimeout(checkMissingCaptionAndLink,500);if(!ACTIVE_CUSTOMER)return;var today=getTodayISO();var allRows=sortRows(cd().rows);cd().rows=allRows;var pastRows=allRows.filter(function(r){return isPastDate(r.date);});var futureRows=allRows.filter(function(r){return!isPastDate(r.date);});var pastCount=pastRows.length;var toggleBtn=document.getElementById('past-toggle-btn');if(toggleBtn){toggleBtn.style.display=pastCount>0?'flex':'none';var ti=document.getElementById('past-toggle-icon');var tl=document.getElementById('past-toggle-label');var tb2=document.getElementById('past-count-badge');if(ti)ti.textContent=SHOW_PAST?'▼':'▶';if(tl)tl.textContent=SHOW_PAST?'Vergangene Posts ausblenden':'Vergangene Posts anzeigen';if(tb2)tb2.textContent=pastCount;}
   var rowsToRender=SHOW_PAST?allRows:futureRows;var tb='';
   rowsToRender.forEach(function(row){var ri=allRows.indexOf(row);var past=isPastDate(row.date);
-    tb+='<tr class="'+(past?'past-row':'')+' onclick="openContentModal('+ri+')" style="cursor:pointer"><td style="width:24px;text-align:center;padding:2px"><input type="checkbox" class="bulk-cb" '+(_bulkSelected.has(ri)?'checked':'')+' onclick="event.stopPropagation();bulkToggleRow('+ri+',this.checked)"></td><td><input class="cell-input" type="date" value="'+(normalizeDate(row.date)||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].date=this.value;buildCalendar()" onblur="renderContentTable()"></td>';
+    tb+='<tr class="'+(past?'past-row':'')+'" data-rowname="'+escHtml(row.name||'')+' onclick="openContentModal('+ri+')" style="cursor:pointer"><td style="width:24px;text-align:center;padding:2px"><input type="checkbox" class="bulk-cb" '+(_bulkSelected.has(ri)?'checked':'')+' onclick="event.stopPropagation();bulkToggleRow('+ri+',this.checked)"></td><td><input class="cell-input" type="date" value="'+(normalizeDate(row.date)||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].date=this.value;buildCalendar()" onblur="renderContentTable()"></td>';
     if(row.art==='Light-Ad'&&ROLE==='agency'){
       var today30=new Date();today30.setDate(today30.getDate()-30);
       var minDate=today30.getFullYear()+'-'+String(today30.getMonth()+1).padStart(2,'0')+'-'+String(today30.getDate()).padStart(2,'0');
