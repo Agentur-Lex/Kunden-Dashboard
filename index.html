@@ -2869,6 +2869,13 @@ function renderClientTodosOnOverview(){
     var doneAt=t.completedAt||t.doneAt||0;
     return doneAt&&(now-doneAt)<threeDays;
   });
+  var prioOrder={high:0,med:1,low:2};
+  visible.sort(function(a,b){
+    if(a.done!==b.done)return a.done?1:-1; // Erledigte nach hinten
+    var pa=prioOrder[a.prio]!==undefined?prioOrder[a.prio]:2;
+    var pb=prioOrder[b.prio]!==undefined?prioOrder[b.prio]:2;
+    return pa-pb;
+  });
   if(!visible.length){
     container.innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px 0">Keine offenen To-Dos</div>';
     return;
