@@ -1416,6 +1416,8 @@ function updateOnboardingBars(){
   var pct=calcProgress(ACTIVE_CUSTOMER);
   var navOb=document.getElementById('nav-onboarding');
   if(navOb&&ROLE==='client'){navOb.parentElement.style.display=pct<100?'':'none';}
+  // Onboarding-To-Do auf Übersicht aktualisieren
+  if(ROLE==='client')renderClientTodosOnOverview();
   var inlineBlock=document.getElementById('ov-ob-inline');
   if(inlineBlock&&ROLE==='client'){inlineBlock.style.display=pct<100?'block':'none';}
   var ob=cd().obSteps||[];
@@ -2821,6 +2823,16 @@ function checkAnalyticsReminder(){
   setTimeout(function(){if(banner.parentElement)banner.remove();try{localStorage.setItem(reminderKey,'1');}catch(e){}},30000);
 }
 
+function clientToggleTodoFromOverview(idx){
+  var t=cd().todos[idx];
+  if(!t)return;
+  t.done=!t.done;
+  if(t.done)t.completedAt=Date.now();
+  else delete t.completedAt;
+  scheduleSave();
+  renderClientTodosOnOverview();
+  updateTodoBadge();
+}
 function renderClientTodosOnOverview(){
   var container=document.getElementById('ov-todo-summary');
   if(!container||ROLE!=='client'||!ACTIVE_CUSTOMER)return;
@@ -2849,7 +2861,13 @@ function renderClientTodosOnOverview(){
     var isOb=t.isOnboarding;
     html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);opacity:'+(isDone?'0.5':'1')+';cursor:'+(isOb?'pointer':'default')+'" '+(isOb?'onclick="goToOnboarding()"':'')+'>';
     // Checkbox (nur ansehen, nicht klicken für Kunden)
-    html+='<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(isDone?'var(--accent)':'var(--border2)')+';background:'+(isDone?'var(--accent)':'#fff')+';flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center">';
+    var realIdx=(cd().todos||[]).indexOf(t);
+    var canCheck=!t.isOnboarding&&realIdx>=0;
+    var cbonclick=canCheck?'clientToggleTodoFromOverview('+realIdx+')':""; 
+    var cbcursor=canCheck?'pointer':'default';
+    var cbBorder=isDone?'var(--accent)':'var(--border2)';
+    var cbBg=isDone?'var(--accent)':'#fff';
+    html+='<div onclick="'+cbonclick+'" style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+cbBorder+';background:'+cbBg+';flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:'+cbcursor+'">';
     if(isDone)html+='<svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5"/></svg>';
     html+='</div>';
     // Text
