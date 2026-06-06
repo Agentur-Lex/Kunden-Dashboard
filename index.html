@@ -2824,11 +2824,16 @@ function checkAnalyticsReminder(){
 function renderClientTodosOnOverview(){
   var container=document.getElementById('ov-todo-summary');
   if(!container||ROLE!=='client'||!ACTIVE_CUSTOMER)return;
-  var todos=cd().todos||[];
+  var rawTodos=(cd().todos||[]).filter(function(t){
+    return (t.assign==='client'||t.assign==='both')&&!t.isReset;
+  });
+  var pct=calcProgress(ACTIVE_CUSTOMER);
+  // Onboarding-To-Do automatisch einfügen
+  var allTodos=pct<100?[{text:'Onboarding abschließen',prio:'high',done:false,isOnboarding:true}].concat(rawTodos):rawTodos;
   var now=Date.now();
   var threeDays=3*24*60*60*1000;
   // Offene + erledigte (nur letzte 3 Tage)
-  var visible=todos.filter(function(t){
+  var visible=allTodos.filter(function(t){
     if(!t.done)return true;
     var doneAt=t.completedAt||t.doneAt||0;
     return doneAt&&(now-doneAt)<threeDays;
@@ -2841,7 +2846,8 @@ function renderClientTodosOnOverview(){
   visible.forEach(function(t,i){
     var isDone=t.done;
     var prioColor=t.prio==='high'?'var(--accent)':t.prio==='med'?'var(--amber)':'var(--text3)';
-    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);opacity:'+(isDone?'0.5':'1')+'">';
+    var isOb=t.isOnboarding;
+    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);opacity:'+(isDone?'0.5':'1')+';cursor:'+(isOb?'pointer':'default')+'" '+(isOb?'onclick="goToOnboarding()"':'')+'>';
     // Checkbox (nur ansehen, nicht klicken für Kunden)
     html+='<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+(isDone?'var(--accent)':'var(--border2)')+';background:'+(isDone?'var(--accent)':'#fff')+';flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center">';
     if(isDone)html+='<svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5"/></svg>';
