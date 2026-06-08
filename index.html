@@ -293,9 +293,9 @@ textarea{resize:vertical;line-height:1.5}
   /* Content-Modal: Vorschau unter Felder */
   .modal-split{flex-direction:column!important;max-height:95vh!important;overflow-y:auto!important}
   .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border)}
-  .modal-right{background:#111!important;min-height:480px;height:480px}
-  #phone-screen{width:100%!important;height:100%!important}
-  #phone-screen iframe,#phone-screen video{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;min-height:440px!important}
+  .modal-right{background:#111!important;height:auto!important;min-height:0!important}
+  #phone-screen{width:100%!important;height:auto!important;aspect-ratio:16/9;position:relative}
+  #phone-screen iframe,#phone-screen video{position:absolute!important;inset:0;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important}
   /* Shoot-Detail-Modal: Buttons unten fixiert */
   .shoot-modal-foot{position:sticky!important;bottom:0!important;background:var(--surface)!important;z-index:10!important}
   #analytics-tc{grid-template-columns:1fr!important;width:100%!important;max-width:100%!important}
@@ -3224,6 +3224,7 @@ function openContentModal(ri){
   document.getElementById('content-modal-title').textContent=row.name||'Beitrag';
   var body='';
   var fields=[['date','Datum','date'],['name','Titel','text'],['link','Drive-Link','url'],['art','Content-Art','dropdown'],['spez','Spez.','dropdown'],['caption','Caption','textarea']];
+  if(ROLE==='client')fields=fields.filter(function(f){return f[0]!=='link'&&f[0]!=='art'&&f[0]!=='spez';});
   fields.forEach(function(col){
     var key=col[0],lbl=col[1],type=col[2];
     var clientEditable=(key==='date'||key==='caption');
