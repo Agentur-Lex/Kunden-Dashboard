@@ -1711,77 +1711,116 @@ function renderUpcomingShoots(){
   Object.keys(DATA).forEach(function(custId){
     var d=DATA[custId];
     if(!d||!d.shoots)return;
-    var _st=d.status||'aktiv';
-    if(_st==='abgeschlossen'||_st==='Abgeschlossen')return;
+    var st=(d.status||'').toLowerCase();
+    if(st==='abgeschlossen')return;
     d.shoots.forEach(function(s){
       var dt=normalizeDate(s.date);
-      if(dt&&dt>today){
-        shoots.push({date:dt,time:s.time||'',title:s.title||'',custName:d.name||custId,ideas:s.ideas||[],target:(s.ideas||[]).length,custId:custId});
-      }
+      if(dt&&dt>today)shoots.push({date:dt,time:s.time||'',title:s.title||'',custName:d.name||custId,ideas:s.ideas||[],target:(s.ideas||[]).length,custId:custId});
     });
   });
   shoots.sort(function(a,b){return a.date.localeCompare(b.date)||(a.time.localeCompare(b.time));});
-  var html='<table style="width:100%;border-collapse:collapse;font-size:11px">'
-    +'<thead><tr>'
-    +'<th style="text-align:left;padding:5px 10px 5px 0;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">DATUM</th>'
-    +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">TITEL</th>'
-    +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">KUNDE</th>'
-    +'<th style="text-align:center;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">ANZAHL</th>'
-    +'</tr></thead><tbody>';
-  if(shoots.length){
+
+  var table=document.createElement('table');
+  table.style.cssText='width:100%;border-collapse:collapse;font-size:11px';
+  var thead=document.createElement('thead');
+  var hdr=document.createElement('tr');
+  ['DATUM','TITEL','KUNDE','ANZAHL'].forEach(function(txt,i){
+    var th=document.createElement('th');
+    th.style.cssText=(i===0?'text-align:left;padding:5px 10px 5px 0;':'text-align:'+(i===3?'center':'left')+';padding:5px 10px;')+'font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)';
+    th.textContent=txt;
+    hdr.appendChild(th);
+  });
+  thead.appendChild(hdr);
+  table.appendChild(thead);
+  var tbody=document.createElement('tbody');
+
   shoots.forEach(function(s){
     var key=s.date+'_'+s.title+s.custName;
     if(_closedBanners.has(key))return;
     var filled=s.ideas.filter(function(x){return x.thema&&x.thema.trim();}).length;
-    var contentStr=filled+' / '+s.target;
-    var contentColor,contentBg,contentBorder;
-    if(filled===0){contentColor='#dc2626';contentBg='rgba(220,38,38,0.08)';contentBorder='rgba(220,38,38,0.25)';}
-    else if(s.target>0&&filled>=s.target){contentColor='#16a34a';contentBg='rgba(22,163,74,0.08)';contentBorder='rgba(22,163,74,0.25)';}
-    else{contentColor='#f59e0b';contentBg='rgba(245,158,11,0.10)';contentBorder='rgba(245,158,11,0.30)';}
-    html+='<tr style="border-bottom:1px solid var(--border2);cursor:pointer" onclick="agencyOpenShoot(\''+s.custId+'\')" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">'
-      +'<td style="padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)">'+fmtISO(s.date)+'<span class="upc-time">'+(s.time?' · '+s.time+' Uhr':'')+'</span>'+'</td>'
-      +'<td style="padding:6px 10px;font-weight:600;color:var(--text)">'+escHtml(s.title||'–')+'</td>'
-      +'<td style="padding:6px 10px;color:var(--text2)">'+escHtml(s.custName)+'</td>'
-      +'<td style="padding:6px 10px;text-align:center"><span class="upc-anzahl" style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:'+contentColor+';background:'+contentBg+';border:1px solid '+contentBorder+'">'+contentStr+'</span></td>'
-      +'</tr>';
+    var cs=filled+' / '+s.target;
+    var cc,cb,cbo;
+    if(filled===0){cc='#dc2626';cb='rgba(220,38,38,0.08)';cbo='rgba(220,38,38,0.25)';}
+    else if(s.target>0&&filled>=s.target){cc='#16a34a';cb='rgba(22,163,74,0.08)';cbo='rgba(22,163,74,0.25)';}
+    else{cc='#f59e0b';cb='rgba(245,158,11,0.10)';cbo='rgba(245,158,11,0.30)';}
+    var tr=document.createElement('tr');
+    tr.style.cssText='border-bottom:1px solid var(--border2);cursor:pointer';
+    tr.setAttribute('data-custid',s.custId);
+    tr.addEventListener('mouseover',function(){this.style.background='var(--surface2)';});
+    tr.addEventListener('mouseout',function(){this.style.background='';});
+    tr.addEventListener('click',function(){agencyOpenShoot(this.getAttribute('data-custid'));});
+    var td1=document.createElement('td');
+    td1.style.cssText='padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)';
+    td1.innerHTML=fmtISO(s.date)+(s.time?'<span class="upc-time"> · '+escHtml(s.time)+' Uhr</span>':'');
+    var td2=document.createElement('td');
+    td2.style.cssText='padding:6px 10px;font-weight:600;color:var(--text)';
+    td2.textContent=s.title||'–';
+    var td3=document.createElement('td');
+    td3.style.cssText='padding:6px 10px;color:var(--text2)';
+    td3.textContent=s.custName;
+    var td4=document.createElement('td');
+    td4.style.cssText='padding:6px 10px;text-align:center';
+    var badge=document.createElement('span');
+    badge.className='upc-anzahl';
+    badge.style.cssText='display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:'+cc+';background:'+cb+';border:1px solid '+cbo;
+    badge.textContent=cs;
+    td4.appendChild(badge);
+    tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td4);
+    tbody.appendChild(tr);
   });
-  } // end if shoots.length
-  // ── Kunden ohne kommenden Drehtermin ──
+
+  // Kunden ohne kommenden Drehtermin
   var custWithShoot=new Set(shoots.map(function(s){return s.custId;}));
-  var noShootCustomers=[];
+  var noShoot=[];
   Object.keys(DATA).forEach(function(custId){
     var d=DATA[custId];
     if(!d)return;
-    var status=d.status||'aktiv';
-    if(status==='abgeschlossen'||status==='Abgeschlossen')return;
+    var st=(d.status||'').toLowerCase();
+    if(st==='abgeschlossen')return;
     if(!custWithShoot.has(custId)){
-      // Letzten vergangenen Drehtermin ermitteln
       var lastDate='';
-      if(d.shoots){
-        d.shoots.forEach(function(s){
-          var dt=normalizeDate(s.date);
-          if(dt&&dt<=today&&dt>lastDate)lastDate=dt;
-        });
-      }
-      noShootCustomers.push({custId:custId,custName:d.name||custId,lastDate:lastDate});
+      if(d.shoots){d.shoots.forEach(function(s){var dt=normalizeDate(s.date);if(dt&&dt<=today&&dt>lastDate)lastDate=dt;});}
+      noShoot.push({custId:custId,custName:d.name||custId,lastDate:lastDate});
     }
   });
-  noShootCustomers.sort(function(a,b){return a.custName.localeCompare(b.custName);});
-  if(noShootCustomers.length){
-    html+='<tr><td colspan="4" style="padding:10px 0 4px 0;border-top:1px solid var(--border)">'
-      +'<div style="font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em">KUNDEN OHNE KOMMENDEN DREHTERMIN</div></td></tr>';
-    noShootCustomers.forEach(function(c){
+  noShoot.sort(function(a,b){return a.custName.localeCompare(b.custName);});
+
+  if(noShoot.length){
+    var sepTr=document.createElement('tr');
+    var sepTd=document.createElement('td');
+    sepTd.setAttribute('colspan','4');
+    sepTd.style.cssText='padding:10px 0 4px 0;border-top:1px solid var(--border)';
+    var sepLbl=document.createElement('div');
+    sepLbl.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em';
+    sepLbl.textContent='KUNDEN OHNE KOMMENDEN DREHTERMIN';
+    sepTd.appendChild(sepLbl);
+    sepTr.appendChild(sepTd);
+    tbody.appendChild(sepTr);
+
+    noShoot.forEach(function(c){
+      var tr=document.createElement('tr');
+      tr.style.cssText='border-bottom:1px solid var(--border2);cursor:pointer;opacity:.55';
+      tr.setAttribute('data-custid',c.custId);
+      tr.addEventListener('mouseover',function(){this.style.opacity='0.8';});
+      tr.addEventListener('mouseout',function(){this.style.opacity='0.55';});
+      tr.addEventListener('click',function(){agencyOpenShoot(this.getAttribute('data-custid'));});
       var lastStr=c.lastDate?('Letzter: '+fmtISO(c.lastDate)):'Noch kein Drehtermin';
-      html+='<tr style="border-bottom:1px solid var(--border2);cursor:pointer;opacity:.55" onclick="agencyOpenShoot(\''+c.custId+'\')" onmouseover="this.style.opacity=\'0.8\'" onmouseout="this.style.opacity=\'0.55\'">'
-        +'<td style="padding:6px 10px 6px 0;color:var(--text3);font-size:10px">'+lastStr+'</td>'
-        +'<td style="padding:6px 10px;color:var(--text3)">–</td>'
-        +'<td style="padding:6px 10px;color:var(--text3);font-weight:500">'+escHtml(c.custName)+'</td>'
-        +'<td style="padding:6px 10px;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border2)">0 / 0</span></td>'
-        +'</tr>';
+      var td1=document.createElement('td');td1.style.cssText='padding:6px 10px 6px 0;color:var(--text3);font-size:10px';td1.textContent=lastStr;
+      var td2=document.createElement('td');td2.style.cssText='padding:6px 10px;color:var(--text3)';td2.textContent='–';
+      var td3=document.createElement('td');td3.style.cssText='padding:6px 10px;color:var(--text3);font-weight:500';td3.textContent=c.custName;
+      var td4=document.createElement('td');td4.style.cssText='padding:6px 10px;text-align:center';
+      var badge=document.createElement('span');
+      badge.style.cssText='display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border2)';
+      badge.textContent='0 / 0';
+      td4.appendChild(badge);
+      tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td4);
+      tbody.appendChild(tr);
     });
   }
-  html+='</tbody></table>';
-  el.innerHTML=html;
+
+  table.appendChild(tbody);
+  el.innerHTML='';
+  el.appendChild(table);
 }
 
 function agencyOpenShoot(custId){
@@ -5328,6 +5367,7 @@ function updateShootReminder(){
   // 30-Minuten-Timer: Banner wieder einblenden
   if(_shootReminderTimer)clearTimeout(_shootReminderTimer);
   _shootReminderTimer=setTimeout(function(){_closedBanners.clear();updateShootReminder();},30*60*1000);
+  } // end if shoots.length
 }
 function updateTodoBadge(){
   var badge=document.getElementById('todo-nav-badge');
