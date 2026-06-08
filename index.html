@@ -1792,17 +1792,44 @@ function renderUpcomingShoots(){
   noShoot.sort(function(a,b){return a.custName.localeCompare(b.custName);});
 
   if(noShoot.length){
+    // Collapse-State aus sessionStorage
+    var noShootCollapsed=false;
+    try{noShootCollapsed=sessionStorage.getItem('upc_noshoot_collapsed')==='1';}catch(e){}
+
     var sepTr=document.createElement('tr');
     var sepTd=document.createElement('td');
     sepTd.setAttribute('colspan','4');
-    sepTd.style.cssText='padding:10px 0 4px 0;border-top:1px solid var(--border)';
-    var sepLbl=document.createElement('div');
+    sepTd.style.cssText='padding:10px 0 4px 0;border-top:1px solid var(--border);cursor:pointer;user-select:none';
+    var sepInner=document.createElement('div');
+    sepInner.style.cssText='display:flex;align-items:center;gap:6px';
+    var sepLbl=document.createElement('span');
     sepLbl.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em';
     sepLbl.textContent='DREHTERMIN AUSSTEHEND';
-    sepTd.appendChild(sepLbl);
+    var sepArrow=document.createElement('span');
+    sepArrow.style.cssText='font-size:9px;color:var(--text3);transition:transform .2s';
+    sepArrow.textContent='▾';
+    sepInner.appendChild(sepLbl);
+    sepInner.appendChild(sepArrow);
+    sepTd.appendChild(sepInner);
     sepTr.appendChild(sepTd);
     tbody.appendChild(sepTr);
 
+    // Sub-Header-Zeile
+    var subHdrTr=document.createElement('tr');
+    var subHdrCols=[
+      {text:'Letzter Drehtermin',colspan:1,align:'left'},
+      {text:'Kunde',colspan:3,align:'left'}
+    ];
+    subHdrCols.forEach(function(col){
+      var th=document.createElement('td');
+      th.setAttribute('colspan',col.colspan);
+      th.style.cssText='padding:4px 10px 4px '+(col.align==='left'&&col.colspan===1?'0':'10px')+';font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.04em;opacity:.7';
+      th.textContent=col.text;
+      subHdrTr.appendChild(th);
+    });
+    tbody.appendChild(subHdrTr);
+
+    var noShootRows=[subHdrTr];
     noShoot.forEach(function(c){
       var tr=document.createElement('tr');
       tr.style.cssText='border-bottom:1px solid var(--border2);cursor:pointer;opacity:.55';
@@ -1810,12 +1837,27 @@ function renderUpcomingShoots(){
       tr.addEventListener('mouseover',function(){this.style.opacity='0.8';});
       tr.addEventListener('mouseout',function(){this.style.opacity='0.55';});
       tr.addEventListener('click',function(){agencyOpenShoot(this.getAttribute('data-custid'));});
-      var td1=document.createElement('td');td1.style.cssText='padding:6px 10px 6px 0;color:var(--text3);font-size:10px';td1.textContent='–';
-      var td2=document.createElement('td');td2.setAttribute('colspan','2');td2.style.cssText='padding:6px 10px;color:var(--text3);font-weight:500';td2.textContent=c.custName;
-      var td4=document.createElement('td');td4.style.cssText='padding:6px 10px;text-align:right;white-space:nowrap';
-      td4.innerHTML=c.lastDate?('<span style="font-size:10px;color:var(--text3)">'+fmtISO(c.lastDate)+'</span>'):'<span style="font-size:10px;color:var(--text3)">–</span>';
-      tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td4);
+      var td1=document.createElement('td');
+      td1.style.cssText='padding:6px 10px 6px 0;font-size:10px;color:var(--text3);white-space:nowrap';
+      td1.textContent=c.lastDate?fmtISO(c.lastDate):'–';
+      var td2=document.createElement('td');td2.setAttribute('colspan','3');td2.style.cssText='padding:6px 10px;color:var(--text3);font-weight:500';td2.textContent=c.custName;
+      tr.appendChild(td1);tr.appendChild(td2);
       tbody.appendChild(tr);
+      noShootRows.push(tr);
+    });
+
+    // Initialen Zustand setzen
+    function applyNoShootCollapse(collapsed){
+      noShootRows.forEach(function(r){r.style.display=collapsed?'none':'';});
+      sepArrow.style.transform=collapsed?'rotate(-90deg)':'';
+    }
+    applyNoShootCollapse(noShootCollapsed);
+
+    // Toggle on click
+    sepTd.addEventListener('click',function(){
+      noShootCollapsed=!noShootCollapsed;
+      try{sessionStorage.setItem('upc_noshoot_collapsed',noShootCollapsed?'1':'0');}catch(e){}
+      applyNoShootCollapse(noShootCollapsed);
     });
   }
 
