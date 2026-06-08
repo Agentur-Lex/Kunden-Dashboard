@@ -455,7 +455,9 @@ textarea{resize:vertical;line-height:1.5}
   #bulk-bar{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;padding:8px 16px;display:none;align-items:center;gap:12px;border-radius:6px;margin-bottom:8px;font-size:12px;font-weight:600}
   #bulk-bar button{background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:5px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600}
   #bulk-bar button:hover{background:rgba(255,255,255,0.35)}
-  .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
+  .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);-webkit-appearance:none;appearance:none;border:1.5px solid var(--border);border-radius:3px;background:var(--surface2);position:relative;flex-shrink:0;vertical-align:middle}
+  .bulk-cb:checked{background:var(--accent);border-color:var(--accent)}
+  .bulk-cb:checked::after{content:'';position:absolute;left:3px;top:0px;width:5px;height:8px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg)}
 
 /* ── Page-Transition ── */
   .page{opacity:0;transition:opacity .18s ease}
