@@ -1724,7 +1724,7 @@ function renderUpcomingShoots(){
   table.style.cssText='width:100%;border-collapse:collapse;font-size:11px';
   var thead=document.createElement('thead');
   var hdr=document.createElement('tr');
-  ['DATUM','TITEL','KUNDE','ANZAHL'].forEach(function(txt,i){
+  ['DATUM','KUNDE','TITEL','ANZAHL'].forEach(function(txt,i){
     var th=document.createElement('th');
     th.style.cssText=(i===0?'text-align:left;padding:5px 10px 5px 0;':'text-align:'+(i===3?'center':'left')+';padding:5px 10px;')+'font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)';
     th.textContent=txt;
@@ -1753,11 +1753,11 @@ function renderUpcomingShoots(){
     td1.style.cssText='padding:6px 10px 6px 0;white-space:nowrap;color:var(--text2)';
     td1.innerHTML=fmtISO(s.date)+(s.time?'<span class="upc-time"> · '+escHtml(s.time)+' Uhr</span>':'');
     var td2=document.createElement('td');
-    td2.style.cssText='padding:6px 10px;font-weight:600;color:var(--text)';
-    td2.textContent=s.title||'–';
+    td2.style.cssText='padding:6px 10px;color:var(--text2)';
+    td2.textContent=s.custName;
     var td3=document.createElement('td');
-    td3.style.cssText='padding:6px 10px;color:var(--text2)';
-    td3.textContent=s.custName;
+    td3.style.cssText='padding:6px 10px;font-weight:600;color:var(--text)';
+    td3.textContent=s.title||'–';
     var td4=document.createElement('td');
     td4.style.cssText='padding:6px 10px;text-align:center';
     var badge=document.createElement('span');
@@ -1792,7 +1792,7 @@ function renderUpcomingShoots(){
     sepTd.style.cssText='padding:10px 0 4px 0;border-top:1px solid var(--border)';
     var sepLbl=document.createElement('div');
     sepLbl.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em';
-    sepLbl.textContent='Drehtermin ausstehend';
+    sepLbl.textContent='DREHTERMIN AUSSTEHEND';
     sepTd.appendChild(sepLbl);
     sepTr.appendChild(sepTd);
     tbody.appendChild(sepTr);
@@ -1806,8 +1806,8 @@ function renderUpcomingShoots(){
       tr.addEventListener('click',function(){agencyOpenShoot(this.getAttribute('data-custid'));});
       var lastStr=c.lastDate?('Letzter: '+fmtISO(c.lastDate)):'Noch kein Drehtermin';
       var td1=document.createElement('td');td1.style.cssText='padding:6px 10px 6px 0;color:var(--text3);font-size:10px';td1.textContent=lastStr;
-      var td2=document.createElement('td');td2.style.cssText='padding:6px 10px;color:var(--text3)';td2.textContent='–';
-      var td3=document.createElement('td');td3.style.cssText='padding:6px 10px;color:var(--text3);font-weight:500';td3.textContent=c.custName;
+      var td2=document.createElement('td');td2.style.cssText='padding:6px 10px;color:var(--text3);font-weight:500';td2.textContent=c.custName;
+      var td3=document.createElement('td');td3.style.cssText='padding:6px 10px;color:var(--text3)';td3.textContent='–';
       var td4=document.createElement('td');td4.style.cssText='padding:6px 10px;text-align:center';
       var badge=document.createElement('span');
       badge.style.cssText='display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border2)';
