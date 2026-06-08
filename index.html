@@ -294,10 +294,10 @@ textarea{resize:vertical;line-height:1.5}
   .modal-split{flex-direction:column!important;max-height:95vh!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
   .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border)}
   .modal-left-body{overflow-y:visible!important;flex:none!important}
-  .modal-right{background:#111!important;height:177.78vw!important;min-height:300px!important;max-height:667px!important;padding-bottom:32px!important}
-  .modal-right-body{overflow:visible!important;flex:none!important}
+  .modal-right{background:#111!important;height:400px!important}
+  .modal-right-body{overflow:hidden!important}
   #phone-screen{width:100%!important;height:100%!important}
-  #phone-screen iframe,#phone-screen video{width:100%!important;height:100%!important;display:block!important;min-height:0!important;border:none!important}
+  #phone-screen iframe,#phone-screen video{width:100%!important;height:100%!important;border:none!important;display:block!important}
   /* Shoot-Detail-Modal: Buttons unten fixiert */
   .shoot-modal-foot{position:sticky!important;bottom:0!important;background:var(--surface)!important;z-index:10!important}
   #analytics-tc{grid-template-columns:1fr!important;width:100%!important;max-width:100%!important}
@@ -3272,22 +3272,7 @@ function updatePhonePreview(link){
     frame.allow='autoplay';
     frame.setAttribute('allowfullscreen','');
     screen.appendChild(frame);
-    // Scroll-Overlay: leitet vertikale Wischgesten ans Modal weiter, lässt Taps durch
-    if(window.innerWidth<=768){
-      var overlay=document.createElement('div');
-      overlay.style.cssText='position:absolute;inset:0;z-index:1;touch-action:pan-y;background:transparent;';
-      var lastY=0,tapTimer=null;
-      overlay.addEventListener('touchstart',function(e){lastY=e.touches[0].clientY;tapTimer=setTimeout(function(){overlay.style.pointerEvents='none';},180);},{ passive:true });
-      overlay.addEventListener('touchmove',function(e){
-        clearTimeout(tapTimer);
-        var modal=document.querySelector('.modal-split');
-        if(modal)modal.scrollTop+=lastY-e.touches[0].clientY;
-        lastY=e.touches[0].clientY;
-      },{ passive:true });
-      overlay.addEventListener('touchend',function(){setTimeout(function(){overlay.style.pointerEvents='';},0);});
-      screen.style.position='relative';
-      screen.appendChild(overlay);
-    }
+
   } else {
     screen.innerHTML='<div class="phone-placeholder"><span style="font-size:26px;display:block;margin-bottom:8px">▶</span>Drive-Link<br>für Vorschau</div>';
   }
