@@ -2210,8 +2210,7 @@ function renderShootsList(){
   // Split into future and past
   var futureIdx=[], pastIdx=[];
   d.shoots.forEach(function(s,i){
-    (normalizeDate(s.date)
-    <today ? pastIdx : futureIdx).push(i);
+    (normalizeDate(s.date)<today ? pastIdx : futureIdx).push(i);
   });
 
   // Toggle button
