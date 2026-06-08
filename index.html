@@ -2863,58 +2863,88 @@ function renderClientTodosOnOverview(){
     return (t.assign==='client'||t.assign==='both')&&!t.isReset;
   });
   var pct=calcProgress(ACTIVE_CUSTOMER);
-  // Onboarding-To-Do automatisch einfügen
   var allTodos=pct<100?[{text:'Onboarding abschließen',prio:'high',done:false,isOnboarding:true}].concat(rawTodos):rawTodos;
   var now=Date.now();
   var threeDays=3*24*60*60*1000;
-  // Offene + erledigte (nur letzte 3 Tage)
   var visible=allTodos.filter(function(t){
     if(!t.done)return true;
-    var doneAt=t.completedAt||t.doneAt||0;
+    var doneAt=t.completedAt||0;
     return doneAt&&(now-doneAt)<threeDays;
   });
   var prioOrder={high:0,med:1,low:2};
   visible.sort(function(a,b){
-    if(a.done!==b.done)return a.done?1:-1; // Erledigte nach hinten
-    var pa=prioOrder[a.prio]!==undefined?prioOrder[a.prio]:2;
-    var pb=prioOrder[b.prio]!==undefined?prioOrder[b.prio]:2;
-    return pa-pb;
+    if(a.done!==b.done)return a.done?1:-1;
+    return (prioOrder[a.prio]||2)-(prioOrder[b.prio]||2);
   });
+  container.innerHTML='';
   if(!visible.length){
-    container.innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px 0">Keine offenen To-Dos</div>';
+    var empty=document.createElement('div');
+    empty.style.cssText='font-size:11px;color:var(--text3);padding:8px 0';
+    empty.textContent='Keine offenen To-Dos ✓';
+    container.appendChild(empty);
     return;
   }
-  var html='';
   visible.forEach(function(t,i){
-    var isDone=t.done;
-    var prioColor=t.prio==='high'?'var(--accent)':t.prio==='med'?'var(--amber)':'var(--text3)';
-    var isOb=t.isOnboarding;
-    var isLast=(i===visible.length-1);
-    var todoOC=isOb?'goToOnboarding()':(t._autoKey&&(t._autoKey.indexOf('autocap|')===0||t._autoKey.indexOf('autolink|')===0)?'jumpToContentRow('+JSON.stringify(t._autoKey.split('|')[3]||'')+')':'');
-    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;'+(isLast?'':' border-bottom:1px solid var(--border);')+';opacity:'+(isDone?'0.5':'1')+';cursor:'+(todoOC?'pointer':'default')+'" '+(todoOC?'onclick="'+todoOC+'"':'')+'>'; 
-    // Checkbox (nur ansehen, nicht klicken für Kunden)
+    var isDone=!!t.done;
+    var isLast=i===visible.length-1;
+    var isOb=!!t.isOnboarding;
+    var autoKey=t._autoKey||'';
+    var isAuto=(autoKey.indexOf('autocap|')===0||autoKey.indexOf('autolink|')===0);
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:8px 0;'
+      +(isLast?'':'border-bottom:1px solid var(--border);')
+      +'opacity:'+(isDone?'0.5':'1');
+    if(isOb){
+      row.style.cursor='pointer';
+      row.addEventListener('click',function(){goToOnboarding();});
+    } else if(isAuto){
+      var at=autoKey.split('|')[3]||'';
+      row.style.cursor='pointer';
+      row.addEventListener('click',(function(title){return function(){jumpToContentRow(title);};})(at));
+    }
+    // Checkbox
     var realIdx=(cd().todos||[]).indexOf(t);
-    var canCheck=!t.isOnboarding&&realIdx>=0;
-    var cbonclick=canCheck?'clientToggleTodoFromOverview('+realIdx+')':""; 
-    var cbcursor=canCheck?'pointer':'default';
-    var cbBorder=isDone?'var(--accent)':'var(--border2)';
-    var cbBg=isDone?'var(--accent)':'#fff';
-    html+='<div onclick="'+cbonclick+'" style="width:16px;height:16px;border-radius:4px;border:1.5px solid '+cbBorder+';background:'+cbBg+';flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:'+cbcursor+'">';
-    if(isDone)html+='<svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5"/></svg>';
-    html+='</div>';
+    var canCheck=!isOb&&realIdx>=0;
+    var cb=document.createElement('div');
+    cb.style.cssText='width:16px;height:16px;border-radius:4px;flex-shrink:0;margin-top:1px;'
+      +'display:flex;align-items:center;justify-content:center;'
+      +'border:1.5px solid '+(isDone?'var(--accent)':'var(--border2)')+';'
+      +'background:'+(isDone?'var(--accent)':'#fff')+';'
+      +'cursor:'+(canCheck?'pointer':'default');
+    if(isDone){
+      cb.innerHTML='<svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5"/></svg>';
+    }
+    if(canCheck){
+      cb.addEventListener('click',(function(ri){return function(e){
+        e.stopPropagation();clientToggleTodoFromOverview(ri);
+      };})(realIdx));
+    }
+    row.appendChild(cb);
     // Text
-    html+='<div style="flex:1;min-width:0">';
-    html+='<div style="font-size:12px;font-weight:500;color:var(--text);text-decoration:'+(isDone?'line-through':'none')+'">'+escHtml(t.text||'')+'</div>';
-    if(t.due&&!isDone)html+='<div style="font-size:10px;color:var(--text3);margin-top:2px">Fällig: '+fmtISO(t.due)+'</div>';
-    html+='</div>';
+    var td=document.createElement('div');
+    td.style.cssText='flex:1;min-width:0';
+    var tl=document.createElement('div');
+    tl.style.cssText='font-size:12px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+';text-decoration:'+(isDone?'line-through':'none');
+    tl.textContent=t.text||'';
+    td.appendChild(tl);
+    if(t.due&&!isDone){
+      var dl=document.createElement('div');
+      dl.style.cssText='font-size:10px;color:var(--text3);margin-top:2px';
+      dl.textContent='Fällig: '+fmtISO(t.due);
+      td.appendChild(dl);
+    }
+    row.appendChild(td);
     // Prio-Badge
     if(!isDone&&t.prio&&t.prio!=='low'){
-      html+='<span style="font-size:9px;font-weight:700;color:#fff;background:'+prioColor+';border-radius:4px;padding:2px 6px;flex-shrink:0">'+(t.prio==='high'?'Hoch':'Mittel')+'</span>';
+      var badge=document.createElement('span');
+      badge.style.cssText='font-size:9px;font-weight:700;color:#fff;border-radius:4px;padding:2px 6px;flex-shrink:0;background:'+(t.prio==='high'?'var(--accent)':'var(--amber)');
+      badge.textContent=t.prio==='high'?'Hoch':'Mittel';
+      row.appendChild(badge);
     }
-    html+='</div>';
+    container.appendChild(row);
   });
-  container.innerHTML=html;
 }
+
 function goToOnboarding(){
   showPage('overview',document.getElementById('nav-overview'));
   setTimeout(function(){
