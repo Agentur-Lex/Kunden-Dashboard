@@ -1721,14 +1721,14 @@ function renderUpcomingShoots(){
     });
   });
   shoots.sort(function(a,b){return a.date.localeCompare(b.date)||(a.time.localeCompare(b.time));});
-  if(!shoots.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:4px 0">Keine kommenden Drehtermine.</div>';return;}
   var html='<table style="width:100%;border-collapse:collapse;font-size:11px">'
     +'<thead><tr>'
-    +'<th style="text-align:left;padding:5px 10px 5px 0;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">DATUM</th>'
-    +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">TITEL</th>'
-    +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">KUNDE</th>'
-    +'<th style="text-align:center;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;border-bottom:1px solid var(--border)">ANZAHL</th>'
+    +'<th style="text-align:left;padding:5px 10px 5px 0;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">DATUM</th>'
+    +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">TITEL</th>'
+    +'<th style="text-align:left;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">KUNDE</th>'
+    +'<th style="text-align:center;padding:5px 10px;font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em;'+(shoots.length?'border-bottom:1px solid var(--border)':'')+'">ANZAHL</th>'
     +'</tr></thead><tbody>';
+  if(shoots.length){
   shoots.forEach(function(s){
     var key=s.date+'_'+s.title+s.custName;
     if(_closedBanners.has(key))return;
@@ -1745,6 +1745,7 @@ function renderUpcomingShoots(){
       +'<td style="padding:6px 10px;text-align:center"><span class="upc-anzahl" style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:'+contentColor+';background:'+contentBg+';border:1px solid '+contentBorder+'">'+contentStr+'</span></td>'
       +'</tr>';
   });
+  } // end if shoots.length
   // ── Kunden ohne kommenden Drehtermin ──
   var custWithShoot=new Set(shoots.map(function(s){return s.custId;}));
   var noShootCustomers=[];
@@ -5307,6 +5308,7 @@ function updateShootReminder(){
   shoots.sort(function(a,b){return a.date.localeCompare(b.date);});
   // Nur nicht-geschlossene anzeigen
   container.innerHTML='';
+  if(shoots.length){
   shoots.forEach(function(s){
     var key=s.date+'_'+s.title+s.custName;
     if(_closedBanners.has(key))return;
