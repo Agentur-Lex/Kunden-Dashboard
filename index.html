@@ -1711,6 +1711,8 @@ function renderUpcomingShoots(){
   Object.keys(DATA).forEach(function(custId){
     var d=DATA[custId];
     if(!d||!d.shoots)return;
+    var _st=d.status||'aktiv';
+    if(_st==='abgeschlossen'||_st==='Abgeschlossen')return;
     d.shoots.forEach(function(s){
       var dt=normalizeDate(s.date);
       if(dt&&dt>today){
@@ -1750,17 +1752,27 @@ function renderUpcomingShoots(){
     var d=DATA[custId];
     if(!d)return;
     var status=d.status||'aktiv';
-    if(status==='abgeschlossen')return;
+    if(status==='abgeschlossen'||status==='Abgeschlossen')return;
     if(!custWithShoot.has(custId)){
-      noShootCustomers.push({custId:custId,custName:d.name||custId});
+      // Letzten vergangenen Drehtermin ermitteln
+      var lastDate='';
+      if(d.shoots){
+        d.shoots.forEach(function(s){
+          var dt=normalizeDate(s.date);
+          if(dt&&dt<=today&&dt>lastDate)lastDate=dt;
+        });
+      }
+      noShootCustomers.push({custId:custId,custName:d.name||custId,lastDate:lastDate});
     }
   });
   noShootCustomers.sort(function(a,b){return a.custName.localeCompare(b.custName);});
   if(noShootCustomers.length){
-    html+='<tr><td colspan="4" style="padding:10px 0 4px 0;border-top:1px solid var(--border)">'      +'<div style="font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em">KUNDEN OHNE KOMMENDEN DREHTERMIN</div></td></tr>';
+    html+='<tr><td colspan="4" style="padding:10px 0 4px 0;border-top:1px solid var(--border)">'
+      +'<div style="font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em">KUNDEN OHNE KOMMENDEN DREHTERMIN</div></td></tr>';
     noShootCustomers.forEach(function(c){
+      var lastStr=c.lastDate?('Letzter: '+fmtISO(c.lastDate)):'Noch kein Drehtermin';
       html+='<tr style="border-bottom:1px solid var(--border2);cursor:pointer;opacity:.55" onclick="agencyOpenShoot(\''+c.custId+'\')" onmouseover="this.style.opacity=\'0.8\'" onmouseout="this.style.opacity=\'0.55\'">'
-        +'<td style="padding:6px 10px 6px 0;color:var(--text3)">–</td>'
+        +'<td style="padding:6px 10px 6px 0;color:var(--text3);font-size:10px">'+lastStr+'</td>'
         +'<td style="padding:6px 10px;color:var(--text3)">–</td>'
         +'<td style="padding:6px 10px;color:var(--text3);font-weight:500">'+escHtml(c.custName)+'</td>'
         +'<td style="padding:6px 10px;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:6px;font-weight:600;font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border2)">0 / 0</span></td>'
