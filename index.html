@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+  <!-- build: 202606081450  -->
   <meta name="theme-color" content="#FF5757">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -496,6 +497,7 @@ textarea{resize:vertical;line-height:1.5}
   .pi-icon:hover .pi-tip{display:block}
 </style>
 </head>
+<script>window.onerror=function(msg,src,line,col,err){console.error('GLOBAL ERROR:',msg,'at',src+':'+line+':'+col);};</script>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
@@ -5811,7 +5813,7 @@ document.addEventListener('keydown',function(e){
 });
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
+  navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});
     regs.forEach(function(r){r.unregister();});
   }).then(function(){
     if('caches' in window){
