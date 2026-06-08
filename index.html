@@ -3086,7 +3086,7 @@ function renderClientTodosOnOverview(){
     container._jumpHandlerSet=true;
     container.addEventListener('click',function(e){
       var item=e.target.closest('[data-jumptitle]');
-      if(item){jumpToContentRow(item.getAttribute('data-jumptitle'));}
+      if(item&&window.innerWidth>768){jumpToContentRow(item.getAttribute('data-jumptitle'));}
     });
   }
 }
@@ -3125,7 +3125,7 @@ function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();
       todoList._jumpHandlerSet=true;
       todoList.addEventListener('click',function(e){
         var item=e.target.closest('[data-jumptitle]');
-        if(item){jumpToContentRow(item.getAttribute('data-jumptitle'));}
+        if(item&&window.innerWidth>768){jumpToContentRow(item.getAttribute('data-jumptitle'));}
       });
     }
   },100);Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});var isAgency=ROLE==='agency';var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);var visible;if(isAgency){visible=todos;}else{visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}}
