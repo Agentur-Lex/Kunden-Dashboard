@@ -458,8 +458,26 @@ textarea{resize:vertical;line-height:1.5}
   .bulk-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--accent)}
 
 /* ── Page-Transition ── */
-  .page{opacity:0;transition:opacity .15s ease}
+  .page{opacity:0;transition:opacity .18s ease}
   .page.page-visible{opacity:1}
+  /* ── Smooth Transitions ── */
+  .card{transition:box-shadow .2s ease,transform .15s ease}
+  .card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+  .nav-item{transition:background .15s ease,color .15s ease}
+  button,.btn-primary,.btn-outline,.btn-icon{transition:background .15s ease,opacity .15s ease,box-shadow .15s ease}
+  .btn-primary:hover{opacity:.9}
+  .btn-outline:hover{background:var(--surface2)}
+  .todo-item{transition:opacity .2s ease,background .15s ease}
+  .todo-item:hover{background:var(--surface2)}
+  input[type=text],input[type=url],input[type=date],select,textarea{transition:border-color .15s ease,box-shadow .15s ease}
+  input[type=text]:focus,input[type=url]:focus,input[type=date]:focus,select:focus,textarea:focus{box-shadow:0 0 0 2px rgba(255,87,87,.18)}
+  .metric-card{transition:box-shadow .2s ease}
+  .metric-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+  .kpi{transition:box-shadow .2s ease}
+  .kpi:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+  .cal-ev{transition:opacity .15s ease}
+  .cal-ev:hover{opacity:.8}
+  #ob-panel,#ob-creds-body,#ob-quest-body{transition:max-height .35s ease,padding .35s ease,margin .35s ease}
 /* ── Analyse-Badge ── */
   .analytics-badge{display:none;position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;white-space:nowrap;border:1.5px solid #fff;line-height:1.2}
 /* ── Fachbegriff-Tooltips ── */
@@ -2902,7 +2920,7 @@ function renderClientTodosOnOverview(){
     } else if(isAuto){
       var at=autoKey.split('|')[3]||'';
       row.style.cursor='pointer';
-      row.addEventListener('click',(function(title){return function(){jumpToContentRow(title);};})(at));
+      row.setAttribute('data-jumptitle',at);
     }
     // Checkbox
     var realIdx=(cd().todos||[]).indexOf(t);
@@ -2945,6 +2963,14 @@ function renderClientTodosOnOverview(){
     }
     container.appendChild(row);
   });
+  // Delegierter Jump-Handler für Auto-Todos
+  if(container&&!container._jumpHandlerSet){
+    container._jumpHandlerSet=true;
+    container.addEventListener('click',function(e){
+      var item=e.target.closest('[data-jumptitle]');
+      if(item){jumpToContentRow(item.getAttribute('data-jumptitle'));}
+    });
+  }
 }
 
 function goToOnboarding(){
