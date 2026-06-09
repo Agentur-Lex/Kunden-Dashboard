@@ -1709,7 +1709,20 @@ function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;try{sessionStorage.setItem('l
 function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});;var hideCustSel=['overview','settings','agency-overview'];var custSel=document.getElementById('cust-dropdown');var custLbl=document.querySelector('#agency-tb span');if(custSel){custSel.style.display=hideCustSel.indexOf(id)!==-1?'none':'';if(custLbl)custLbl.style.display=hideCustSel.indexOf(id)!==-1?'none':'';};
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
   var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg){pg.classList.add('active');pg.classList.remove('page-visible');requestAnimationFrame(function(){requestAnimationFrame(function(){pg.classList.add('page-visible');});});}if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
-function openModal(id){var e=document.getElementById(id);if(e)e.style.display='flex';}
+function openModal(id){
+  var e=document.getElementById(id);
+  if(!e)return;
+  e.style.display='flex';
+  if(id==='content-modal'&&window.innerWidth<=768){
+    var split=e.querySelector('.modal-split');
+    if(split){
+      split.style.height='calc(100vh - 32px)';
+      split.style.overflowY='scroll';
+      split.style.webkitOverflowScrolling='touch';
+      split.style.overflowX='hidden';
+    }
+  }
+}
 function closeModal(id){var e=document.getElementById(id);if(e){e.style.display='none';if(id==='content-modal'){var ps=document.getElementById('phone-screen');if(ps)ps.innerHTML='<div class="phone-placeholder"><span style="font-size:32px;display:block;margin-bottom:10px">▶</span>Drive-Link<br>für Vorschau</div>';renderContentTable();}}}
 
 // ── AGENCY OVERVIEW ──
