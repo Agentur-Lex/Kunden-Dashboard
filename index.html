@@ -290,9 +290,9 @@ textarea{resize:vertical;line-height:1.5}
   #shoot-ideas-table td:nth-child(2),#shoot-ideas-table th:nth-child(2){padding-left:20px!important}
   #shoot-ideas-table td:nth-child(3),#shoot-ideas-table th:nth-child(3){display:none!important}
   .shoot-col-link{display:none!important}
-  /* Content-Modal: absolut positioniertes Kind scrollt zuverlässig auf iOS */
-  #content-modal{padding:0!important;align-items:stretch!important;justify-content:stretch!important}
-  #content-modal .modal-split{position:absolute!important;inset:16px!important;height:auto!important;max-height:none!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;flex-direction:column!important;border-radius:12px!important}
+  /* Content-Modal: absolut positioniert, natürliche Höhe, scrollt auf iOS */
+  #content-modal{padding:0!important;align-items:flex-start!important;justify-content:center!important}
+  #content-modal .modal-split{position:absolute!important;top:16px!important;left:16px!important;right:16px!important;max-height:calc(100vh - 32px)!important;height:auto!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;flex-direction:column!important}
   #content-modal .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);flex-shrink:0!important}
   #content-modal .modal-left-body{overflow:visible!important;flex:none!important}
   #content-modal .modal-right{background:#111!important;height:320px!important;flex-shrink:0!important}
