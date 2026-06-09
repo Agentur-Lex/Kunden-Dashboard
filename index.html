@@ -1713,7 +1713,7 @@ function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal'
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
   var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg){pg.classList.add('active');pg.classList.remove('page-visible');requestAnimationFrame(function(){requestAnimationFrame(function(){pg.classList.add('page-visible');});});}if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
 function openModal(id){var e=document.getElementById(id);if(e)e.style.display='flex';}
-function closeModal(id){var e=document.getElementById(id);if(e){e.style.display='none';if(id==='content-modal'){var ps=document.getElementById('phone-screen');if(ps)ps.innerHTML='<div class="phone-placeholder"><span style="font-size:32px;display:block;margin-bottom:10px">▶</span>Drive-Link<br>für Vorschau</div>';renderContentTable();}}}
+function closeModal(id){var e=document.getElementById(id);if(e){e.style.display='none';if(id==='content-modal'){closeVideoFullscreen();var ps=document.getElementById('phone-screen');if(ps)ps.innerHTML='<div class="phone-placeholder"><span style="font-size:32px;display:block;margin-bottom:10px">▶</span>Drive-Link<br>für Vorschau</div>';renderContentTable();}}}
 
 // ── AGENCY OVERVIEW ──
 var SHOW_DONE_CUSTOMERS=false;
