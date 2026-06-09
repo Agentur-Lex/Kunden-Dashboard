@@ -291,9 +291,9 @@ textarea{resize:vertical;line-height:1.5}
   #shoot-ideas-table td:nth-child(3),#shoot-ideas-table th:nth-child(3){display:none!important}
   .shoot-col-link{display:none!important}
   /* Content-Modal: Vorschau unter Felder */
-  .modal-overlay{overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;align-items:flex-start!important;padding:16px!important;box-sizing:border-box!important}
-  .modal-split{flex-direction:column!important;max-height:none!important;overflow:visible!important;flex-shrink:0!important;width:calc(100% - 0px)!important;margin:0 auto!important}
-  .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);overflow:visible!important}
+  .modal-overlay{overflow:hidden!important;align-items:flex-start!important;padding:16px!important;box-sizing:border-box!important}
+  .modal-split{flex-direction:column!important;max-height:calc(100vh - 32px)!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;flex-shrink:0!important;width:100%!important}
+  .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border)}
   .modal-left-body{overflow:visible!important;flex:none!important}
   .modal-right{background:#111!important;height:400px!important;flex-shrink:0!important}
   .modal-right-body{overflow:hidden!important;height:100%!important}
