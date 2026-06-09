@@ -290,9 +290,9 @@ textarea{resize:vertical;line-height:1.5}
   #shoot-ideas-table td:nth-child(2),#shoot-ideas-table th:nth-child(2){padding-left:20px!important}
   #shoot-ideas-table td:nth-child(3),#shoot-ideas-table th:nth-child(3){display:none!important}
   .shoot-col-link{display:none!important}
-  /* Content-Modal: absolut positioniert, natürliche Höhe, scrollt auf iOS */
-  #content-modal{padding:0!important;align-items:flex-start!important;justify-content:center!important}
-  #content-modal .modal-split{position:absolute!important;top:16px!important;left:16px!important;right:16px!important;max-height:calc(100vh - 32px)!important;height:auto!important;overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;flex-direction:column!important}
+  /* Content-Modal mobile: block + scroll */
+  #content-modal{overflow-y:scroll!important;-webkit-overflow-scrolling:touch!important;padding:16px!important;box-sizing:border-box!important;align-items:flex-start!important}
+  #content-modal .modal-split{flex-direction:column!important;max-height:none!important;overflow:visible!important;width:100%!important;position:static!important}
   #content-modal .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);flex-shrink:0!important}
   #content-modal .modal-left-body{overflow:visible!important;flex:none!important}
   #content-modal .modal-right{background:#111!important;height:320px!important;flex-shrink:0!important}
@@ -1709,7 +1709,11 @@ function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;try{sessionStorage.setItem('l
 function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});;var hideCustSel=['overview','settings','agency-overview'];var custSel=document.getElementById('cust-dropdown');var custLbl=document.querySelector('#agency-tb span');if(custSel){custSel.style.display=hideCustSel.indexOf(id)!==-1?'none':'';if(custLbl)custLbl.style.display=hideCustSel.indexOf(id)!==-1?'none':'';};
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
   var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg){pg.classList.add('active');pg.classList.remove('page-visible');requestAnimationFrame(function(){requestAnimationFrame(function(){pg.classList.add('page-visible');});});}if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
-function openModal(id){var e=document.getElementById(id);if(e)e.style.display='flex';}
+function openModal(id){
+  var e=document.getElementById(id);
+  if(!e)return;
+  e.style.display=(id==='content-modal'&&window.innerWidth<=768)?'block':'flex';
+}
 function closeModal(id){var e=document.getElementById(id);if(e){e.style.display='none';if(id==='content-modal'){var ps=document.getElementById('phone-screen');if(ps)ps.innerHTML='<div class="phone-placeholder"><span style="font-size:32px;display:block;margin-bottom:10px">▶</span>Drive-Link<br>für Vorschau</div>';renderContentTable();}}}
 
 // ── AGENCY OVERVIEW ──
