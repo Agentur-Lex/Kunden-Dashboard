@@ -396,9 +396,8 @@ textarea{resize:vertical;line-height:1.5}
   .analytics-kpi-grid{grid-template-columns:repeat(3,1fr)!important}
   .metrics-grid{grid-template-columns:1fr!important}
   .sidebar{padding:8px 10px}
-  .sidebar-client{justify-content:center!important}
-  .sidebar-client .sidebar-logo{flex-shrink:0;margin-right:auto!important;position:relative}
-  .sidebar-client .nav-item{flex:1!important;min-width:0!important;justify-content:center!important}
+  .sidebar-client{justify-content:center!important;gap:2px!important}
+  .sidebar-client .sidebar-logo{flex-shrink:0;margin-right:8px!important}
   .nav-item{min-width:36px}
   .nav-item svg{width:16px;height:16px}
   .nav-item{font-size:9px}
@@ -512,6 +511,9 @@ textarea{resize:vertical;line-height:1.5}
   .prog-fill{transition:width .8s cubic-bezier(.4,0,.2,1)!important}
 /* ── Tour ── */
   #tour-overlay{position:fixed;inset:0;z-index:8000;pointer-events:all}
+body.tour-active,html.tour-active{overflow:hidden!important}
+body.tour-active .content-area{overflow:hidden!important}
+body.tour-active .sidebar{overflow:hidden!important;touch-action:none!important}
   #tour-highlight{position:fixed;z-index:8001;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;transition:all .3s ease;cursor:default}
   #tour-tooltip{position:fixed;z-index:8002;background:#fff;border-radius:12px;padding:18px 20px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.18);pointer-events:all;transition:all .3s ease}
   #tour-tooltip h3{margin:0 0 8px;font-size:14px;font-weight:700;color:var(--text)}
@@ -5791,7 +5793,8 @@ function tourStart(){
   TOUR_IDX=0;
   var ov=document.getElementById('tour-overlay');
   if(ov)ov.style.display='block';
-  document.body.style.overflow='hidden';
+  document.body.classList.add('tour-active');
+  document.documentElement.classList.add('tour-active');
   tourShow();
 }
 
@@ -5867,7 +5870,8 @@ function tourPrev(){
 function tourEnd(){
   var ov=document.getElementById('tour-overlay');
   if(ov)ov.style.display='none';
-  document.body.style.overflow='';
+  document.body.classList.remove('tour-active');
+  document.documentElement.classList.remove('tour-active');
   try{localStorage.setItem('lex_tour_done_'+ACTIVE_CUSTOMER,'1');}catch(e){}
   checkInstallGuide();
 }
