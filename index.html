@@ -325,7 +325,9 @@ textarea{resize:vertical;line-height:1.5}
   .app{flex-direction:column;height:auto;min-height:100vh}
   html,body{overflow:auto}
   .main{min-width:0;width:100%}
-  .content-area{padding:12px 14px}
+  .content-area{padding:12px 14px;overflow-x:hidden!important}
+  #page-analytics,#analytics-page-content{width:100%!important;box-sizing:border-box!important}
+  #analytics-page-content .card{width:100%!important;box-sizing:border-box!important}
   .page-title{font-size:15px;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:center}
   /* ── Sidebar ── */
   .sidebar{width:100%;height:auto;flex-direction:row;padding:6px 8px;gap:0;border-right:none;border-bottom:1px solid rgba(255,255,255,0.15);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;flex-wrap:nowrap;align-items:center}
@@ -350,11 +352,10 @@ textarea{resize:vertical;line-height:1.5}
   .analytics-kpi-grid .metric-val{font-size:16px!important}
   .analytics-kpi-grid .metric-lbl{font-size:8px!important}
   .two-col,.form-row{grid-template-columns:1fr!important}
-  div[style*="grid-template-columns:1fr 1fr"][style*="align-items:start"]{grid-template-columns:1fr 1fr!important}
   #analytics-page-content > div[style*="grid-template-columns"]{grid-template-columns:1fr!important}
   /* ── Dashboard ── */
   #page-overview .metrics-grid{grid-template-columns:repeat(2,1fr)!important}
-  div[style*="grid-template-columns:1fr 1fr"][style*="align-items:start"]{grid-template-columns:1fr!important}
+  div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
   /* ── Content-Liste ── */
   #page-contentlist{display:none!important}
   /* ── Brainstorming ── */
