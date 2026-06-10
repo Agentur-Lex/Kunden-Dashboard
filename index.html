@@ -396,8 +396,9 @@ textarea{resize:vertical;line-height:1.5}
   .analytics-kpi-grid{grid-template-columns:repeat(3,1fr)!important}
   .metrics-grid{grid-template-columns:1fr!important}
   .sidebar{padding:8px 10px}
-  .sidebar-client .sidebar-logo{display:none!important}
   .sidebar-client{justify-content:center!important}
+  .sidebar-client .sidebar-logo{flex-shrink:0;margin-right:auto!important;position:relative}
+  .sidebar-client .nav-item{flex:1!important;min-width:0!important;justify-content:center!important}
   .nav-item{min-width:36px}
   .nav-item svg{width:16px;height:16px}
   .nav-item{font-size:9px}
@@ -1002,6 +1003,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
   <div class="modal-split" onclick="event.stopPropagation()">
     <div class="modal-left"><div class="modal-left-head"><span class="modal-title" id="content-modal-title">Beitrag</span><button class="modal-close" onclick="closeModal('content-modal')">✕</button></div><div class="modal-left-body" id="content-modal-body"></div><div class="modal-left-foot" id="content-modal-foot"></div></div>
     <div class="modal-right"><div class="modal-right-head">▶ Vorschau</div><div class="modal-right-body"><div id="phone-screen" style="width:100%;height:100%;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center"><div class="phone-placeholder"><span style="font-size:32px;display:block;margin-bottom:10px">▶</span>Drive-Link<br>für Vorschau</div></div></div></div>
+  </div>
   </div>
 </div>
 
@@ -5774,19 +5776,22 @@ async function doChangePasswordSB(){
 <script>
 
 // ── Tour ──
-var TOUR_STEPS=[
+var TOUR_STEPS_ALL=[
   {target:'nav-overview',page:'overview',title:'Dashboard – Deine Übersicht',text:'Hier siehst du auf einen Blick was du wissen musst: Das Wachstum deiner Accounts, offene To-Dos und nächste Drehtermine. Außerdem findest du hier das Onboarding und hast einen Bereich, in den du Ideen teilen kannst.'},
   {target:'nav-shoots',page:'shoots',title:'Drehtermine – Deine Aufnahmen',text:'Hier sind alle geplanten Drehtage aufgelistet. Du siehst was geplant ist, kannst eigene Content-Ideen hinzufügen und vorhandene bearbeiten.'},
-  {target:'nav-todos',page:'todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle deine offenen Aufgaben. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir umsetzen.'},
+  {target:'nav-todos',page:'todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle deine offenen Aufgaben. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir umsetzen.',agencyOnly:true},
   {target:'nav-calendar',page:'calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen an Posts innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
   {target:'nav-analytics',page:'analytics',title:'Analysedaten – Deine Zahlen',text:'Hier werden monatlich die wichtigsten Kennzahlen eingepflegt. So behältst du immer den Überblick über dein Wachstum.'},
 ];
+var TOUR_STEPS=TOUR_STEPS_ALL;
 var TOUR_IDX=0;
 
 function tourStart(){
+  TOUR_STEPS=TOUR_STEPS_ALL.filter(function(s){return !s.agencyOnly||ROLE==='agency';});
   TOUR_IDX=0;
   var ov=document.getElementById('tour-overlay');
   if(ov)ov.style.display='block';
+  document.body.style.overflow='hidden';
   tourShow();
 }
 
@@ -5862,7 +5867,7 @@ function tourPrev(){
 function tourEnd(){
   var ov=document.getElementById('tour-overlay');
   if(ov)ov.style.display='none';
-  // Tour als gesehen markieren
+  document.body.style.overflow='';
   try{localStorage.setItem('lex_tour_done_'+ACTIVE_CUSTOMER,'1');}catch(e){}
   checkInstallGuide();
 }
