@@ -396,6 +396,8 @@ textarea{resize:vertical;line-height:1.5}
   .analytics-kpi-grid{grid-template-columns:repeat(3,1fr)!important}
   .metrics-grid{grid-template-columns:1fr!important}
   .sidebar{padding:8px 10px}
+  .sidebar-client .sidebar-logo{display:none!important}
+  .sidebar-client{justify-content:center!important}
   .nav-item{min-width:36px}
   .nav-item svg{width:16px;height:16px}
   .nav-item{font-size:9px}
@@ -1633,7 +1635,7 @@ function startAgencySession(){
   try{_lc=sessionStorage.getItem('lastCustomer')||localStorage.getItem('lastCustomer')||'';}catch(e){}
   ACTIVE_CUSTOMER=(_lc&&DATA[_lc])?_lc:(Object.keys(DATA)[0]||'');
   var _savedAC=ACTIVE_CUSTOMER;
-  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=_savedAC||getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();checkAnalyticsReminder();setTimeout(checkMissingCaptionAndLink,1000);
+  updateTodoBadge();showScreen('main-app');document.getElementById('agency-tb').style.display='flex';document.querySelector('.sidebar').classList.remove('sidebar-client');document.getElementById('client-tb').style.display='none';document.getElementById('agency-chip').style.display='flex';document.getElementById('client-chip').style.display='none';ROLE='agency';ACTIVE_CUSTOMER=_savedAC||getCustomerKeys()[0]||'';document.getElementById('sidebar-agency-overview').style.display='block';document.querySelectorAll('.agency-only').forEach(function(el){el.style.display='';});document.querySelectorAll('.client-only').forEach(function(el){el.style.display='none';});var rab=document.getElementById('role-agency-btn');if(rab)rab.classList.add('active');var rcb=document.getElementById('role-client-btn');if(rcb)rcb.classList.remove('active');document.getElementById('sidebar-user-card').style.display='none';syncDropdowns();renderCredList();showPage('agency-overview',document.getElementById('nav-agency-overview'));renderAgencyOverview();var _cd=document.getElementById('cust-dropdown');if(_cd)_cd.style.display='none';var _cl=document.querySelector('#agency-tb span');if(_cl)_cl.style.display='none';updateShootReminder();flushPendingNotifications();updateUndoBtn();checkAnalyticsReminder();setTimeout(checkMissingCaptionAndLink,1000);
   if(null&&!isInStandaloneMode()){try{if(!sessionStorage.getItem('pwa_dismissed_session')){setTimeout(function(){var b=document.getElementById('pwa-banner');if(b)b.style.display='flex';},2000);}}catch(e){}}
 }
 function startClientSession(k){
@@ -1646,7 +1648,7 @@ function startClientSession(k){
   }
   showScreen('main-app');
   document.getElementById('agency-tb').style.display='none';
-  document.getElementById('client-tb').style.display='flex';
+  document.getElementById('client-tb').style.display='flex';document.querySelector('.sidebar').classList.add('sidebar-client');
   document.getElementById('agency-chip').style.display='none';
   document.getElementById('client-chip').style.display='flex';
   var c=CREDS[k]||{label:(DATA[k]&&DATA[k].name)||'Kunde',tempPw:'',pwChanged:true};
