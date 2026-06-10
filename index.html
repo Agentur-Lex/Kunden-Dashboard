@@ -412,6 +412,8 @@ textarea{resize:vertical;line-height:1.5}
   #analytics-import-panel, #analytics-import-btn{display:none!important}
   #agency-ov-grid{grid-template-columns:1fr!important}
   #nav-contentlist{display:none!important}
+  #analytics-tc{grid-template-columns:1fr!important;width:100%!important}
+  .bc-inner-grid{grid-template-columns:1fr!important}
   .kacheln-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
   .kachel{padding:10px 12px!important}
   .kachel .kachel-del{position:absolute;top:8px;right:8px}
@@ -776,13 +778,11 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
             </select>
           </div>
           <div id="analytics-stand-display" class="client-only" style="font-size:11px;color:var(--text3);margin-left:4px"></div>
-          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            <button id="analytics-report-btn" class="btn-outline" onclick="exportMonthlyReport()" style="font-size:11px;padding:5px 11px;display:flex;align-items:center;gap:5px">
+          <button id="analytics-report-btn" class="btn-outline" onclick="exportMonthlyReport()" style="font-size:11px;padding:5px 11px;display:flex;align-items:center;gap:5px;margin-left:auto">
               <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M3 15v2h14v-2"/></svg>
               Monatsreport
             </button>
-            <button id="analytics-edit-btn" class="btn-outline agency-only" onclick="toggleAnalyticsEdit()" style="font-size:11px;padding:5px 12px">✎ Bearbeiten</button>
-          </div>
+            <button id="analytics-edit-btn" class="btn-outline agency-only" onclick="toggleAnalyticsEdit()" style="font-size:11px;padding:5px 12px;margin-left:auto">✎ Bearbeiten</button>
         </div>
         <!-- Dynamic analytics blocks rendered by renderAnalyticsPage() -->
         <div id="analytics-import-panel" class="card agency-only" style="display:none;margin-bottom:14px">
@@ -5170,7 +5170,7 @@ function renderAnalyticsPage(){
   });
 
   var bcInner = document.createElement('div');
-  bcInner.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start';
+  bcInner.className='bc-inner-grid';bcInner.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start';
 
   // Left: dropdown
   var leftDiv = document.createElement('div');
