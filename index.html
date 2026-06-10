@@ -304,9 +304,7 @@ textarea{resize:vertical;line-height:1.5}
   #content-modal .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);flex-shrink:0!important}
   #content-modal .modal-left-body{overflow:visible!important;flex:none!important}
   #content-modal input[type=date]{-webkit-appearance:none!important;appearance:none!important;padding:8px 12px!important;height:auto!important;box-sizing:border-box!important;width:100%!important}
-  #content-modal .modal-right{background:var(--surface2)!important;aspect-ratio:unset!important;height:auto!important;width:100%!important;flex-shrink:0!important;display:flex!important;flex-direction:column!important;border-top:1px solid var(--border)!important;border-radius:0 0 var(--radius-lg) var(--radius-lg)!important;overflow:hidden!important}
-  #content-modal .modal-right-head{flex-shrink:0!important}
-  #content-modal .modal-right-body{overflow:visible!important;flex:none!important;padding:16px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  #content-modal .modal-right{display:none!important}
   #content-modal #phone-screen{width:100%!important;height:100%!important}
   /* Shoot-Detail-Modal: Buttons unten fixiert */
   .shoot-modal-foot{position:sticky!important;bottom:0!important;background:var(--surface)!important;z-index:10!important}
@@ -3276,7 +3274,9 @@ function openContentModal(ri){
     body+='</div>';
   });
   document.getElementById('content-modal-body').innerHTML=body;
-  document.getElementById('content-modal-foot').innerHTML='<button class="btn-primary" onclick="closeModal(\'content-modal\')">Schließen</button><button class="btn-outline" style="color:#FF8585;border-color:rgba(255,87,87,0.3)" onclick="if(confirm(\'Löschen?\'))deleteRow('+ri+')"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg> Löschen</button>';
+  var _footLink=row.link||'';
+  var _previewBtn=(_footLink&&window.innerWidth<=768)?('<a href="https://drive.google.com/file/d/'+((_footLink.match(/\/d\/([a-zA-Z0-9_-]+)/)||[])[1]||'')+ '/view" target="_blank" rel="noopener" class="btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--accent);border-color:rgba(255,87,87,0.3)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg> Vorschau</a>'):'';
+  document.getElementById('content-modal-foot').innerHTML='<button class="btn-primary" onclick="closeModal(\'content-modal\')">Schließen</button>'+_previewBtn+'<button class="btn-outline" style="color:#FF8585;border-color:rgba(255,87,87,0.3)" onclick="if(confirm(\'Löschen?\'))deleteRow('+ri+')"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg> Löschen</button>';
   var link=row.link||'';
   updatePhonePreview(link);
   openModal('content-modal');
