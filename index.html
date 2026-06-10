@@ -304,7 +304,7 @@ textarea{resize:vertical;line-height:1.5}
   #content-modal .modal-left{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);flex-shrink:0!important}
   #content-modal .modal-left-body{overflow:visible!important;flex:none!important}
   #content-modal input[type=date]{-webkit-appearance:none!important;appearance:none!important;padding:8px 12px!important;height:auto!important;box-sizing:border-box!important;width:100%!important}
-  #content-modal .modal-right{background:#111!important;aspect-ratio:9/17!important;height:auto!important;width:100%!important;flex-shrink:0!important;display:flex!important;flex-direction:column!important}
+  #content-modal .modal-right{background:#111!important;aspect-ratio:18/17!important;height:auto!important;width:100%!important;flex-shrink:0!important;display:flex!important;flex-direction:column!important}
   #content-modal .modal-right-head{flex-shrink:0!important}
   #content-modal .modal-right-body{overflow:hidden!important;flex:1!important;min-height:0!important}
   #content-modal #phone-screen{width:100%!important;height:100%!important}
@@ -3298,24 +3298,6 @@ function updatePhonePreview(link){
     frame.allow='autoplay';
     frame.setAttribute('allowfullscreen','');
     screen.appendChild(frame);
-    // Mobile: tap overlay → Vollbild
-    if(window.innerWidth<=768){
-      var overlay=document.createElement('div');
-      overlay.style.cssText='position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);cursor:pointer;border-radius:inherit';
-      overlay.innerHTML='<div style="width:64px;height:64px;background:rgba(255,87,87,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,87,87,0.5)"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg></div>';
-      overlay.addEventListener('click',function(){
-        overlay.remove();
-        // Versuche Vollbild
-        var req=frame.requestFullscreen||frame.webkitRequestFullscreen||frame.mozRequestFullScreen;
-        if(req){
-          try{req.call(frame);}catch(e){window.open('https://drive.google.com/file/d/'+m[1]+'/view','_blank');}
-        } else {
-          window.open('https://drive.google.com/file/d/'+m[1]+'/view','_blank');
-        }
-      });
-      screen.style.position='relative';
-      screen.appendChild(overlay);
-    }
   } else {
     screen.innerHTML='<div class="phone-placeholder"><span style="font-size:26px;display:block;margin-bottom:8px">▶</span>Drive-Link<br>für Vorschau</div>';
   }
