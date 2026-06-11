@@ -861,11 +861,10 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       <!-- TO-DOS -->
       <div class="page" id="page-todos">
         <div class="page-title" style="flex-direction:row;align-items:center">To-Dos</div>
-        <div id="todo-filter-bar" class="agency-only" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
         <div class="card agency-only"><div class="card-title">Neue Aufgabe</div>
           <div class="form-row"><div><span class="flbl">Aufgabe</span><input type="text" id="new-todo-text" style="margin:0"></div><div><span class="flbl">Fällig am</span><input type="date" id="new-todo-date" style="margin:0"></div></div>
-          <div class="form-row" style="margin-top:8px"><div><span class="flbl">Priorität</span><select id="new-todo-prio" style="margin:0"><option value="high">Hoch</option><option value="med" selected>Mittel</option><option value="low">Niedrig</option></select></div><div><span class="flbl">Zugewiesen an</span><select id="new-todo-assign" style="margin:0"><option value="agency">Agentur</option><option value="client">Kunde</option><option value="both">Beide</option></select></div></div>
-          <div class="form-row" style="margin-top:8px"><div style="width:100%"><span class="flbl">Kunde <span style="color:var(--accent)">*</span></span><select id="new-todo-cust" style="margin:0"><option value="">– Bitte auswählen –</option></select></div></div>
+          <div class="form-row" style="margin-top:8px"><div><span class="flbl">Priorität</span><select id="new-todo-prio" style="margin:0"><option value="high">Hoch</option><option value="med" selected>Mittel</option><option value="low">Niedrig</option></select></div></div>
+          <div style="margin-top:8px"><span class="flbl">Zugewiesen an <span style="color:var(--accent)">*</span></span><div id="todo-assign-checks" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;padding:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm)"></div></div>
           <button class="btn-primary" style="margin-top:10px" onclick="addTodo()">Hinzufügen</button>
         </div>
         <div class="card"><div class="card-title">Offen <span style="font-size:10px;color:var(--text3);font-weight:400" id="open-count"></span></div><div id="todo-open"></div><div id="todo-empty" style="display:none;font-size:11px;color:var(--text3);padding:6px 0">Keine offenen Aufgaben.</div></div>
@@ -2912,17 +2911,33 @@ function addTodo(){
   pushUndo();
   var txt=((document.getElementById('new-todo-text')||{}).value||'').trim();
   if(!txt)return;
-  var custId=ROLE==='agency'?(document.getElementById('new-todo-cust')||{}).value:'';
-  if(ROLE==='agency'&&!custId){showToast('Bitte Kunden auswählen');return;}
   var due=(document.getElementById('new-todo-date')||{}).value;
   var prio=(document.getElementById('new-todo-prio')||{}).value;
-  var asgn=(document.getElementById('new-todo-assign')||{}).value;
-  var target=ROLE==='agency'?DATA[custId]:cd();
-  if(!target)return;
-  target.todos.unshift({text:txt,due:due,prio:prio,assign:asgn,done:false,createdAt:Date.now()});
+  if(ROLE!=='agency'){
+    cd().todos.unshift({text:txt,due:due,prio:prio,assign:'both',done:false,createdAt:Date.now()});
+    scheduleSave();document.getElementById('new-todo-text').value='';document.getElementById('new-todo-date').value='';renderTodos();return;
+  }
+  // Agency: read multi-select checkboxes
+  var checks=document.querySelectorAll('#todo-assign-checks input[type=checkbox]:checked');
+  if(!checks.length){showToast('Bitte mindestens eine Option auswählen');return;}
+  var agencyChecked=false;var custIds=[];
+  checks.forEach(function(cb){
+    if(cb.value==='__agency__')agencyChecked=true;
+    else custIds.push(cb.value);
+  });
+  var asgn=agencyChecked?'agency':'both';
+  var targets=custIds.length>0?custIds:[ACTIVE_CUSTOMER];
+  var created=0;
+  targets.forEach(function(custId){
+    if(!DATA[custId])return;
+    DATA[custId].todos.unshift({text:txt,due:due,prio:prio,assign:asgn,done:false,createdAt:Date.now()});
+    created++;
+  });
+  if(!created){showToast('Keine gültigen Kunden ausgewählt');return;}
   scheduleSave();
   document.getElementById('new-todo-text').value='';
   document.getElementById('new-todo-date').value='';
+  showToast(created+' Todo'+(created>1?'s':'')+' erstellt');
   renderTodos();
 }
 function toggleTodo(idx,custId){
@@ -3181,29 +3196,22 @@ function renderTodos(){
   // ── Agency view: global across all customers ──
   Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});
 
-  // Populate filter chips
-  _renderTodoFilterChips();
-
-  // Populate customer dropdown in form
-  var custSel=document.getElementById('new-todo-cust');
-  if(custSel){
-    var prev=custSel.value;
-    custSel.innerHTML='<option value="">– Bitte auswählen –</option>';
+  // Populate Zugewiesen-an checkboxes
+  var assignBox=document.getElementById('todo-assign-checks');
+  if(assignBox&&!assignBox._populated){
+    assignBox._populated=true;
+    var items=[{val:'__agency__',lbl:'Agentur'}];
     getCustomerKeys().forEach(function(k){
-      if(DATA[k]&&DATA[k].status!=='abgeschlossen'){
-        var o=document.createElement('option');
-        o.value=k;o.textContent=DATA[k].name||k;
-        if(k===prev)o.selected=true;
-        custSel.appendChild(o);
-      }
+      if(DATA[k]&&DATA[k].status!=='abgeschlossen')items.push({val:k,lbl:DATA[k].name||k});
     });
+    assignBox.innerHTML=items.map(function(it){
+      return'<label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;padding:3px 8px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;white-space:nowrap"><input type="checkbox" value="'+it.val+'" style="accent-color:var(--accent);width:13px;height:13px"> '+escHtml(it.lbl)+'</label>';
+    }).join('');
   }
 
   // Collect todos from relevant customers
   var custs=getCustomerKeys().filter(function(k){
-    if(!DATA[k]||DATA[k].status==='abgeschlossen')return false;
-    if(_todoFilterCusts.size>0)return _todoFilterCusts.has(k);
-    return true;
+    return DATA[k]&&DATA[k].status!=='abgeschlossen';
   });
 
   var allOpen=[],allDone=[];
@@ -3211,7 +3219,6 @@ function renderTodos(){
     var todos=(DATA[custId]||{}).todos||[];
     var custName=(DATA[custId]||{}).name||custId;
     todos.forEach(function(t,i){
-      if(_todoFilterAgency&&t.assign==='client')return;
       var entry={t:t,i:i,custId:custId,custName:custName};
       if(!t.done&&!t.isReset)allOpen.push(entry);
       else if(t.done)allDone.push(entry);
@@ -3251,34 +3258,6 @@ function renderTodos(){
   _renderTodoLists(allOpen,allDone,true);
 }
 
-function _renderTodoFilterChips(){
-  var bar=document.getElementById('todo-filter-bar');
-  if(!bar)return;
-  var chips=[];
-  // Alle chip
-  var allActive=!_todoFilterAgency&&_todoFilterCusts.size===0;
-  chips.push('<button onclick="_setTodoFilter(\'all\')" style="padding:4px 12px;border-radius:20px;border:1px solid '+(allActive?'var(--accent)':'var(--border)')+';background:'+(allActive?'var(--accent)':'var(--surface2)')+';color:'+(allActive?'#fff':'var(--text2)')+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Alle</button>');
-  // Agentur chip
-  chips.push('<button onclick="_setTodoFilter(\'agency\')" style="padding:4px 12px;border-radius:20px;border:1px solid '+(_todoFilterAgency?'var(--accent)':'var(--border)')+';background:'+(_todoFilterAgency?'var(--accent)':'var(--surface2)')+';color:'+(_todoFilterAgency?'#fff':'var(--text2)')+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Agentur</button>');
-  // Customer chips
-  getCustomerKeys().forEach(function(k){
-    if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
-    var sel=_todoFilterCusts.has(k);
-    chips.push('<button onclick="_setTodoFilter(\'cust\',\''+k+'\')" style="padding:4px 12px;border-radius:20px;border:1px solid '+(sel?'var(--accent)':'var(--border)')+';background:'+(sel?'var(--accent)':'var(--surface2)')+';color:'+(sel?'#fff':'var(--text2)')+';font-size:11px;cursor:pointer;font-family:inherit">'+(DATA[k].name||k)+'</button>');
-  });
-  bar.innerHTML=chips.join('');
-}
-
-function _setTodoFilter(type,custId){
-  if(type==='all'){_todoFilterAgency=false;_todoFilterCusts=new Set();}
-  else if(type==='agency'){_todoFilterAgency=!_todoFilterAgency;_todoFilterCusts=new Set();}
-  else if(type==='cust'){
-    _todoFilterAgency=false;
-    if(_todoFilterCusts.has(custId))_todoFilterCusts.delete(custId);
-    else _todoFilterCusts.add(custId);
-  }
-  renderTodos();
-}
 
 function _renderTodoLists(open,done2,isAgency){
   function chk(checked,fn){return'<button class="todo-chk'+(checked?' checked':'')+'" onclick="'+fn+'" style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid '+(checked?'var(--accent)':'var(--border2)')+';background:'+(checked?'var(--accent)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">'+(checked?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9 10.5,3"/></svg>':'')+'</button>';}
