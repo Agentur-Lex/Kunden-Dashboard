@@ -3337,7 +3337,7 @@ function _renderTodoLists(open,done2,isAgency){
     (isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+
     '</div></div>'+
     '<span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+
-    (isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+',\''+custId+'\')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+',\''+custId+'\')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+
+    (isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset&&!t._autoKey?'<button class="btn-icon" onclick="startEdit('+i+',\''+custId+'\')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+',\''+custId+'\')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+
     '</div>';
   }
 
