@@ -859,6 +859,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
             <span id="shoots-past-label" style="flex:1">Vergangene Termine anzeigen</span>
             <span class="past-count-badge" id="shoots-past-count">0</span>
           </div>
+          <div id="shoots-past-list" style="padding:0 18px 14px;display:none"></div>
         </div>
       </div>
 
@@ -2361,34 +2362,32 @@ function renderShootsList(){
   futureIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
   pastIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
   var showIdx=futureIdx.slice();
-  if(ROLE==='agency'){if(SHOW_PAST_SHOOTS)showIdx=showIdx.concat(pastIdx);}else{showIdx=showIdx.concat(pastIdx);}
-
+  // Agency: past shoots go to separate list below toggle
   var sl=document.getElementById('shoots-list');
+  var pl=document.getElementById('shoots-past-list');
   if(!sl)return;
   try{sl.innerHTML='';}catch(e){return;}
+  if(pl)pl.innerHTML='';
 
-  if(showIdx.length===0){
+  if(ROLE!=='agency'){showIdx=futureIdx.concat(pastIdx);}
+
+  if(futureIdx.length===0&&(ROLE!=='agency'||!SHOW_PAST_SHOOTS)){
     var em=document.createElement('div');
     em.style.cssText='font-size:11px;color:var(--text3);padding:4px 0';
     em.textContent='Keine Termine geplant.';
-    if(sl)sl.appendChild(em);
+    sl.appendChild(em);
   }
 
-  var pastHeaderAdded=false;
+  // Update past-list visibility
+  if(pl)pl.style.display=(ROLE==='agency'&&SHOW_PAST_SHOOTS&&pastIdx.length)?'block':'none';
 
   showIdx.forEach(function(i){
     var s=d.shoots[i];
     if(!s)return;
     var isPast=pastIdx.indexOf(i)!==-1;
-
-    // ── Past header ──
-    if(isPast&&!pastHeaderAdded){
-      pastHeaderAdded=true;
-      var ph=document.createElement('div');
-      ph.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;padding:10px 0 6px';
-      ph.textContent='Vergangene Termine';
-      if(sl)sl.appendChild(ph);
-    }
+    // Agency: past shoots go into separate list
+    var target=(ROLE==='agency'&&isPast&&pl)?pl:sl;
+    var pastHeaderAdded=false;
 
     // ── Shoot wrapper ──
     var wrap=document.createElement('div');
@@ -2847,7 +2846,7 @@ function renderShootsList(){
     panel.appendChild(addRow);
 
     wrap.appendChild(panel);
-    if(sl)sl.appendChild(wrap);
+    if(target)target.appendChild(wrap);
   });
 
   // Overview: only future, compact header only
