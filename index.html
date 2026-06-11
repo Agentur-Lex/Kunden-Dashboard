@@ -1917,32 +1917,46 @@ async function setCustomerStatus(k,status){
   renderCredList();
 }
 async function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kacheln');if(!kacheln)return;var today=getTodayISO();
-  // Agentur-Todos direkt frisch aus Supabase laden und rendern
-  try{
-    var sb2=getSB();var custIds=Object.keys(DATA);
-    if(custIds.length){
-      var freshTodos=await sb2.from('todos').select('*').in('customer_id',custIds).eq('done',false).in('assign',['agency','both']);
-      if(freshTodos.data){
-        // Alle agency-Todos direkt aus DB rendern (unabhängig von DATA)
-        var atEl2=document.getElementById('agency-todos-all');
-        var atEmpty2=document.getElementById('agency-todos-empty');
-        var allFresh=freshTodos.data.map(function(t){
-          var cname=(DATA[t.customer_id]&&DATA[t.customer_id].name)||'';
-          return {t:{text:t.text,prio:t.prio||'med',assign:t.assign,due:t.due||'',isReset:t.is_reset,_id:t.id},cname:cname};
-        });
-        allFresh.sort(function(a,b){return({high:0,med:1,low:2})[a.t.prio]-({high:0,med:1,low:2})[b.t.prio];});
-        if(atEl2){
-          if(!allFresh.length){atEl2.innerHTML='';if(atEmpty2)atEmpty2.style.display='block';}
-          else{
-            if(atEmpty2)atEmpty2.style.display='none';
-            atEl2.innerHTML=allFresh.map(function(e){
-              return'<div class="agency-todo-row"><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:var(--text)">'+escHtml(e.t.text)+'</div><div style="font-size:10px;color:var(--text3)">'+escHtml(e.cname)+(e.t.due?' · '+fmtISO(e.t.due):'')+'</div></div><span class="priority-pill '+pCls(e.t.prio)+'">'+pLbl(e.t.prio)+'</span></div>';
-            }).join('');
-          }
+  // Agentur-Todos aus lokalem DATA-Objekt (konsistent mit Todos-Seite)
+  (function(){
+    var atEl2=document.getElementById('agency-todos-all');
+    var atEmpty2=document.getElementById('agency-todos-empty');
+    if(!atEl2)return;
+    var pOrder={high:0,med:1,low:2};
+    var allTodos=[];
+    getCustomerKeys().forEach(function(k){
+      if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
+      var cname=DATA[k].name||k;
+      (DATA[k].todos||[]).forEach(function(t){
+        if(!t.done&&(t.assign==='agency'||t.assign==='both')&&!t.isReset){
+          allTodos.push({t:t,cname:cname,custId:k});
         }
-      }
+      });
+    });
+    allTodos.sort(function(a,b){
+      var pd=(pOrder[a.t.prio]||1)-(pOrder[b.t.prio]||1);
+      if(pd!==0)return pd;
+      return a.cname.localeCompare(b.cname,'de');
+    });
+    var total=allTodos.length;
+    var shown=allTodos.slice(0,2);
+    if(!total){atEl2.innerHTML='';if(atEmpty2)atEmpty2.style.display='block';return;}
+    if(atEmpty2)atEmpty2.style.display='none';
+    var html=shown.map(function(e){
+      return'<div class="agency-todo-row"><div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:var(--text)">'+escHtml(e.t.text)+'</div><div style="font-size:10px;color:var(--text3)">'+escHtml(e.cname)+(e.t.due?' · '+fmtISO(e.t.due):'')+'</div></div><span class="priority-pill '+pCls(e.t.prio)+'">'+pLbl(e.t.prio)+'</span></div>';
+    }).join('');
+    if(total>2){
+      var rest=total-2;
+      var moreDiv=document.createElement('div');
+    moreDiv.style.cssText='margin-top:8px;cursor:pointer;font-size:11px;font-weight:600;color:var(--accent);text-align:center;padding:6px;border:1px solid rgba(255,87,87,0.25);border-radius:6px;background:rgba(255,87,87,0.05)';
+    moreDiv.textContent='+'+rest+' weitere Todo'+(rest===1?'':'s')+' →';
+    moreDiv.addEventListener('click',function(){showPage('todos',document.getElementById('nav-todos'));});
+    atEl2.innerHTML=html;
+    atEl2.appendChild(moreDiv);
+    return;
     }
-  }catch(e){console.error('agency todos fetch:',e);}
+    atEl2.innerHTML=html;
+  })();
   renderUpcomingShoots();
   var allKeys=Object.keys(DATA);
   var statusOrder={'active':0,'paused':1,'done':2};
