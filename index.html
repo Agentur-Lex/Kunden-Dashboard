@@ -5678,14 +5678,23 @@ function updateTodoBadge(){
   var badge=document.getElementById('todo-nav-badge');
   if(!badge)return;
   var count=0;
-  if(ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
-    var todos=DATA[ACTIVE_CUSTOMER].todos||[];
-    var pct=calcProgress(ACTIVE_CUSTOMER);
-    count=todos.filter(function(t){
-      if(ROLE==='agency')return !t.done;
-      return !t.done&&(t.assign==='client'||t.assign==='both')&&!t.isReset;
-    }).length;
-    if(ROLE==='client'&&pct<100)count+=1;
+  if(ROLE==='agency'){
+    // Alle Kunden summieren
+    getCustomerKeys().forEach(function(k){
+      if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
+      (DATA[k].todos||[]).forEach(function(t){
+        if(!t.done)count++;
+      });
+    });
+  } else {
+    if(ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
+      var todos=DATA[ACTIVE_CUSTOMER].todos||[];
+      var pct=calcProgress(ACTIVE_CUSTOMER);
+      count=todos.filter(function(t){
+        return !t.done&&(t.assign==='client'||t.assign==='both')&&!t.isReset;
+      }).length;
+      if(pct<100)count+=1;
+    }
   }
   badge.textContent=count>0?count:'';
   badge.style.display=count>0?'flex':'none';
