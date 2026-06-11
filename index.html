@@ -864,7 +864,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div class="card agency-only"><div class="card-title">Neue Aufgabe</div>
           <div class="form-row"><div><span class="flbl">Aufgabe</span><input type="text" id="new-todo-text" style="margin:0"></div><div><span class="flbl">Fällig am</span><input type="date" id="new-todo-date" style="margin:0"></div></div>
           <div class="form-row" style="margin-top:8px"><div><span class="flbl">Priorität</span><select id="new-todo-prio" style="margin:0"><option value="high">Hoch</option><option value="med" selected>Mittel</option><option value="low">Niedrig</option></select></div></div>
-          <div style="margin-top:8px"><span class="flbl">Zugewiesen an <span style="color:var(--accent)">*</span></span><div id="todo-assign-checks" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;padding:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm)"></div></div>
+          <div style="margin-top:8px;position:relative"><span class="flbl">Zugewiesen an <span style="color:var(--accent)">*</span></span><div id="todo-assign-wrap" style="position:relative;margin-top:4px"><button type="button" id="todo-assign-trigger" onclick="_toggleAssignDrop()" style="width:100%;text-align:left;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between"><span id="todo-assign-label">– Bitte auswählen –</span><span style="font-size:9px;color:var(--text3)">▾</span></button><div id="todo-assign-drop" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);max-height:200px;overflow-y:auto;margin-top:2px"><div id="todo-assign-checks" style="padding:6px"></div></div></div></div>
           <button class="btn-primary" style="margin-top:10px" onclick="addTodo()">Hinzufügen</button>
         </div>
         <div class="card"><div class="card-title">Offen <span style="font-size:10px;color:var(--text3);font-weight:400" id="open-count"></span></div><div id="todo-open"></div><div id="todo-empty" style="display:none;font-size:11px;color:var(--text3);padding:6px 0">Keine offenen Aufgaben.</div></div>
@@ -2941,12 +2941,10 @@ function addTodo(){
   renderTodos();
 }
 function toggleTodo(idx,custId){
-  (custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].done = !(custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].done;
-  if((custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].done) {
-    (custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].completedAt = Date.now();
-  } else {
-    delete cd().todos[idx].completedAt;
-  }
+  var _td=(custId&&DATA[custId]?DATA[custId]:cd());
+  _td.todos[idx].done=!_td.todos[idx].done;
+  if(_td.todos[idx].done){_td.todos[idx].completedAt=Date.now();}
+  else{delete _td.todos[idx].completedAt;}
   scheduleSave();
   renderTodos();
   if(ROLE==='client')renderClientTodosOnOverview();
@@ -3198,14 +3196,13 @@ function renderTodos(){
 
   // Populate Zugewiesen-an checkboxes
   var assignBox=document.getElementById('todo-assign-checks');
-  if(assignBox&&!assignBox._populated){
-    assignBox._populated=true;
+  if(assignBox){
     var items=[{val:'__agency__',lbl:'Agentur'}];
     getCustomerKeys().forEach(function(k){
       if(DATA[k]&&DATA[k].status!=='abgeschlossen')items.push({val:k,lbl:DATA[k].name||k});
     });
     assignBox.innerHTML=items.map(function(it){
-      return'<label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;padding:3px 8px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;white-space:nowrap"><input type="checkbox" value="'+it.val+'" style="accent-color:var(--accent);width:13px;height:13px"> '+escHtml(it.lbl)+'</label>';
+      return'<label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;padding:6px 10px;border-radius:5px;hover:background:var(--surface2)"><input type="checkbox" value="'+it.val+'" onchange="_updateAssignLabel()" style="accent-color:var(--accent);width:13px;height:13px;flex-shrink:0"> '+escHtml(it.lbl)+'</label>';
     }).join('');
   }
 
@@ -3256,6 +3253,37 @@ function renderTodos(){
   }
 
   _renderTodoLists(allOpen,allDone,true);
+}
+
+
+function _toggleAssignDrop(){
+  var drop=document.getElementById('todo-assign-drop');
+  if(!drop)return;
+  var open=drop.style.display==='none';
+  drop.style.display=open?'block':'none';
+  if(open){
+    // Close when clicking outside
+    setTimeout(function(){
+      document.addEventListener('click',function _cl(e){
+        var wrap=document.getElementById('todo-assign-wrap');
+        if(wrap&&!wrap.contains(e.target)){
+          var d=document.getElementById('todo-assign-drop');
+          if(d)d.style.display='none';
+          document.removeEventListener('click',_cl);
+        }
+      });
+    },0);
+  }
+}
+function _updateAssignLabel(){
+  var checks=document.querySelectorAll('#todo-assign-checks input[type=checkbox]:checked');
+  var lbl=document.getElementById('todo-assign-label');
+  if(!lbl)return;
+  if(!checks.length){lbl.textContent='– Bitte auswählen –';return;}
+  var names=Array.from(checks).map(function(cb){
+    return cb.value==='__agency__'?'Agentur':(DATA[cb.value]&&DATA[cb.value].name)||cb.value;
+  });
+  lbl.textContent=names.join(', ');
 }
 
 
