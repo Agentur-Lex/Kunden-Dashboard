@@ -852,7 +852,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           </div>
           <div id="shoots-list" style="padding:0 18px 14px"></div>
           <div id="shoots-past-toggle" class="past-toggle-btn agency-only" onclick="togglePastShoots()" style="display:none">
-            <span id="shoots-past-icon">▶</span>
+            <span id="shoots-past-icon" style="display:flex;align-items:center;transform:rotate(-90deg);transition:transform .2s"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;flex-shrink:0"><path d="M2 4l4 4 4-4"/></svg></span>
             <span id="shoots-past-label" style="flex:1">Vergangene Termine anzeigen</span>
             <span class="past-count-badge" id="shoots-past-count">0</span>
           </div>
@@ -930,7 +930,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
             </table>
           </div>
           <div class="add-row-btn" onclick="addContentRow()"><span style="font-size:18px;line-height:1;color:var(--accent)">+</span> Beitrag hinzufügen</div>
-          <div class="past-toggle-btn" id="past-toggle-btn" onclick="togglePastRows()" style="display:none"><span id="past-toggle-icon">▶</span><span id="past-toggle-label" style="flex:1">Vergangene Posts anzeigen</span><span class="past-count-badge" id="past-count-badge">0</span></div>
+          <div class="past-toggle-btn" id="past-toggle-btn" onclick="togglePastRows()" style="display:none"><span id="past-toggle-icon" style="display:flex;align-items:center;transform:rotate(-90deg);transition:transform .2s"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;flex-shrink:0"><path d="M2 4l4 4 4-4"/></svg></span><span id="past-toggle-label" style="flex:1">Vergangene Posts anzeigen</span><span class="past-count-badge" id="past-count-badge">0</span></div>
         </div>
       </div>
 
@@ -1837,8 +1837,8 @@ function renderUpcomingShoots(){
     sepLbl.style.cssText='font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.06em';
     sepLbl.textContent='DREHTERMIN AUSSTEHEND';
     var sepArrow=document.createElement('span');
-    sepArrow.style.cssText='font-size:18px;color:var(--text3);transition:transform .2s;line-height:1';
-    sepArrow.textContent='▾';
+    sepArrow.style.cssText='display:flex;align-items:center;color:var(--text3);transition:transform .2s;line-height:1';
+    sepArrow.innerHTML='<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;flex-shrink:0"><path d="M2 4l4 4 4-4"/></svg>';
     sepInner.appendChild(sepLbl);
     sepInner.appendChild(sepArrow);
     sepTd.appendChild(sepInner);
@@ -2333,7 +2333,7 @@ function renderShootsList(){
     var icon=document.getElementById('shoots-past-icon');
     var lbl2=document.getElementById('shoots-past-label');
     var cnt=document.getElementById('shoots-past-count');
-    if(icon)icon.textContent=SHOW_PAST_SHOOTS?'▼':'▶';
+    if(icon)icon.style.transform=SHOW_PAST_SHOOTS?'rotate(0deg)':'rotate(-90deg)';
     if(lbl2)lbl2.textContent=SHOW_PAST_SHOOTS?'Vergangene Termine ausblenden':'Vergangene Termine anzeigen';
     if(cnt)cnt.textContent=pastIdx.length;
   }
@@ -3187,6 +3187,17 @@ function getTodoOnclick(t,i){
 }
 function renderTodos(){
   updateTodoBadge();
+  // Delegierter Jump-Handler auf #todo-open
+  setTimeout(function(){
+    var tl=document.getElementById('todo-open');
+    if(tl&&!tl._jumpHandlerSet){
+      tl._jumpHandlerSet=true;
+      tl.addEventListener('click',function(e){
+        var item=e.target.closest('[data-jumptitle]');
+        if(item&&window.innerWidth>768){jumpToContentRow(item.getAttribute('data-jumptitle'),item.getAttribute('data-jumpcust'));}
+      });
+    }
+  },100);
   // ── Client view: unchanged ──
   if(ROLE!=='agency'){
     if(!ACTIVE_CUSTOMER)return;
@@ -3359,7 +3370,7 @@ function captionKeydown(e,el){
   if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();var pos=el.selectionStart;el.value=el.value.slice(0,pos)+'\n'+el.value.slice(pos);el.selectionStart=el.selectionEnd=pos+1;return;}
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur();}
 }
-function renderContentTable(){if(ROLE==='agency')setTimeout(checkMissingCaptionAndLink,500);if(!ACTIVE_CUSTOMER)return;var today=getTodayISO();var allRows=sortRows(cd().rows);cd().rows=allRows;var pastRows=allRows.filter(function(r){return isPastDate(r.date);});var futureRows=allRows.filter(function(r){return!isPastDate(r.date);});var pastCount=pastRows.length;var toggleBtn=document.getElementById('past-toggle-btn');if(toggleBtn){toggleBtn.style.display=pastCount>0?'flex':'none';var ti=document.getElementById('past-toggle-icon');var tl=document.getElementById('past-toggle-label');var tb2=document.getElementById('past-count-badge');if(ti)ti.textContent=SHOW_PAST?'▼':'▶';if(tl)tl.textContent=SHOW_PAST?'Vergangene Posts ausblenden':'Vergangene Posts anzeigen';if(tb2)tb2.textContent=pastCount;}
+function renderContentTable(){if(ROLE==='agency')setTimeout(checkMissingCaptionAndLink,500);if(!ACTIVE_CUSTOMER)return;var today=getTodayISO();var allRows=sortRows(cd().rows);cd().rows=allRows;var pastRows=allRows.filter(function(r){return isPastDate(r.date);});var futureRows=allRows.filter(function(r){return!isPastDate(r.date);});var pastCount=pastRows.length;var toggleBtn=document.getElementById('past-toggle-btn');if(toggleBtn){toggleBtn.style.display=pastCount>0?'flex':'none';var ti=document.getElementById('past-toggle-icon');var tl=document.getElementById('past-toggle-label');var tb2=document.getElementById('past-count-badge');if(ti)ti.style.transform=SHOW_PAST?'rotate(0deg)':'rotate(-90deg)';if(tl)tl.textContent=SHOW_PAST?'Vergangene Posts ausblenden':'Vergangene Posts anzeigen';if(tb2)tb2.textContent=pastCount;}
   var rowsToRender=SHOW_PAST?allRows:futureRows;var tb='';
   rowsToRender.forEach(function(row){var ri=allRows.indexOf(row);var past=isPastDate(row.date);
     tb+='<tr class="'+(past?'past-row':'')+' onclick="openContentModal('+ri+')" style="cursor:pointer"><td style="width:24px;text-align:center;padding:2px"><input type="checkbox" class="bulk-cb" '+(_bulkSelected.has(ri)?'checked':'')+' onclick="event.stopPropagation();bulkToggleRow('+ri+',this.checked)"></td><td><input class="cell-input" type="date" value="'+(normalizeDate(row.date)||'')+'" onclick="event.stopPropagation()" onchange="cd().rows['+ri+'].date=this.value;buildCalendar()" onblur="renderContentTable()"></td>';
@@ -3928,8 +3939,8 @@ function renderObPanel(){
     var sepQ=document.createElement('div');
     sepQ.style.cssText='font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none';
     var sepQlbl=document.createElement('span');sepQlbl.textContent='Fragebogen';
-    var sepQico=document.createElement('span');sepQico.style.cssText='transition:transform .25s;display:inline-block;font-size:18px;line-height:1;color:var(--text2)';sepQico.textContent='›';
-    sepQico.style.transform=questOpen?'rotate(90deg)':'';
+    var sepQico=document.createElement('span');sepQico.style.cssText='transition:transform .25s;display:inline-block;font-size:18px;line-height:1;color:var(--text2)';sepQico.innerHTML='<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;flex-shrink:0"><path d="M2 4l4 4 4-4"/></svg>';
+    sepQico.style.transform=questOpen?'rotate(0deg)':'rotate(-90deg)';
     sepQ.appendChild(sepQlbl);sepQ.appendChild(sepQico);
     var questBody=document.createElement('div');questBody.id='ob-quest-body';questBody.style.cssText='overflow:hidden;transition:max-height .35s ease;max-height:'+(questOpen?'3000px':'0');
     sepQ.onclick=function(){var open=questBody.style.maxHeight!=='0px'&&questBody.style.maxHeight!=='0';questBody.style.maxHeight=open?'0':'3000px';sepQico.style.transform=open?'':'rotate(90deg)';cd()._questOpen=!open;};
@@ -4013,11 +4024,11 @@ function renderObPanel(){
     var sep2=document.createElement('div');
     sep2.style.cssText='font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:20px 0 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none';
     var sep2lbl=document.createElement('span');sep2lbl.textContent='Social-Media-Zugangsdaten';
-    var sep2ico=document.createElement('span');sep2ico.id='creds-toggle-ico';sep2ico.style.cssText='transition:transform .25s;display:inline-block;font-size:18px;line-height:1;color:var(--text2)';sep2ico.textContent='›';
-    sep2ico.style.transform=credsOpen?'rotate(90deg)':'';
+    var sep2ico=document.createElement('span');sep2ico.id='creds-toggle-ico';sep2ico.style.cssText='transition:transform .2s;display:flex;align-items:center;color:var(--text2)';sep2ico.innerHTML='<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;flex-shrink:0"><path d="M2 4l4 4 4-4"/></svg>';
+    sep2ico.style.transform=credsOpen?'rotate(0deg)':'rotate(-90deg)';
     sep2.appendChild(sep2lbl);sep2.appendChild(sep2ico);
     var credsBody=document.createElement('div');credsBody.id='ob-creds-body';credsBody.style.cssText='overflow:hidden;transition:max-height .35s ease;max-height:'+(credsOpen?'3000px':'0');
-    sep2.onclick=function(){var open=credsBody.style.maxHeight!=='0px'&&credsBody.style.maxHeight!=='0';credsBody.style.maxHeight=open?'0':'3000px';sep2ico.style.transform=open?'':'rotate(90deg)';cd()._credsOpen=!open;};
+    sep2.onclick=function(){var open=credsBody.style.maxHeight!=='0px'&&credsBody.style.maxHeight!=='0';credsBody.style.maxHeight=open?'0':'3000px';sep2ico.style.transform=open?'rotate(-90deg)':'rotate(0deg)';cd()._credsOpen=!open;};
     con.appendChild(sep2);
     var note = document.createElement('div');
     note.style.cssText = 'font-size:11px;color:var(--text3);margin-bottom:12px';
