@@ -861,9 +861,11 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       <!-- TO-DOS -->
       <div class="page" id="page-todos">
         <div class="page-title" style="flex-direction:row;align-items:center">To-Dos</div>
+        <div id="todo-filter-bar" class="agency-only" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
         <div class="card agency-only"><div class="card-title">Neue Aufgabe</div>
           <div class="form-row"><div><span class="flbl">Aufgabe</span><input type="text" id="new-todo-text" style="margin:0"></div><div><span class="flbl">Fällig am</span><input type="date" id="new-todo-date" style="margin:0"></div></div>
           <div class="form-row" style="margin-top:8px"><div><span class="flbl">Priorität</span><select id="new-todo-prio" style="margin:0"><option value="high">Hoch</option><option value="med" selected>Mittel</option><option value="low">Niedrig</option></select></div><div><span class="flbl">Zugewiesen an</span><select id="new-todo-assign" style="margin:0"><option value="agency">Agentur</option><option value="client">Kunde</option><option value="both">Beide</option></select></div></div>
+          <div class="form-row" style="margin-top:8px"><div style="width:100%"><span class="flbl">Kunde <span style="color:var(--accent)">*</span></span><select id="new-todo-cust" style="margin:0"><option value="">– Bitte auswählen –</option></select></div></div>
           <button class="btn-primary" style="margin-top:10px" onclick="addTodo()">Hinzufügen</button>
         </div>
         <div class="card"><div class="card-title">Offen <span style="font-size:10px;color:var(--text3);font-weight:400" id="open-count"></span></div><div id="todo-open"></div><div id="todo-empty" style="display:none;font-size:11px;color:var(--text3);padding:6px 0">Keine offenen Aufgaben.</div></div>
@@ -1356,7 +1358,7 @@ function openOnboardingModal(){
   }
 }
 
-var SESSION={type:null,key:null},ROLE='agency',ACTIVE_CUSTOMER='',EDITING_TODO=-1,PENDING_FIRST=null,PW_REVEALED={};
+var SESSION={type:null,key:null},ROLE='agency',ACTIVE_CUSTOMER='',EDITING_TODO=-1,EDITING_TODO_CUST='',_todoFilterAgency=false,_todoFilterCusts=new Set(),PENDING_FIRST=null,PW_REVEALED={};
 var SHOW_PAST=false,SHOW_PAST_SHOOTS=false,SHOW_ADD_FORM=false,CURRENT_SHOOT_IDX=-1,CURRENT_IDEA_IDX=-1,CAL_OFFSET=0,OB_DRAG_IDX=-1,OPEN_SHOOT_PANELS={};
 var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Snippets','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
@@ -1728,7 +1730,7 @@ function resetAllEditStates(){
   if(obp)obp.style.display='none';
 }
 function agencySwitchCustomer(k){ACTIVE_CUSTOMER=k;try{sessionStorage.setItem('lastCustomer',k);localStorage.setItem('lastCustomer',k);}catch(e){}resetAllEditStates();renderCustomerView();updateTodoBadge();updateShootReminder();}
-function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});;var hideCustSel=['overview','settings','agency-overview'];var custSel=document.getElementById('cust-dropdown');var custLbl=document.querySelector('#agency-tb span');if(custSel){custSel.style.display=hideCustSel.indexOf(id)!==-1?'none':'';if(custLbl)custLbl.style.display=hideCustSel.indexOf(id)!==-1?'none':'';};
+function showPage(id,el){['content-modal','shoot-add-modal','shoot-detail-modal','pw-change-modal','onboarding-modal','import-help-modal'].forEach(function(m){var e=document.getElementById(m);if(e)e.style.display='none';});document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});;var hideCustSel=['overview','settings','agency-overview','todos'];var custSel=document.getElementById('cust-dropdown');var custLbl=document.querySelector('#agency-tb span');if(custSel){custSel.style.display=hideCustSel.indexOf(id)!==-1?'none':'';if(custLbl)custLbl.style.display=hideCustSel.indexOf(id)!==-1?'none':'';};
   var saf=document.getElementById('shoot-add-form');if(saf)saf.style.display='none';
   var satb=document.getElementById('shoot-add-toggle-btn');if(satb)satb.textContent='+ Drehtermin';var pg=document.getElementById('page-'+id);if(pg){pg.classList.add('active');pg.classList.remove('page-visible');requestAnimationFrame(function(){requestAnimationFrame(function(){pg.classList.add('page-visible');});});}if(el)el.classList.add('active');if(id==='agency-overview')renderAgencyOverview();else renderCustomerView();}
 function openModal(id){var e=document.getElementById(id);if(e)e.style.display='flex';}
@@ -2906,11 +2908,27 @@ function saveShootDesc() {
 }
 
 // ── TODOS ──
-function addTodo(){pushUndo();var txt=((document.getElementById('new-todo-text')||{}).value||'').trim();if(!txt)return;var due=(document.getElementById('new-todo-date')||{}).value;var prio=(document.getElementById('new-todo-prio')||{}).value;var asgn=(document.getElementById('new-todo-assign')||{}).value;cd().todos.unshift({text:txt,due:due,prio:prio,assign:asgn,done:false,createdAt:Date.now()});scheduleSave();document.getElementById('new-todo-text').value='';document.getElementById('new-todo-date').value='';renderTodos();}
-function toggleTodo(idx){
-  cd().todos[idx].done = !cd().todos[idx].done;
-  if(cd().todos[idx].done) {
-    cd().todos[idx].completedAt = Date.now();
+function addTodo(){
+  pushUndo();
+  var txt=((document.getElementById('new-todo-text')||{}).value||'').trim();
+  if(!txt)return;
+  var custId=ROLE==='agency'?(document.getElementById('new-todo-cust')||{}).value:'';
+  if(ROLE==='agency'&&!custId){showToast('Bitte Kunden auswählen');return;}
+  var due=(document.getElementById('new-todo-date')||{}).value;
+  var prio=(document.getElementById('new-todo-prio')||{}).value;
+  var asgn=(document.getElementById('new-todo-assign')||{}).value;
+  var target=ROLE==='agency'?DATA[custId]:cd();
+  if(!target)return;
+  target.todos.unshift({text:txt,due:due,prio:prio,assign:asgn,done:false,createdAt:Date.now()});
+  scheduleSave();
+  document.getElementById('new-todo-text').value='';
+  document.getElementById('new-todo-date').value='';
+  renderTodos();
+}
+function toggleTodo(idx,custId){
+  (custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].done = !(custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].done;
+  if((custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].done) {
+    (custId&&DATA[custId]?DATA[custId]:cd()).todos[idx].completedAt = Date.now();
   } else {
     delete cd().todos[idx].completedAt;
   }
@@ -2918,10 +2936,10 @@ function toggleTodo(idx){
   renderTodos();
   if(ROLE==='client')renderClientTodosOnOverview();
 }
-function deleteTodo(idx){pushUndo();cd().todos.splice(idx,1);scheduleSave();renderTodos();}
-function startEdit(idx){EDITING_TODO=idx;renderTodos();}
+function deleteTodo(idx,custId){pushUndo();(custId&&DATA[custId]?DATA[custId]:cd()).todos.splice(idx,1);scheduleSave();renderTodos();}
+function startEdit(idx,custId){EDITING_TODO=idx;EDITING_TODO_CUST=custId||ACTIVE_CUSTOMER;renderTodos();}
 function cancelEdit(){EDITING_TODO=-1;renderTodos();}
-function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var t=cd().todos[idx];t.text=txt;t.due=(document.getElementById('edit-due-'+idx)||{}).value;t.prio=(document.getElementById('edit-prio-'+idx)||{}).value;t.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;scheduleSave();renderTodos();}
+function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var custId=EDITING_TODO_CUST||ACTIVE_CUSTOMER;var td=(custId&&DATA[custId]?DATA[custId]:cd()).todos[idx];td.text=txt;td.due=(document.getElementById('edit-due-'+idx)||{}).value;td.prio=(document.getElementById('edit-prio-'+idx)||{}).value;td.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;EDITING_TODO_CUST='';scheduleSave();renderTodos();}
 // doAgencyReset → weiter unten implementiert
 // ── Analytics Badge ──
 var ANALYTICS_BADGE_KEY='analytics_badge_';
@@ -3144,43 +3162,174 @@ function getTodoOnclick(t,i){
   }
   return '';
 }
-function renderTodos(){if(!ACTIVE_CUSTOMER)return;updateTodoBadge();
-  // Delegierter Click-Handler für jump-Todos
-  setTimeout(function(){
-    var todoList=document.getElementById('todo-open');
-    if(todoList&&!todoList._jumpHandlerSet){
-      todoList._jumpHandlerSet=true;
-      todoList.addEventListener('click',function(e){
-        var item=e.target.closest('[data-jumptitle]');
-        if(item&&window.innerWidth>768){jumpToContentRow(item.getAttribute('data-jumptitle'));}
-      });
-    }
-  },100);Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});var isAgency=ROLE==='agency';var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);var visible;if(isAgency){visible=todos;}else{visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}}
-  var open=visible.filter(function(t){return!t.done;}).map(function(t){return{t:t,i:todos.indexOf(t)};});var done2=visible.filter(function(t){return t.done&&!t.isOnboarding;}).map(function(t){return{t:t,i:todos.indexOf(t)};});
-  var badge=document.getElementById('todo-badge');if(badge){badge.style.display=open.length?'inline':'none';badge.textContent=open.length;}
-  var oc=document.getElementById('open-count');if(oc)oc.textContent='('+open.length+')';var dc=document.getElementById('done-count');if(dc)dc.textContent='('+done2.length+')';
+function renderTodos(){
+  updateTodoBadge();
+  // ── Client view: unchanged ──
+  if(ROLE!=='agency'){
+    if(!ACTIVE_CUSTOMER)return;
+    Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});
+    var d=cd();var todos=d.todos;var pct=calcProgress(ACTIVE_CUSTOMER);
+    var visible=todos.filter(function(t){return(t.assign==='client'||t.assign==='both')&&!t.isReset;});
+    if(pct<100){visible=[{text:'Onboarding abschließen',due:'',prio:'high',assign:'client',done:false,isOnboarding:true,_pct:pct}].concat(visible);}
+    var open=visible.filter(function(t){return!t.done;}).map(function(t){return{t:t,i:todos.indexOf(t),custId:ACTIVE_CUSTOMER};});
+    var done2=visible.filter(function(t){return t.done&&!t.isOnboarding;}).map(function(t){return{t:t,i:todos.indexOf(t),custId:ACTIVE_CUSTOMER};});
+    _renderTodoLists(open,done2,false);
+    renderClientTodosOnOverview();
+    return;
+  }
+
+  // ── Agency view: global across all customers ──
+  Object.keys(DATA).forEach(function(k){purgeStaleDoneTodos(k);});
+
+  // Populate filter chips
+  _renderTodoFilterChips();
+
+  // Populate customer dropdown in form
+  var custSel=document.getElementById('new-todo-cust');
+  if(custSel){
+    var prev=custSel.value;
+    custSel.innerHTML='<option value="">– Bitte auswählen –</option>';
+    getCustomerKeys().forEach(function(k){
+      if(DATA[k]&&DATA[k].status!=='abgeschlossen'){
+        var o=document.createElement('option');
+        o.value=k;o.textContent=DATA[k].name||k;
+        if(k===prev)o.selected=true;
+        custSel.appendChild(o);
+      }
+    });
+  }
+
+  // Collect todos from relevant customers
+  var custs=getCustomerKeys().filter(function(k){
+    if(!DATA[k]||DATA[k].status==='abgeschlossen')return false;
+    if(_todoFilterCusts.size>0)return _todoFilterCusts.has(k);
+    return true;
+  });
+
+  var allOpen=[],allDone=[];
+  custs.forEach(function(custId){
+    var todos=(DATA[custId]||{}).todos||[];
+    var custName=(DATA[custId]||{}).name||custId;
+    todos.forEach(function(t,i){
+      if(_todoFilterAgency&&t.assign==='client')return;
+      var entry={t:t,i:i,custId:custId,custName:custName};
+      if(!t.done&&!t.isReset)allOpen.push(entry);
+      else if(t.done)allDone.push(entry);
+    });
+  });
+
+  // Sort: by customer name, then by priority within customer
+  var prioOrder={high:0,med:1,low:2};
+  function sortEntries(arr){
+    arr.sort(function(a,b){
+      var nc=a.custName.localeCompare(b.custName,'de');
+      if(nc!==0)return nc;
+      return(prioOrder[a.t.prio]||1)-(prioOrder[b.t.prio]||1);
+    });
+    return arr;
+  }
+  sortEntries(allOpen);sortEntries(allDone);
+
+  // Update badge
+  var badge=document.getElementById('todo-badge');if(badge){badge.style.display=allOpen.length?'inline':'none';badge.textContent=allOpen.length;}
+  var oc=document.getElementById('open-count');if(oc)oc.textContent='('+allOpen.length+')';
+  var dc=document.getElementById('done-count');if(dc)dc.textContent='('+allDone.length+')';
+
+  // Update overview summary
   var ovS=document.getElementById('ov-todo-summary');
   if(ovS&&ROLE==='agency'){
-    var hc=open.filter(function(x){return x.t.prio==='high';}).length;
-    var mc=open.filter(function(x){return x.t.prio==='med';}).length;
+    var hc=allOpen.filter(function(x){return x.t.prio==='high';}).length;
+    var mc=allOpen.filter(function(x){return x.t.prio==='med';}).length;
     ovS.innerHTML='<div class="mini-stat"><span style="color:var(--text3)">Hoch priorisiert</span>'
       +'<span style="font-weight:700;color:#fff;background:#FF5757;border-radius:12px;padding:2px 10px;font-size:11px">'+hc+' offen</span></div>'
       +'<div class="mini-stat"><span style="color:var(--text3)">Mittel</span>'
       +'<span style="font-weight:700;color:#fff;background:var(--amber);border-radius:12px;padding:2px 10px;font-size:11px">'+mc+' offen</span></div>'
       +'<div class="mini-stat"><span style="color:var(--text3)">Erledigt</span>'
-      +'<span style="font-weight:700;color:var(--green);font-size:13px">'+done2.length+'</span></div>';
-  } else if(ovS&&ROLE==='client'){
-    renderClientTodosOnOverview();
+      +'<span style="font-weight:700;color:var(--green);font-size:13px">'+allDone.length+'</span></div>';
   }
-  function buildItem(entry,isDone){var t=entry.t;var i=entry.i;if(t.isOnboarding){return'<div class="todo-item" style="cursor:pointer" onclick="goToOnboarding()">'+chk(false,'')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--accent)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Onboarding abschließen</div><div style="margin-top:6px"><div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;background:var(--accent);border-radius:2px;width:'+t._pct+'%"></div></div></div></div><span class="priority-pill p-high">Hoch</span></div>';}
-  if(EDITING_TODO===i&&isAgency){return'<div class="todo-edit-form"><span class="flbl">Aufgabe</span><input type="text" id="edit-text-'+i+'" value="'+t.text.replace(/"/g,'&quot;')+'" style="margin-bottom:8px"><div class="form-row"><div><span class="flbl">Fällig</span><input type="date" id="edit-due-'+i+'" value="'+(t.due||'')+'" style="margin:0"></div><div><span class="flbl">Priorität</span><select id="edit-prio-'+i+'" style="margin:0"><option value="high"'+(t.prio==='high'?' selected':'')+'>Hoch</option><option value="med"'+(t.prio==='med'?' selected':'')+'>Mittel</option><option value="low"'+(t.prio==='low'?' selected':'')+'>Niedrig</option></select></div></div><div style="margin-top:8px"><span class="flbl">Zugewiesen an</span><select id="edit-assign-'+i+'" style="margin:0"><option value="agency"'+(t.assign==='agency'?' selected':'')+'>Agentur</option><option value="client"'+(t.assign==='client'?' selected':'')+'>Kunde</option><option value="both"'+(t.assign==='both'?' selected':'')+'>Beide</option></select></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn-primary" onclick="saveEdit('+i+')">Speichern</button><button class="btn-outline" onclick="cancelEdit()">Abbrechen</button></div></div>';}
-  var al=t.assign==='agency'?'Agentur':t.assign==='client'?'Kunde':'Beide';var rb=(t.isReset&&isAgency)?'<button class="btn-outline" style="margin:0 0 0 8px;font-size:10px;padding:2px 9px;color:var(--accent);border-color:rgba(255,87,87,0.4)" onclick="agencySwitchCustomer(\''+t.resetKey+'\');showPage(\'settings\',document.getElementById(\'nav-settings\'))">Zurücksetzen →</button>':'';
-  var todoJumpTitle=getTodoOnclick(t,i);
-  return'<div class="todo-item" style="position:relative;'+(todoJumpTitle?'cursor:pointer':'')+'" '+(todoJumpTitle?'data-jumptitle="'+escHtml(todoJumpTitle)+'"':'')+'>'+
-  (!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+chk(isDone,'toggleTodo('+i+')')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div><div style="display:flex;gap:8px;margin-top:2px">'+(t.due?'<span style="font-size:10px;color:var(--text3)">Fällig: '+fmtISO(t.due)+'</span>':'')+(isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+(t.createdAt&&(t.isReset||t.shootRef!==undefined||t.isBrainstorm)?'<span style="font-size:10px;color:var(--text3)">Erstellt: '+new Date(t.createdAt).toLocaleDateString('de-DE')+'</span>':'')+'</div></div><span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+(isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+'</div>';}
-  var oel=document.getElementById('todo-open');var oem=document.getElementById('todo-empty');var del=document.getElementById('todo-done');var dem=document.getElementById('done-empty');
-  if(oel){oel.innerHTML=open.map(function(e){return buildItem(e,false);}).join('');if(oem)oem.style.display=open.length?'none':'block';}
-  if(del){del.innerHTML=done2.map(function(e){return buildItem(e,true);}).join('');if(dem)dem.style.display=done2.length?'none':'block';}}
+
+  _renderTodoLists(allOpen,allDone,true);
+}
+
+function _renderTodoFilterChips(){
+  var bar=document.getElementById('todo-filter-bar');
+  if(!bar)return;
+  var chips=[];
+  // Alle chip
+  var allActive=!_todoFilterAgency&&_todoFilterCusts.size===0;
+  chips.push('<button onclick="_setTodoFilter(\'all\')" style="padding:4px 12px;border-radius:20px;border:1px solid '+(allActive?'var(--accent)':'var(--border)')+';background:'+(allActive?'var(--accent)':'var(--surface2)')+';color:'+(allActive?'#fff':'var(--text2)')+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Alle</button>');
+  // Agentur chip
+  chips.push('<button onclick="_setTodoFilter(\'agency\')" style="padding:4px 12px;border-radius:20px;border:1px solid '+(_todoFilterAgency?'var(--accent)':'var(--border)')+';background:'+(_todoFilterAgency?'var(--accent)':'var(--surface2)')+';color:'+(_todoFilterAgency?'#fff':'var(--text2)')+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Agentur</button>');
+  // Customer chips
+  getCustomerKeys().forEach(function(k){
+    if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
+    var sel=_todoFilterCusts.has(k);
+    chips.push('<button onclick="_setTodoFilter(\'cust\',\''+k+'\')" style="padding:4px 12px;border-radius:20px;border:1px solid '+(sel?'var(--accent)':'var(--border)')+';background:'+(sel?'var(--accent)':'var(--surface2)')+';color:'+(sel?'#fff':'var(--text2)')+';font-size:11px;cursor:pointer;font-family:inherit">'+(DATA[k].name||k)+'</button>');
+  });
+  bar.innerHTML=chips.join('');
+}
+
+function _setTodoFilter(type,custId){
+  if(type==='all'){_todoFilterAgency=false;_todoFilterCusts=new Set();}
+  else if(type==='agency'){_todoFilterAgency=!_todoFilterAgency;_todoFilterCusts=new Set();}
+  else if(type==='cust'){
+    _todoFilterAgency=false;
+    if(_todoFilterCusts.has(custId))_todoFilterCusts.delete(custId);
+    else _todoFilterCusts.add(custId);
+  }
+  renderTodos();
+}
+
+function _renderTodoLists(open,done2,isAgency){
+  function chk(checked,fn){return'<button class="todo-chk'+(checked?' checked':'')+'" onclick="'+fn+'" style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid '+(checked?'var(--accent)':'var(--border2)')+';background:'+(checked?'var(--accent)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">'+(checked?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9 10.5,3"/></svg>':'')+'</button>';}
+  function pCls(p){return p==='high'?'p-high':p==='med'?'p-med':'p-low';}
+  function pLbl(p){return p==='high'?'Hoch':p==='med'?'Mittel':'Niedrig';}
+
+  function buildItem(entry,isDone){
+    var t=entry.t;var i=entry.i;var custId=entry.custId||ACTIVE_CUSTOMER;var custName=entry.custName||'';
+    if(t.isOnboarding){return'<div class="todo-item" style="cursor:pointer" onclick="goToOnboarding()">'+chk(false,'')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--accent)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Onboarding abschließen</div><div style="margin-top:6px"><div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;background:var(--accent);border-radius:2px;width:'+t._pct+'%"></div></div></div></div><span class="priority-pill p-high">Hoch</span></div>';}
+    var al=t.assign==='agency'?'Agentur':t.assign==='client'?'Kunde':'Beide';
+    var rb=(t.isReset&&isAgency)?'<button class="btn-outline" style="margin:0 0 0 8px;font-size:10px;padding:2px 9px;color:var(--accent);border-color:rgba(255,87,87,0.4)" onclick="agencySwitchCustomer(\''+t.resetKey+'\');showPage(\'settings\',document.getElementById(\'nav-settings\'))">Zurücksetzen →</button>':'';
+    var todoJumpTitle=getTodoOnclick(t,i);
+    var custLabel=isAgency&&custName?'<span style="font-size:9px;font-weight:600;color:#fff;background:var(--accent);border-radius:10px;padding:1px 7px;flex-shrink:0">'+escHtml(custName)+'</span>':'';
+    if(EDITING_TODO===i&&EDITING_TODO_CUST===custId&&isAgency){
+      return'<div class="todo-edit-form"><span class="flbl">Aufgabe</span><input type="text" id="edit-text-'+i+'" value="'+t.text.replace(/"/g,'&quot;')+'" style="margin-bottom:8px"><div class="form-row"><div><span class="flbl">Fällig</span><input type="date" id="edit-due-'+i+'" value="'+(t.due||'')+'" style="margin:0"></div><div><span class="flbl">Priorität</span><select id="edit-prio-'+i+'" style="margin:0"><option value="high"'+(t.prio==='high'?' selected':'')+'>Hoch</option><option value="med"'+(t.prio==='med'?' selected':'')+'>Mittel</option><option value="low"'+(t.prio==='low'?' selected':'')+'>Niedrig</option></select></div></div><div style="margin-top:8px"><span class="flbl">Zugewiesen an</span><select id="edit-assign-'+i+'" style="margin:0"><option value="agency"'+(t.assign==='agency'?' selected':'')+'>Agentur</option><option value="client"'+(t.assign==='client'?' selected':'')+'>Kunde</option><option value="both"'+(t.assign==='both'?' selected':'')+'>Beide</option></select></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn-primary" onclick="saveEdit('+i+')">Speichern</button><button class="btn-outline" onclick="cancelEdit()">Abbrechen</button></div></div>';
+    }
+    return'<div class="todo-item" style="position:relative;'+(todoJumpTitle?'cursor:pointer':'')+'" '+(todoJumpTitle?'data-jumptitle="'+escHtml(todoJumpTitle)+'"':'')+'>'+
+    (!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+
+    chk(isDone,'toggleTodo('+i+',\''+custId+'\')')+
+    '<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;align-items:center">'+
+    custLabel+
+    (t.due?'<span style="font-size:10px;color:var(--text3)">Fällig: '+fmtISO(t.due)+'</span>':'')+
+    (isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+
+    '</div></div>'+
+    '<span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+
+    (isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset?'<button class="btn-icon" onclick="startEdit('+i+',\''+custId+'\')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+',\''+custId+'\')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+
+    '</div>';
+  }
+
+  // Group by customer for agency
+  function renderGrouped(entries,isDone){
+    if(!entries.length)return'';
+    var html='';
+    var lastCust='';
+    entries.forEach(function(entry){
+      if(isAgency&&entry.custName!==lastCust){
+        html+='<div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.05em;padding:8px 0 4px;border-top:'+(lastCust?'1px solid var(--border2)':'none')+'">'+escHtml(entry.custName)+'</div>';
+        lastCust=entry.custName;
+      }
+      html+=buildItem(entry,isDone);
+    });
+    return html;
+  }
+
+  var oel=document.getElementById('todo-open');var oem=document.getElementById('todo-empty');
+  var del=document.getElementById('todo-done');var dem=document.getElementById('done-empty');
+  if(oel){oel.innerHTML=renderGrouped(open,false);if(oem)oem.style.display=open.length?'none':'block';}
+  if(del){del.innerHTML=renderGrouped(done2,true);if(dem)dem.style.display=done2.length?'none':'block';}
+}
+
 
 // ── CONTENT TABLE ──
 function togglePastRows(){SHOW_PAST=!SHOW_PAST;renderContentTable();}
