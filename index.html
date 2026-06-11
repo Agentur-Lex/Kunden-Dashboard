@@ -2361,7 +2361,6 @@ function renderShootsList(){
   // Sort each group by date separately
   futureIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
   pastIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
-  var showIdx=futureIdx.slice();
   // Agency: past shoots go to separate list below toggle
   var sl=document.getElementById('shoots-list');
   var pl=document.getElementById('shoots-past-list');
@@ -2369,24 +2368,26 @@ function renderShootsList(){
   try{sl.innerHTML='';}catch(e){return;}
   if(pl)pl.innerHTML='';
 
-  if(ROLE!=='agency'){showIdx=futureIdx.concat(pastIdx);}
+  // Show/hide past list
+  if(pl)pl.style.display=(ROLE==='agency'&&SHOW_PAST_SHOOTS&&pastIdx.length)?'block':'none';
 
-  if(futureIdx.length===0&&(ROLE!=='agency'||!SHOW_PAST_SHOOTS)){
+  if(futureIdx.length===0){
     var em=document.createElement('div');
     em.style.cssText='font-size:11px;color:var(--text3);padding:4px 0';
     em.textContent='Keine Termine geplant.';
     sl.appendChild(em);
   }
 
-  // Update past-list visibility
-  if(pl)pl.style.display=(ROLE==='agency'&&SHOW_PAST_SHOOTS&&pastIdx.length)?'block':'none';
+  // Render future shoots into sl, past shoots into pl (agency) or sl (client)
+  var renderList=ROLE==='agency'
+    ? futureIdx.map(function(i){return{i:i,target:sl};}).concat(pastIdx.map(function(i){return{i:i,target:pl||sl};}))
+    : futureIdx.concat(pastIdx).map(function(i){return{i:i,target:sl};});
 
-  showIdx.forEach(function(i){
+  renderList.forEach(function(entry){
+    var i=entry.i; var target=entry.target; if(!target)return;
     var s=d.shoots[i];
     if(!s)return;
     var isPast=pastIdx.indexOf(i)!==-1;
-    // Agency: past shoots go into separate list
-    var target=(ROLE==='agency'&&isPast&&pl)?pl:sl;
     var pastHeaderAdded=false;
 
     // ── Shoot wrapper ──
@@ -2846,7 +2847,7 @@ function renderShootsList(){
     panel.appendChild(addRow);
 
     wrap.appendChild(panel);
-    if(target)target.appendChild(wrap);
+    target.appendChild(wrap);
   });
 
   // Overview: only future, compact header only
