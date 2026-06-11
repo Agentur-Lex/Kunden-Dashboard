@@ -1948,8 +1948,8 @@ async function renderAgencyOverview(){var kacheln=document.getElementById('kunde
     if(total>2){
       var rest=total-2;
       var moreDiv=document.createElement('div');
-    moreDiv.style.cssText='margin-top:8px;cursor:pointer;font-size:11px;font-weight:600;color:var(--accent);text-align:center;padding:6px;border:1px solid rgba(255,87,87,0.25);border-radius:6px;background:rgba(255,87,87,0.05)';
-    moreDiv.textContent='+'+rest+' weitere Todo'+(rest===1?'':'s')+' →';
+    moreDiv.style.cssText='margin-top:6px;cursor:pointer;font-size:10px;color:var(--text3);text-align:center;padding:2px 0';
+    moreDiv.textContent='+'+rest;
     moreDiv.addEventListener('click',function(){showPage('todos',document.getElementById('nav-todos'));});
     atEl2.innerHTML=html;
     atEl2.appendChild(moreDiv);
@@ -3327,7 +3327,7 @@ function _updateAssignLabel(){
 
 
 function _renderTodoLists(open,done2,isAgency){
-  function chk(checked,fn){return'<button class="todo-chk'+(checked?' checked':'')+'" onclick="'+fn+'" style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid '+(checked?'var(--accent)':'var(--border2)')+';background:'+(checked?'var(--accent)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">'+(checked?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9 10.5,3"/></svg>':'')+'</button>';}
+  function chk(checked,fn){return'<button class="todo-chk'+(checked?' checked':'')+'" onclick="event.stopPropagation();'+fn+'" style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid '+(checked?'var(--accent)':'var(--border2)')+';background:'+(checked?'var(--accent)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">'+(checked?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9 10.5,3"/></svg>':'')+'</button>';}
   function pCls(p){return p==='high'?'p-high':p==='med'?'p-med':'p-low';}
   function pLbl(p){return p==='high'?'Hoch':p==='med'?'Mittel':'Niedrig';}
 
