@@ -2596,6 +2596,15 @@ function renderShootsList(){
       delShootBtn.className='btn-icon del shoot-del-btn';header.appendChild(delShootBtn);
     }
 
+    // Vollbild-Icon
+    var expandBtn=document.createElement('button');
+    expandBtn.className='btn-icon';
+    expandBtn.title='Vollbild öffnen';
+    expandBtn.style.cssText='flex-shrink:0';
+    expandBtn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3l-7 7M3 21l7-7M14 3h7v7M10 21H3v-7"/></svg>';
+    (function(idx3){expandBtn.addEventListener('click',function(e){e.stopPropagation();openShootDetail(idx3);});})(i);
+    header.appendChild(expandBtn);
+
     wrap.appendChild(header);
 
     // ── Content-Pieces inline panel ──
