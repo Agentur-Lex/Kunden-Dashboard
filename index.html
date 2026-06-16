@@ -2691,25 +2691,58 @@ function renderShootsList(){
       tr.style.cursor='pointer';
       tr.title='Klicken für Beschreibung';
 
-      // Thema
+      // Thema + Details-Akkordeon
       var tdT=document.createElement('td');tdT.style.padding='6px 10px';
       var themaInp=document.createElement('input');
       themaInp.type='text';themaInp.value=idea.thema||'';themaInp.placeholder='Content-Thema...';
       themaInp.style.cssText='width:100%;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-size:11px;font-family:inherit;padding:3px 6px;outline:none;box-sizing:border-box';
-      // Desc indicator
-      if(idea.desc&&idea.desc.trim()){
-        var dot=document.createElement('span');dot.textContent=' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>';dot.style.cssText='font-size:10px;cursor:pointer';
-        (function(idx2){dot.onclick=function(e){e.stopPropagation();CURRENT_SHOOT_IDX=i;openIdeaDesc(idx2);};})(ri);
-        tdT.appendChild(themaInp);tdT.appendChild(dot);
-      }else{tdT.appendChild(themaInp);}
+      themaInp.addEventListener('click',function(e){e.stopPropagation();});
       (function(idx2){
         themaInp.addEventListener('change',function(){
           cd().shoots[i].ideas[idx2].thema=this.value;
-          scheduleSave();
-          renderShootsList();
+          scheduleSave();renderShootsList();
         });
-        themaInp.addEventListener('click',function(e){e.stopPropagation();});
       })(ri);
+
+      // Details toggle
+      var detToggle=document.createElement('button');
+      detToggle.type='button';
+      var detOpen=!!(idea.desc&&idea.desc.trim());
+      detToggle.style.cssText='display:flex;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:10px;font-family:inherit;padding:2px 0 0;line-height:1.2;margin-top:3px';
+      var detChevron=document.createElement('span');
+      detChevron.innerHTML='<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s"><path d="M2 4l4 4 4-4"/></svg>';
+      detChevron.style.display='flex';
+      detChevron.style.transform=detOpen?'rotate(0deg)':'rotate(-90deg)';
+      detChevron.style.transition='transform .15s';
+      var detLbl=document.createElement('span');detLbl.textContent='Details';
+      detToggle.appendChild(detChevron);detToggle.appendChild(detLbl);
+
+      // Details body (textarea)
+      var detBody=document.createElement('div');
+      detBody.style.cssText='overflow:hidden;transition:max-height .2s ease;max-height:'+(detOpen?'200px':'0');
+      var detTa=document.createElement('textarea');
+      detTa.value=idea.desc||'';
+      detTa.placeholder='Notizen, Beschreibung, Anweisungen...';
+      detTa.rows=3;
+      detTa.style.cssText='width:100%;margin-top:5px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-size:10px;font-family:inherit;padding:4px 6px;outline:none;box-sizing:border-box;resize:vertical';
+      detTa.addEventListener('click',function(e){e.stopPropagation();});
+      (function(idx2){
+        detTa.addEventListener('input',function(){
+          cd().shoots[i].ideas[idx2].desc=this.value;scheduleSave();
+        });
+      })(ri);
+      detBody.appendChild(detTa);
+
+      detToggle.addEventListener('click',function(e){
+        e.stopPropagation();
+        detOpen=!detOpen;
+        detChevron.style.transform=detOpen?'rotate(0deg)':'rotate(-90deg)';
+        detBody.style.maxHeight=detOpen?'200px':'0';
+      });
+
+      tdT.appendChild(themaInp);
+      tdT.appendChild(detToggle);
+      tdT.appendChild(detBody);
       tr.appendChild(tdT);
 
       // Erledigt
