@@ -1760,6 +1760,7 @@ function renderUpcomingShoots(){
     var st=(d.status||'').toLowerCase();
     if(st==='abgeschlossen')return;
     d.shoots.forEach(function(s){
+      if(!s.date)return; // Kein Datum → nicht im Kalender
       var dt=normalizeDate(s.date);
       if(dt&&dt>today)shoots.push({date:dt,time:s.time||'',title:s.title||'',custName:d.name||custId,ideas:s.ideas||[],target:(s.ideas||[]).length,custId:custId});
     });
@@ -2346,7 +2347,7 @@ function renderShootsList(){
   // Split into future and past
   var futureIdx=[], pastIdx=[];
   d.shoots.forEach(function(s,i){
-    (normalizeDate(s.date)<today ? pastIdx : futureIdx).push(i);
+    (s.date&&normalizeDate(s.date)<today ? pastIdx : futureIdx).push(i);
   });
 
   // Toggle button
@@ -2362,7 +2363,7 @@ function renderShootsList(){
   }
 
   // Sort each group by date separately
-  futureIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
+  futureIdx.sort(function(a,b){var da=normalizeDate(d.shoots[a].date)||'9999-99-99',db=normalizeDate(d.shoots[b].date)||'9999-99-99';return da.localeCompare(db);});
   pastIdx.sort(function(a,b){return normalizeDate(d.shoots[a].date).localeCompare(normalizeDate(d.shoots[b].date));});
   // Agency: past shoots go to separate list below toggle
   var sl=document.getElementById('shoots-list');
@@ -2405,7 +2406,12 @@ function renderShootsList(){
     // Date box
     var dateBox=document.createElement('div');
     dateBox.className='shoot-date-box';
-    dateBox.innerHTML='<div class="shoot-mon">'+monthStr(s.date)+'</div><div class="shoot-day">'+dayStr(s.date)+'</div>';
+    if(s.date){
+      dateBox.innerHTML='<div class="shoot-mon">'+monthStr(s.date)+'</div><div class="shoot-day">'+dayStr(s.date)+'</div>';
+    }else{
+      dateBox.innerHTML='<div class="shoot-mon" style="font-size:8px">DATUM</div><div class="shoot-day" style="font-size:13px">?</div>';
+      dateBox.style.opacity='0.6';
+    }
     header.appendChild(dateBox);
 
     // Info (editable for agency)
@@ -2933,7 +2939,7 @@ function saveShoot(){
   var time=getVal('sh-modal-time','sh-time');
   var title=(getVal('sh-modal-title','sh-title')||'').trim();
   var location=(getVal('sh-modal-location','sh-location')||'').trim();
-  var ckey=getVal('sh-modal-customer','sh-customer');if(!date||!title){alert('Bitte Datum und Titel angeben.');return;}var autoIdeas=[];var spezF=(DATA[ckey]&&DATA[ckey].strategy&&DATA[ckey].strategy.spezFreq)?DATA[ckey].strategy.spezFreq:{};SPEZ_OPTS.filter(function(o){return o!=='-';}).forEach(function(opt){var n=(spezF[opt]||0)*2;for(var ai=0;ai<n;ai++){autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});}});pushUndo();DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return a.date.localeCompare(b.date);});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+  var ckey=getVal('sh-modal-customer','sh-customer');if(!title){alert('Bitte einen Titel angeben.');return;}var autoIdeas=[];var spezF=(DATA[ckey]&&DATA[ckey].strategy&&DATA[ckey].strategy.spezFreq)?DATA[ckey].strategy.spezFreq:{};SPEZ_OPTS.filter(function(o){return o!=='-';}).forEach(function(opt){var n=(spezF[opt]||0)*2;for(var ai=0;ai<n;ai++){autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});}});pushUndo();DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return (a.date||'9999-99-99').localeCompare(b.date||'9999-99-99');});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
