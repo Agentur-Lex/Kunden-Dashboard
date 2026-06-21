@@ -608,6 +608,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
     <div class="auth-sub" id="first-sub">Bitte lege ein eigenes Passwort fest.</div>
     <div class="auth-err" id="first-err"></div>
     <form onsubmit="return false" autocomplete="on">
+    <input type="text" name="username" autocomplete="username" value="" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none" tabindex="-1" aria-hidden="true">
     <span class="flbl">Neues Passwort</span>
     <div class="pw-wrap" style="margin-bottom:3px"><input type="password" id="first-pw1" autocomplete="new-password" placeholder="Mind. 6 Zeichen" oninput="checkStrength('first-pw1','pw-bar1','pw-lbl1')"><button class="pw-toggle" onclick="togglePw('first-pw1',this)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg></button></div>
     <div class="pw-strength-bar" id="pw-bar1" style="width:0"></div>
@@ -1117,11 +1118,12 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
     <div class="modal-head"><span class="modal-title">Passwort ändern</span><button class="modal-close" onclick="closeModal('pw-change-modal')">✕</button></div>
     <div class="modal-body">
       <form onsubmit="return false" autocomplete="on">
+      <input type="text" name="username" autocomplete="username" value="" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none" tabindex="-1" aria-hidden="true">
       <div class="auth-err" id="pw-change-err"></div><div class="auth-ok" id="pw-change-ok">Passwort geändert!</div>
       <span class="flbl">Aktuelles Passwort</span><div class="pw-wrap" style="margin-bottom:12px"><input type="password" id="pw-old" autocomplete="current-password" placeholder="••••••••"><button class="pw-toggle" onclick="togglePw('pw-old',this)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg></button></div>
-      <span class="flbl">Neues Passwort</span><div class="pw-wrap" style="margin-bottom:3px"><input type="password" id="pw-new1" placeholder="Mind. 6 Zeichen" oninput="checkStrength('pw-new1','pw-bar2','pw-lbl2')"><button class="pw-toggle" onclick="togglePw('pw-new1',this)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg></button></div>
+      <span class="flbl">Neues Passwort</span><div class="pw-wrap" style="margin-bottom:3px"><input type="password" id="pw-new1" autocomplete="new-password" placeholder="Mind. 6 Zeichen" oninput="checkStrength('pw-new1','pw-bar2','pw-lbl2')"><button class="pw-toggle" onclick="togglePw('pw-new1',this)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg></button></div>
       <div class="pw-strength-bar" id="pw-bar2" style="width:0"></div><div id="pw-lbl2" style="font-size:10px;color:var(--text3);margin-bottom:10px"></div>
-      <span class="flbl">Bestätigen</span><div class="pw-wrap"><input type="password" id="pw-new2" placeholder="Passwort wiederholen"><button class="pw-toggle" onclick="togglePw('pw-new2',this)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg></button></div>
+      <span class="flbl">Bestätigen</span><div class="pw-wrap"><input type="password" id="pw-new2" autocomplete="new-password" placeholder="Passwort wiederholen"><button class="pw-toggle" onclick="togglePw('pw-new2',this)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg></button></div>
       </form>
     </div>
     <div class="modal-foot"><button class="btn-primary" onclick="doChangePasswordSB()">Ändern</button><button class="btn-outline" onclick="closeModal('pw-change-modal')">Abbrechen</button></div>
@@ -2999,7 +3001,7 @@ function addTodo(){
     if(v==='__agency__')agencyChecked=true;
     else custIds.push(v);
   });
-  var asgn=agencyChecked?'agency':'both';
+  var asgn=agencyChecked?'agency':'client';
   var targets=custIds.length>0?custIds:[ACTIVE_CUSTOMER];
   var created=0;
   targets.forEach(function(custId){
