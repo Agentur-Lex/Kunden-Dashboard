@@ -5938,13 +5938,13 @@ async function sbSaveAllTodos(){
     var dbRes=await sb.from('todos').select('id,is_reset').eq('customer_id',cId);
     if(dbRes.data){
       var toDelete=dbRes.data
-        .filter(function(r){return localIds.indexOf(r.id)===-1&&!r.is_reset;})
+        .filter(function(r){return localIds.indexOf(r.id)===-1&&!(r.is_reset&&!r.done);})
         .map(function(r){return r.id;});
       if(toDelete.length)await sb.from('todos').delete().in('id',toDelete);
     }
   } else if(ROLE==='agency'){
-    // Nur nicht-Reset Todos löschen wenn lokale Liste leer ist
-    await sb.from('todos').delete().eq('customer_id',cId).eq('is_reset',false);
+    // Nur nicht-offene-Reset Todos löschen wenn lokale Liste leer ist
+    await sb.from('todos').delete().eq('customer_id',cId).or('is_reset.eq.false,done.eq.true');
   }
 }
 async function sbSaveAllShoots(overrideCustId){
