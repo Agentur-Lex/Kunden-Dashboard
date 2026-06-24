@@ -6086,8 +6086,23 @@ async function doAgencyReset(k){
     var rpcRes=await sb.rpc('reset_customer_password',{cust_id:k,new_pw:newPw});
     if(rpcRes.error)throw new Error(rpcRes.error.message);
     if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;CREDS[k].tempPw=newPw;}
-    // Reset-Todos für diesen Kunden lokal abhaken (agency kann sie manuell erledigen)
+    // Reset-Todos automatisch abschließen
+    if(DATA[k]&&DATA[k].todos){
+      var changed=false;
+      DATA[k].todos.forEach(function(t){
+        if(t.isReset&&!t.done){t.done=true;t.completedAt=Date.now();changed=true;}
+      });
+      if(changed){
+        var prevActive=ACTIVE_CUSTOMER;
+        ACTIVE_CUSTOMER=k;
+        await sbSaveAllTodos();
+        ACTIVE_CUSTOMER=prevActive;
+      }
+    }
+    // Auch in DB direkt für den Fall dass Todos noch nicht lokal geladen sind
+    await sb.from('todos').update({done:true,completed_at:new Date().toISOString()}).eq('customer_id',k).eq('is_reset',true).eq('done',false);
     renderCredList();
+    if(ROLE==='agency')renderTodos();
     alert('✅ Reset durchgeführt!\n\nTemporäres Passwort für '+label+':\n\n'+newPw+'\n\nBitte dieses Passwort an den Kunden weitergeben. Er wird beim nächsten Login aufgefordert, ein neues zu vergeben.');
   }catch(e){
     alert('Fehler beim Reset: '+e.message+'\n\nBitte stelle sicher, dass die Supabase-Funktion "reset_customer_password" angelegt wurde.');
