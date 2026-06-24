@@ -1617,13 +1617,12 @@ async function doForgot(){
     var custName=custRes.data.name;
     var insertRes=await sb.from('todos').insert({
       customer_id: custId,
-      text: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="4"/><path d="M10.85 13.15L19 5M17 7l2 2M14 4l2 2"/></svg> Passwort-Reset angefragt für: '+custName+' ('+u+')',
+      text: 'Passwort-Reset angefragt: '+custName+' ('+u+')',
       prio: 'high',
       assign: 'agency',
       done: false,
       created_at: Date.now(),
-      is_reset: true,
-      reset_key: custId
+      is_reset: true
     });
     if(insertRes.error){
       hideLoading();
@@ -3265,6 +3264,23 @@ function getTodoOnclick(t,i){
 }
 function renderTodos(){
   updateTodoBadge();
+  // Reset-Todos frisch aus DB laden (kommen asynchron von unangemeldeten Kunden)
+  if(ROLE==='agency'&&ACTIVE_CUSTOMER){
+    getSB().from('todos').select('*').eq('customer_id',ACTIVE_CUSTOMER).eq('is_reset',true).eq('done',false)
+    .then(function(res){
+      if(!res.data||!res.data.length)return;
+      var existing=DATA[ACTIVE_CUSTOMER].todos||[];
+      var existIds=existing.map(function(t){return t._id;});
+      var added=false;
+      res.data.forEach(function(r){
+        if(existIds.indexOf(r.id)===-1){
+          existing.unshift({text:r.text,due:r.due||'',prio:r.prio||'high',assign:'agency',done:false,isReset:true,_id:r.id,createdAt:r.created_at});
+          added=true;
+        }
+      });
+      if(added){DATA[ACTIVE_CUSTOMER].todos=existing;renderTodos();}
+    });
+  }
   // Delegierter Jump-Handler auf #todo-open
   setTimeout(function(){
     var tl=document.getElementById('todo-open');
@@ -3399,7 +3415,7 @@ function _renderTodoLists(open,done2,isAgency){
     var t=entry.t;var i=entry.i;var custId=entry.custId||ACTIVE_CUSTOMER;var custName=entry.custName||'';
     if(t.isOnboarding){return'<div class="todo-item" style="cursor:pointer" onclick="goToOnboarding()">'+chk(false,'')+'<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:var(--accent)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Onboarding abschließen</div><div style="margin-top:6px"><div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;max-width:180px"><div style="height:100%;background:var(--accent);border-radius:2px;width:'+t._pct+'%"></div></div></div></div><span class="priority-pill p-high">Hoch</span></div>';}
     var al=t.assign==='agency'?'Agentur':t.assign==='client'?'Kunde':'Beide';
-    var rb=(t.isReset&&isAgency)?'<button class="btn-outline" style="margin:0 0 0 8px;font-size:10px;padding:2px 9px;color:var(--accent);border-color:rgba(255,87,87,0.4)" onclick="agencySwitchCustomer(\''+t.resetKey+'\');showPage(\'settings\',document.getElementById(\'nav-settings\'))">Zurücksetzen →</button>':'';
+    var rb=(t.isReset&&isAgency)?'<button class="btn-outline" style="margin:0 0 0 8px;font-size:10px;padding:2px 9px;color:var(--accent);border-color:rgba(255,87,87,0.4)" onclick="agencySwitchCustomer(\''+custId+'\');showPage(\'settings\',document.getElementById(\'nav-settings\'))">Zurücksetzen →</button>':'';
     var todoJumpTitle=getTodoOnclick(t,i);
     var custLabel=isAgency&&custName?'<span style="font-size:9px;font-weight:600;color:#fff;background:var(--accent);border-radius:10px;padding:1px 7px;flex-shrink:0">'+escHtml(custName)+'</span>':'';
     if(EDITING_TODO===i&&EDITING_TODO_CUST===custId&&isAgency){
@@ -5832,7 +5848,7 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   var base=makeEmptyCustomer(cust.name);
   if(an&&Object.keys(an).length)Object.assign(base.analytics,an);
   if(strat&&strat.data&&Object.keys(strat.data).length)Object.assign(base.strategy,strat.data);
-  base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id,_autoKey:t.auto_key||null};});
+  base.todos=(todos||[]).map(function(t){return{text:t.text,due:t.due||'',prio:t.prio||'med',assign:t.assign||'agency',done:t.done||false,createdAt:t.created_at,completedAt:t.completed_at,shootRef:t.shoot_ref,isReset:t.is_reset,resetKey:t.reset_key||null,isBrainstorm:t.is_brainstorm,bsCategory:t.bs_category,_id:t.id,_autoKey:t.auto_key||null};});
   var shootArr=Array.isArray(shoots)?shoots:(shoots&&shoots.data?shoots.data:[]);
   base.shoots=shootArr.map(function(s){return{date:s.date||'',time:s.time||'',title:s.title||'',location:s.location||'',status:s.status||'planned',ideas:(s.ideas||[]).map(function(idea){return Object.assign({link:''},idea);}),_id:s.id,targetPieces:s.target_pieces!=null?s.target_pieces:12};});
   base.shoots.sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
@@ -5912,14 +5928,17 @@ async function sbSaveAllTodos(){
   // Gelöschte Todos entfernen (nur IDs die in DB sind aber nicht mehr lokal)
   var localIds=todos.filter(function(t){return t._id;}).map(function(t){return t._id;});
   if(ROLE==='agency'&&localIds.length){
-    // Agentur darf löschen: alle Todos holen und nicht-lokale entfernen
-    var dbRes=await sb.from('todos').select('id').eq('customer_id',cId);
+    // Agentur darf löschen: alle Todos holen und nicht-lokale entfernen (Reset-Todos schützen)
+    var dbRes=await sb.from('todos').select('id,is_reset').eq('customer_id',cId);
     if(dbRes.data){
-      var toDelete=dbRes.data.map(function(r){return r.id;}).filter(function(id){return localIds.indexOf(id)===-1;});
+      var toDelete=dbRes.data
+        .filter(function(r){return localIds.indexOf(r.id)===-1&&!r.is_reset;})
+        .map(function(r){return r.id;});
       if(toDelete.length)await sb.from('todos').delete().in('id',toDelete);
     }
   } else if(ROLE==='agency'){
-    await sb.from('todos').delete().eq('customer_id',cId);
+    // Nur nicht-Reset Todos löschen wenn lokale Liste leer ist
+    await sb.from('todos').delete().eq('customer_id',cId).eq('is_reset',false);
   }
 }
 async function sbSaveAllShoots(overrideCustId){
