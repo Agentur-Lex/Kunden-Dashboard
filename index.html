@@ -1939,7 +1939,7 @@ async function renderAgencyOverview(){var kacheln=document.getElementById('kunde
       if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
       var cname=DATA[k].name||k;
       (DATA[k].todos||[]).forEach(function(t){
-        if(!t.done&&(t.assign==='agency'||t.assign==='both')&&!t.isReset){
+        if(!t.done&&(t.assign==='agency'||t.assign==='both')){
           allTodos.push({t:t,cname:cname,custId:k});
         }
       });
@@ -3338,8 +3338,8 @@ function renderTodos(){
     var custName=(DATA[custId]||{}).name||custId;
     todos.forEach(function(t,i){
       var entry={t:t,i:i,custId:custId,custName:custName};
-      if(!t.done&&!t.isReset)allOpen.push(entry);
-      else if(t.done)allDone.push(entry);
+      if(!t.done)allOpen.push(entry);
+      else allDone.push(entry);
     });
   });
 
