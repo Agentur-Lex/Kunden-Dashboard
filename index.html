@@ -3265,21 +3265,27 @@ function getTodoOnclick(t,i){
 function renderTodos(){
   updateTodoBadge();
   // Reset-Todos frisch aus DB laden (kommen asynchron von unangemeldeten Kunden)
-  if(ROLE==='agency'&&ACTIVE_CUSTOMER){
-    getSB().from('todos').select('*').eq('customer_id',ACTIVE_CUSTOMER).eq('is_reset',true).eq('done',false)
-    .then(function(res){
-      if(!res.data||!res.data.length)return;
-      var existing=DATA[ACTIVE_CUSTOMER].todos||[];
-      var existIds=existing.map(function(t){return t._id;});
-      var added=false;
-      res.data.forEach(function(r){
-        if(existIds.indexOf(r.id)===-1){
-          existing.unshift({text:r.text,due:r.due||'',prio:r.prio||'high',assign:'agency',done:false,isReset:true,_id:r.id,createdAt:r.created_at});
-          added=true;
-        }
+  if(ROLE==='agency'){
+    var allCustIds=getCustomerKeys().filter(function(k){return DATA[k]&&DATA[k].status!=='abgeschlossen';});
+    if(allCustIds.length){
+      getSB().from('todos').select('*').in('customer_id',allCustIds).eq('is_reset',true).eq('done',false)
+      .then(function(res){
+        if(!res.data||!res.data.length)return;
+        var added=false;
+        res.data.forEach(function(r){
+          var cId=r.customer_id;
+          if(!DATA[cId])return;
+          var existing=DATA[cId].todos||[];
+          var existIds=existing.map(function(t){return t._id;});
+          if(existIds.indexOf(r.id)===-1){
+            existing.unshift({text:r.text,due:r.due||'',prio:r.prio||'high',assign:'agency',done:false,isReset:true,_id:r.id,createdAt:r.created_at});
+            DATA[cId].todos=existing;
+            added=true;
+          }
+        });
+        if(added)renderTodos();
       });
-      if(added){DATA[ACTIVE_CUSTOMER].todos=existing;renderTodos();}
-    });
+    }
   }
   // Delegierter Jump-Handler auf #todo-open
   setTimeout(function(){
@@ -6080,8 +6086,7 @@ async function doAgencyReset(k){
     var rpcRes=await sb.rpc('reset_customer_password',{cust_id:k,new_pw:newPw});
     if(rpcRes.error)throw new Error(rpcRes.error.message);
     if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;CREDS[k].tempPw=newPw;}
-    // Reset-Todo als erledigt markieren
-    await sb.from('todos').update({done:true}).eq('customer_id',k).eq('is_reset',true).eq('done',false);
+    // Reset-Todos für diesen Kunden lokal abhaken (agency kann sie manuell erledigen)
     renderCredList();
     alert('✅ Reset durchgeführt!\n\nTemporäres Passwort für '+label+':\n\n'+newPw+'\n\nBitte dieses Passwort an den Kunden weitergeben. Er wird beim nächsten Login aufgefordert, ein neues zu vergeben.');
   }catch(e){
