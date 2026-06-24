@@ -6064,18 +6064,28 @@ async function doSetPassword(){
 }
 
 // ── FIX: doAgencyReset löscht Reset-Todo und setzt pw_changed zurück ──
+function _genTempPw(){
+  var chars='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  var pw='';for(var i=0;i<10;i++)pw+=chars[Math.floor(Math.random()*chars.length)];
+  return pw;
+}
+
 async function doAgencyReset(k){
   var label=CREDS[k]?CREDS[k].label:k;
-  if(!confirm('Passwort für "'+label+'" zurücksetzen? Der Kunde muss beim nächsten Login ein neues Passwort vergeben.'))return;
+  if(!confirm('Passwort für "'+label+'" zurücksetzen?\nDem Kunden wird ein neues temporäres Passwort zugeteilt.'))return;
   var sb=getSB();
   try{
-    await sb.from('customer_creds').update({pw_changed:false}).eq('customer_id',k);
-    if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;}
+    var newPw=_genTempPw();
+    // Über Supabase RPC-Funktion Auth-Passwort + customer_creds gleichzeitig updaten
+    var rpcRes=await sb.rpc('reset_customer_password',{cust_id:k,new_pw:newPw});
+    if(rpcRes.error)throw new Error(rpcRes.error.message);
+    if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;CREDS[k].tempPw=newPw;}
+    // Reset-Todo als erledigt markieren
+    await sb.from('todos').update({done:true}).eq('customer_id',k).eq('is_reset',true).eq('done',false);
     renderCredList();
-    var tmpPw=CREDS[k]?CREDS[k].tempPw:'(siehe Supabase)';
-    alert('Temporäres Passwort: '+tmpPw+' - Bitte gib dem Kunden dieses Passwort. Er wird beim nächsten Login aufgefordert, ein neues zu vergeben.');
+    alert('✅ Reset durchgeführt!\n\nTemporäres Passwort für '+label+':\n\n'+newPw+'\n\nBitte dieses Passwort an den Kunden weitergeben. Er wird beim nächsten Login aufgefordert, ein neues zu vergeben.');
   }catch(e){
-    alert('Fehler: '+e.message);
+    alert('Fehler beim Reset: '+e.message+'\n\nBitte stelle sicher, dass die Supabase-Funktion "reset_customer_password" angelegt wurde.');
   }
 }
 
