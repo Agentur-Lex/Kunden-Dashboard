@@ -3045,9 +3045,17 @@ function addTodo(){
 }
 function toggleTodo(idx,custId){
   var _td=(custId&&DATA[custId]?DATA[custId]:cd());
-  _td.todos[idx].done=!_td.todos[idx].done;
-  if(_td.todos[idx].done){_td.todos[idx].completedAt=Date.now();}
-  else{delete _td.todos[idx].completedAt;}
+  var t=_td.todos[idx];
+  t.done=!t.done;
+  if(t.done){t.completedAt=Date.now();}
+  else{delete t.completedAt;}
+  // Sofort in DB speichern (nicht debounced - verhindert Verlust bei App-Wechsel auf Mobile)
+  if(t._id){
+    var row={done:t.done,completed_at:t.completedAt||null};
+    getSB().from('todos').update(row).eq('id',t._id).then(function(){});
+  } else {
+    scheduleSave();
+  }
   scheduleSave();
   renderTodos();
   if(ROLE==='client')renderClientTodosOnOverview();
@@ -3056,8 +3064,8 @@ function deleteTodo(idx,custId){
   pushUndo();
   var td=(custId&&DATA[custId]?DATA[custId]:cd());
   var t=td.todos[idx];
-  // Reset-Todos direkt aus DB löschen (Sync-Schutz würde sie sonst wiederherstellen)
-  if(t&&t.isReset&&t._id){
+  // Direkt aus DB löschen (funktioniert für alle Rollen inkl. Kunden)
+  if(t&&t._id){
     getSB().from('todos').delete().eq('id',t._id).then(function(){});
   }
   td.todos.splice(idx,1);
