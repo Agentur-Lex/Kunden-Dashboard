@@ -1721,7 +1721,7 @@ function startClientSession(k){
   window.scrollTo({top:0,behavior:'smooth'});
   tourCheckFirstLogin();updateUndoBtn();
   // Badge alle 2 Minuten prüfen
-  setInterval(function(){if(ROLE==='client'&&ACTIVE_CUSTOMER)updateAnalyticsBadge();},120000);setTimeout(function(){if(!document.getElementById('tour-overlay')||document.getElementById('tour-overlay').style.display==='none')checkInstallGuide();},3000);
+  setInterval(function(){if(ROLE==='client'&&ACTIVE_CUSTOMER)updateAnalyticsBadge();},120000);
   // Android: Banner anzeigen wenn Prompt verfügbar
   if(null&&!isInStandaloneMode()){
     try{if(!sessionStorage.getItem('pwa_dismissed_session')){
