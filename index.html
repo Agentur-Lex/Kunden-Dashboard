@@ -829,8 +829,8 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         </div>
         <div class="card"><div class="card-title">Onboarding-Fragen</div><div id="q-list"></div><div id="q-add-form" style="display:flex;gap:8px;margin-top:8px;align-items:center"><input type="text" id="new-q-input" placeholder="Neue Frage..." style="flex:1;margin:0"><label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);white-space:nowrap;cursor:pointer"><input type="checkbox" id="new-q-checkbox" style="accent-color:var(--accent);width:14px;height:14px;margin:0"> Kontrollkästchen</label><button class="btn-primary" onclick="addQuestion()">Hinzufügen</button></div>
             <button class="btn-outline agency-only" onclick="resetObQuestions()" style="margin-top:6px;font-size:11px;padding:4px 12px;color:var(--text3)">↺ Zurücksetzen</button><div style="font-size:10px;color:var(--text3);margin-top:5px" id="q-count-note">0 / 8</div></div>
-        <div class="card"><div class="card-title">Kunden-Antworten</div><div id="agency-q-answers"></div></div>
-        <div class="card"><div class="card-title">Kunden-Zugangsdaten Social Media</div><div id="agency-social-creds"></div></div>
+        <div class="card"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between">Kunden-Antworten<button class="btn-icon agency-only" onclick="_toggleAgencyAnswersEdit()" title="Bearbeiten" id="agency-answers-edit-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button></div><div id="agency-q-answers"></div></div>
+        <div class="card"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between">Kunden-Zugangsdaten Social Media<button class="btn-icon agency-only" onclick="_toggleAgencyCredsEdit()" title="Bearbeiten" id="agency-creds-edit-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button></div><div id="agency-social-creds"></div></div>
       </div>
 
       <!-- DREHTERMINE -->
@@ -2206,99 +2206,11 @@ function renderAgencyOnboardingPage(){
 
     if(ROLE==='agency'){
       if(isFixed){
-        // Fixed steps: label + pencil to expand inline form
-        var fixedHeader=document.createElement('div');
-        fixedHeader.style.cssText='display:flex;align-items:center;gap:6px';
+        // Fixed steps: show as plain text (not editable inline)
         var lbl2=document.createElement('div');
-        lbl2.style.cssText='font-size:12px;font-weight:600;color:'+(step.done?'var(--accent)':'var(--text3)')+';padding:0;flex:1';
+        lbl2.style.cssText='font-size:12px;font-weight:600;color:'+(step.done?'var(--accent)':'var(--text3)')+';padding:0;cursor:default';
         lbl2.textContent=step.label;
-        fixedHeader.appendChild(lbl2);
-        // Pencil button for fixed-2 and fixed-3
-        if(step.id==='fixed-2'||step.id==='fixed-3'){
-          var editBtn=document.createElement('button');
-          editBtn.className='btn-icon';editBtn.title='Bearbeiten';
-          editBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>';
-          (function(sId){
-            editBtn.addEventListener('click',function(e){
-              e.stopPropagation();
-              var formDiv=document.getElementById('ob-inline-form-'+sId);
-              if(!formDiv)return;
-              var open=formDiv.style.maxHeight!=='0px'&&formDiv.style.maxHeight!=='0';
-              formDiv.style.maxHeight=open?'0':'600px';
-              formDiv.style.marginTop=open?'0':'10px';
-            });
-          })(step.id);
-          fixedHeader.appendChild(editBtn);
-        }
-        content.appendChild(fixedHeader);
-        // Inline form (collapsed by default)
-        if(step.id==='fixed-2'||step.id==='fixed-3'){
-          var formDiv=document.createElement('div');
-          formDiv.id='ob-inline-form-'+step.id;
-          formDiv.style.cssText='overflow:hidden;max-height:0;transition:max-height .3s ease,margin-top .3s;margin-top:0;border-top:0';
-          var formInner=document.createElement('div');
-          formInner.style.cssText='padding:10px;background:var(--surface2);border-radius:8px;margin-top:0';
-          if(step.id==='fixed-2'){
-            // Social-Media Zugangsdaten
-            var strat=(d.strategy&&d.strategy.plat)||[];
-            var plats=strat.length?PLATFORMS.filter(function(p){return strat.indexOf(p.label)!==-1;}):PLATFORMS;
-            var sc=d.socialCreds||{};
-            plats.forEach(function(p){
-              var pRow=document.createElement('div');pRow.style.cssText='margin-bottom:10px';
-              var pLbl=document.createElement('div');
-              pLbl.style.cssText='font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:4px';
-              pLbl.innerHTML=p.icon+' '+p.label;
-              pRow.appendChild(pLbl);
-              var row2=document.createElement('div');row2.style.cssText='display:flex;gap:6px';
-              var emailI=document.createElement('input');
-              emailI.type='text';emailI.placeholder='E-Mail / Username';
-              emailI.value=(sc[p.id]&&sc[p.id].email)||'';
-              emailI.style.cssText='flex:1;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
-              var passI=document.createElement('input');
-              passI.type='text';passI.placeholder='Passwort';
-              passI.value=(sc[p.id]&&sc[p.id].pass)||'';
-              passI.style.cssText='flex:1;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
-              (function(pid,eI,pI){
-                function save(){
-                  if(!d.socialCreds)d.socialCreds={};
-                  if(!d.socialCreds[pid])d.socialCreds[pid]={};
-                  d.socialCreds[pid].email=eI.value.trim();
-                  d.socialCreds[pid].pass=pI.value;
-                  scheduleSave();renderSteps();
-                }
-                eI.addEventListener('change',save);pI.addEventListener('change',save);
-              })(p.id,emailI,passI);
-              row2.appendChild(emailI);row2.appendChild(passI);
-              pRow.appendChild(row2);formInner.appendChild(pRow);
-            });
-          } else {
-            // Onboarding-Fragebogen
-            var qs=d.questions||[];
-            qs.forEach(function(q,qi){
-              var qDiv=document.createElement('div');qDiv.style.marginBottom='8px';
-              var qLbl=document.createElement('div');
-              var cleanQ=q.replace(/^\[CB\]/,'').replace(/ \(.*?\)$/,'');
-              qLbl.style.cssText='font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px';
-              qLbl.textContent=(qi+1)+'. '+cleanQ;
-              var ans=document.createElement('textarea');
-              ans.placeholder='Antwort eingeben...';
-              ans.value=(d.answers&&d.answers[qi])||'';
-              ans.rows=2;
-              ans.style.cssText='width:100%;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;margin:0';
-              (function(idx2,ta){
-                ta.addEventListener('change',function(){
-                  if(!d.answers)d.answers={};
-                  d.answers[idx2]=ta.value.trim();
-                  scheduleSave();renderSteps();
-                });
-              })(qi,ans);
-              qDiv.appendChild(qLbl);qDiv.appendChild(ans);
-              formInner.appendChild(qDiv);
-            });
-          }
-          formDiv.appendChild(formInner);
-          content.appendChild(formDiv);
-        }
+        content.appendChild(lbl2);
       } else {
         var labelInp=document.createElement('input');
         labelInp.type='text'; labelInp.value=step.label;
@@ -2368,12 +2280,53 @@ function renderAgencyOnboardingPage(){
     var dv=cd();
     if(!dv.questions.length){ansEl.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Fragen definiert.</div>';}
     else{
-      var h3='';
-      dv.questions.forEach(function(q,qi){
-        var rawA=dv.answers&&dv.answers[qi]?dv.answers[qi]:'–';var qT=dv.questions[qi]||'';var ans=isCheckboxQ(qT)?(rawA==='1'?'✓ Ja':'✗ Nein'):rawA;qT=isCheckboxQ(qT)&&qT.indexOf('[CB]')===0?qT.slice(4):qT;
-        h3+='<div style="margin-bottom:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)"><div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:4px">'+escHtml(q)+'</div><div style="font-size:11px;color:'+(dv.answers&&dv.answers[qi]?'var(--text)':'var(--text3)')+'">'+escHtml(ans)+'</div></div>';
-      });
-      ansEl.innerHTML=h3;
+      if(_agencyAnswersEdit){
+        // Edit mode: render inputs
+        ansEl.innerHTML='';
+        dv.questions.forEach(function(q,qi){
+          var isC=isCheckboxQ(q);
+          var qT=isC&&q.indexOf('[CB]')===0?q.slice(4):q;
+          var wrapper=document.createElement('div');
+          wrapper.style.cssText='margin-bottom:10px;padding:12px;background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius-sm)';
+          var qlbl=document.createElement('div');
+          qlbl.style.cssText='font-size:10px;font-weight:600;color:var(--accent);margin-bottom:6px';
+          qlbl.textContent=qT;
+          wrapper.appendChild(qlbl);
+          if(isC){
+            var sel=document.createElement('select');
+            sel.style.cssText='font-size:11px;margin:0;width:auto';
+            ['–','✓ Ja','✗ Nein'].forEach(function(opt,oi){
+              var o=document.createElement('option');o.value=oi===0?'':oi===1?'1':'0';
+              o.textContent=opt;
+              if((dv.answers&&dv.answers[qi])||''===o.value)o.selected=true;
+              sel.appendChild(o);
+            });
+            (function(idx){sel.addEventListener('change',function(){
+              if(!dv.answers)dv.answers={};dv.answers[idx]=this.value;
+              scheduleSave();renderSteps();
+            });})(qi);
+            wrapper.appendChild(sel);
+          } else {
+            var ta=document.createElement('textarea');
+            ta.value=(dv.answers&&dv.answers[qi])||'';
+            ta.placeholder='Antwort eingeben...';ta.rows=2;
+            ta.style.cssText='width:100%;font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;margin:0';
+            (function(idx,t){ta.addEventListener('change',function(){
+              if(!dv.answers)dv.answers={};dv.answers[idx]=t.value.trim();
+              scheduleSave();renderSteps();
+            });})(qi,ta);
+            wrapper.appendChild(ta);
+          }
+          ansEl.appendChild(wrapper);
+        });
+      } else {
+        var h3='';
+        dv.questions.forEach(function(q,qi){
+          var rawA=dv.answers&&dv.answers[qi]?dv.answers[qi]:'–';var qT=dv.questions[qi]||'';var ans=isCheckboxQ(qT)?(rawA==='1'?'✓ Ja':'✗ Nein'):rawA;qT=isCheckboxQ(qT)&&qT.indexOf('[CB]')===0?qT.slice(4):qT;
+          h3+='<div style="margin-bottom:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)"><div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:4px">'+escHtml(q)+'</div><div style="font-size:11px;color:'+(dv.answers&&dv.answers[qi]?'var(--text)':'var(--text3)')+'">'+escHtml(ans)+'</div></div>';
+        });
+        ansEl.innerHTML=h3;
+      }
     }
   }
   var scEl=document.getElementById('agency-social-creds');
@@ -2382,6 +2335,34 @@ function renderAgencyOnboardingPage(){
     var hasCreds=PLATFORMS.some(function(p){return sc[p.id]&&(sc[p.id].email||sc[p.id].pass);});
     if(!hasCreds){scEl.innerHTML='<div style="font-size:11px;color:var(--text3)">Noch keine Zugangsdaten eingetragen.</div>';}
     else{
+      if(_agencyCredsEdit){
+      // Edit mode
+      scEl.innerHTML='';
+      PLATFORMS.forEach(function(plat){
+        var cred=sc[plat.id]||{};
+        var pDiv=document.createElement('div');pDiv.style.cssText='margin-bottom:12px';
+        var pLbl=document.createElement('div');
+        pLbl.style.cssText='font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:4px';
+        pLbl.innerHTML=plat.icon+' '+plat.label;
+        pDiv.appendChild(pLbl);
+        var row2=document.createElement('div');row2.style.cssText='display:flex;gap:6px';
+        var eI=document.createElement('input');eI.type='text';eI.placeholder='E-Mail / Username';
+        eI.value=cred.email||'';eI.style.cssText='flex:1;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+        var pI=document.createElement('input');pI.type='text';pI.placeholder='Passwort';
+        pI.value=cred.pass||'';pI.style.cssText='flex:1;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+        (function(pid,ei,pi){
+          function saveCred(){
+            if(!cd().socialCreds)cd().socialCreds={};
+            if(!cd().socialCreds[pid])cd().socialCreds[pid]={};
+            cd().socialCreds[pid].email=ei.value.trim();
+            cd().socialCreds[pid].pass=pi.value;
+            scheduleSave();renderSteps();
+          }
+          ei.addEventListener('change',saveCred);pi.addEventListener('change',saveCred);
+        })(plat.id,eI,pI);
+        row2.appendChild(eI);row2.appendChild(pI);pDiv.appendChild(row2);scEl.appendChild(pDiv);
+      });
+    } else {
       var tbl=document.createElement('table');tbl.className='cred-tbl';
       var thead=document.createElement('thead');thead.innerHTML='<tr><th>Plattform</th><th>E-Mail</th><th>Passwort</th></tr>';tbl.appendChild(thead);
       var tbody=document.createElement('tbody');
@@ -2399,10 +2380,23 @@ function renderAgencyOnboardingPage(){
       });
       tbl.appendChild(tbody);scEl.innerHTML='';scEl.appendChild(tbl);
     }
+    }
   }
   renderQList();
 }
 
+function _toggleAgencyAnswersEdit(){
+  _agencyAnswersEdit=!_agencyAnswersEdit;
+  var btn=document.getElementById('agency-answers-edit-btn');
+  if(btn)btn.style.color=_agencyAnswersEdit?'var(--accent)':'';
+  renderAgencyOnboardingPage();
+}
+function _toggleAgencyCredsEdit(){
+  _agencyCredsEdit=!_agencyCredsEdit;
+  var btn=document.getElementById('agency-creds-edit-btn');
+  if(btn)btn.style.color=_agencyCredsEdit?'var(--accent)':'';
+  renderAgencyOnboardingPage();
+}
 function renderQList(){if(!ACTIVE_CUSTOMER)return;var d=cd();var ql=document.getElementById('q-list');var qcn=document.getElementById('q-count-note');if(!ql)return;ql.innerHTML=d.questions.length===0?'<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Noch keine Fragen.</div>':d.questions.map(function(q,i){var isC=isCheckboxQ(q);var qD=isC&&q.indexOf('[CB]')===0?q.slice(4):q;return'<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:5px"><div style="flex:1;font-size:11px;font-weight:500;color:var(--text)">'+escHtml(qD)+(isC?' <span style="font-size:9px;background:var(--accent-soft);color:var(--accent);border-radius:4px;padding:1px 5px">☑</span>':'')+'</div><button class="btn-icon del" onclick="removeQuestion('+i+')">✕</button></div>';}).join('');if(qcn)qcn.textContent=d.questions.length+' / 8';}
 function isCheckboxQ(q){return q.indexOf('[CB]')===0||q==='LinkedIn Werbekonto + Zahlungsmethode angelegt? (nur wenn LinkedIn bespielt wird)'||q==='Meta Werbekonto + Zahlungsmethode angelegt? (nur wenn Instagram/Facebook bespielt wird)';}
 function addQuestion(){
