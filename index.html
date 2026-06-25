@@ -6190,7 +6190,7 @@ var TOUR_STEPS_ALL=[
   {target:'nav-todos',page:'todos',title:'To-Dos – Deine Aufgaben',text:'Hier findest du alle deine offenen Aufgaben. Bitte arbeite sie zeitnah ab – je früher du antwortest, desto besser können wir umsetzen.',agencyOnly:true},
   {target:'nav-calendar',page:'calendar',title:'Kalender – Dein Content-Plan',text:'Hier siehst du wann welcher Post veröffentlicht wird. Du kannst Datum und Caption einzelner Posts anpassen – aber bitte beachte: Änderungen an Posts innerhalb der nächsten 14 Tage können meist nicht mehr umgesetzt werden.'},
   {target:'nav-analytics',page:'analytics',title:'Analysedaten – Deine Zahlen',text:'Hier werden monatlich die wichtigsten Kennzahlen eingepflegt. So behältst du immer den Überblick über dein Wachstum.'},
-  {target:'client-chip',page:'overview',title:'📲 App installieren',clientOnly:true,wide:true,html:true,text:
+  {target:'client-chip',page:'overview',title:'📲 App installieren',clientOnly:true,wide:true,html:true,noHighlight:true,text:
     '<div style="display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid rgba(0,0,0,0.1);padding-bottom:8px">'
     +'<button data-t="desktop" id="igt-desktop" style="flex:1;font-size:10px;font-weight:700;border:none;background:none;cursor:pointer;padding:2px 0;border-bottom:2px solid var(--accent);color:var(--accent);font-family:inherit">\uD83D\uDDA5\uFE0F Desktop</button>'
     +'<button data-t="ios" id="igt-ios" style="flex:1;font-size:10px;font-weight:600;border:none;background:none;cursor:pointer;padding:2px 0;border-bottom:2px solid transparent;color:rgba(0,0,0,0.4);font-family:inherit"> iOS</button>'
@@ -6264,24 +6264,36 @@ function _tourPosition(){
   var rect=target.getBoundingClientRect();
   var pad=6;
   var hl=document.getElementById('tour-highlight');
-  hl.style.left=(rect.left-pad)+'px';
-  hl.style.top=(rect.top-pad)+'px';
-  hl.style.width=(rect.width+pad*2)+'px';
-  hl.style.height=(rect.height+pad*2)+'px';
+  if(step.noHighlight){
+    hl.style.width='0';hl.style.height='0';hl.style.opacity='0';
+  } else {
+    hl.style.opacity='';
+    hl.style.left=(rect.left-pad)+'px';
+    hl.style.top=(rect.top-pad)+'px';
+    hl.style.width=(rect.width+pad*2)+'px';
+    hl.style.height=(rect.height+pad*2)+'px';
+  }
 
   // Tooltip positionieren
   var tt=document.getElementById('tour-tooltip');
   var ttW=280,ttH=160;
   var isMobile=window.innerWidth<=480;
-  var mobileOffset=isMobile?75:0; // ~2cm auf Mobile
-  var left=rect.right+16;
-  var top=rect.top+mobileOffset;
-  if(left+ttW>window.innerWidth-10)left=rect.left-ttW-16;
-  if(left<10)left=10;
-  if(top+ttH>window.innerHeight-10)top=window.innerHeight-ttH-10;
-  if(top<10+mobileOffset)top=10+mobileOffset;
-  tt.style.left=left+'px';
-  tt.style.top=top+'px';
+  var mobileOffset=isMobile?75:0;
+  if(step.noHighlight){
+    // Zentriert anzeigen
+    var ttWide=step.wide?320:280;
+    tt.style.left=Math.round((window.innerWidth-ttWide)/2)+'px';
+    tt.style.top=Math.round(window.innerHeight*0.3)+'px';
+  } else {
+    var left=rect.right+16;
+    var top=rect.top+mobileOffset;
+    if(left+ttW>window.innerWidth-10)left=rect.left-ttW-16;
+    if(left<10)left=10;
+    if(top+ttH>window.innerHeight-10)top=window.innerHeight-ttH-10;
+    if(top<10+mobileOffset)top=10+mobileOffset;
+    tt.style.left=left+'px';
+    tt.style.top=top+'px';
+  }
 
   // Inhalt
   document.getElementById('tour-title').textContent=step.title;
