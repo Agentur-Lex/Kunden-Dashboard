@@ -6016,12 +6016,6 @@ async function loadAllCustomers(){
   for(var i=0;i<res.data.length;i++){await loadCustomerData(res.data[i].id,res.data[i]);}
 }
 async function loadCustomerData(custId,custObj){
-  // Pending Save abwarten bevor Daten überschrieben werden (Race Condition Fix)
-  if(_sbSaveTimer){
-    clearTimeout(_sbSaveTimer);_sbSaveTimer=null;
-    try{await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();}
-    catch(e){console.warn('pre-load save failed:',e);}
-  }
   var sb=getSB();var cust=custObj;
   if(!cust){var cr=await sb.from('customers').select('*').eq('id',custId).maybeSingle();if(cr.error||!cr.data)return;cust=cr.data;}
   if(!cust){console.error('loadCustomerData: cust nicht gefunden für',custId);return;}
