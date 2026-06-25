@@ -1482,7 +1482,7 @@ function updateOnboardingBars(){
   var wasComplete=cd()._obWasComplete||false;
   var pct=calcProgress(ACTIVE_CUSTOMER);
   var navOb=document.getElementById('nav-onboarding');
-  if(navOb&&ROLE==='client'){navOb.style.display=pct<100?'flex':'none';}
+  if(navOb&&ROLE==='client'){navOb.style.display='none';} // Onboarding-Reiter in Kundenansicht ausgeblendet
   // Onboarding-To-Do auf Übersicht aktualisieren
   if(ROLE==='client')renderClientTodosOnOverview();
   var inlineBlock=document.getElementById('ov-ob-inline');
