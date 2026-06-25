@@ -2303,7 +2303,7 @@ function renderAgencyOnboardingPage(){
             });
             (function(idx){sel.addEventListener('change',function(){
               if(!dv.answers)dv.answers={};dv.answers[idx]=this.value;
-              scheduleSave();renderSteps();
+              scheduleSave();renderAgencyOnboardingPage();
             });})(qi);
             wrapper.appendChild(sel);
           } else {
@@ -2313,7 +2313,7 @@ function renderAgencyOnboardingPage(){
             ta.style.cssText='width:100%;font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;margin:0';
             (function(idx,t){ta.addEventListener('change',function(){
               if(!dv.answers)dv.answers={};dv.answers[idx]=t.value.trim();
-              scheduleSave();renderSteps();
+              scheduleSave();renderAgencyOnboardingPage();
             });})(qi,ta);
             wrapper.appendChild(ta);
           }
@@ -2356,7 +2356,7 @@ function renderAgencyOnboardingPage(){
             if(!cd().socialCreds[pid])cd().socialCreds[pid]={};
             cd().socialCreds[pid].email=ei.value.trim();
             cd().socialCreds[pid].pass=pi.value;
-            scheduleSave();renderSteps();
+            scheduleSave();renderAgencyOnboardingPage();
           }
           ei.addEventListener('change',saveCred);pi.addEventListener('change',saveCred);
         })(plat.id,eI,pI);
