@@ -3030,7 +3030,18 @@ function toggleTodo(idx,custId){
   renderTodos();
   if(ROLE==='client')renderClientTodosOnOverview();
 }
-function deleteTodo(idx,custId){pushUndo();(custId&&DATA[custId]?DATA[custId]:cd()).todos.splice(idx,1);scheduleSave();renderTodos();}
+function deleteTodo(idx,custId){
+  pushUndo();
+  var td=(custId&&DATA[custId]?DATA[custId]:cd());
+  var t=td.todos[idx];
+  // Reset-Todos direkt aus DB löschen (Sync-Schutz würde sie sonst wiederherstellen)
+  if(t&&t.isReset&&t._id){
+    getSB().from('todos').delete().eq('id',t._id).then(function(){});
+  }
+  td.todos.splice(idx,1);
+  scheduleSave();
+  renderTodos();
+}
 function startEdit(idx,custId){EDITING_TODO=idx;EDITING_TODO_CUST=custId||ACTIVE_CUSTOMER;renderTodos();}
 function cancelEdit(){EDITING_TODO=-1;renderTodos();}
 function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var custId=EDITING_TODO_CUST||ACTIVE_CUSTOMER;var td=(custId&&DATA[custId]?DATA[custId]:cd()).todos[idx];td.text=txt;td.due=(document.getElementById('edit-due-'+idx)||{}).value;td.prio=(document.getElementById('edit-prio-'+idx)||{}).value;td.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;EDITING_TODO_CUST='';scheduleSave();renderTodos();}
