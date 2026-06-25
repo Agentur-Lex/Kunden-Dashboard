@@ -2206,11 +2206,99 @@ function renderAgencyOnboardingPage(){
 
     if(ROLE==='agency'){
       if(isFixed){
-        // Fixed steps: show as plain text (not editable)
+        // Fixed steps: label + pencil to expand inline form
+        var fixedHeader=document.createElement('div');
+        fixedHeader.style.cssText='display:flex;align-items:center;gap:6px';
         var lbl2=document.createElement('div');
-        lbl2.style.cssText='font-size:12px;font-weight:600;color:var(--text3);padding:0;cursor:default';
+        lbl2.style.cssText='font-size:12px;font-weight:600;color:'+(step.done?'var(--accent)':'var(--text3)')+';padding:0;flex:1';
         lbl2.textContent=step.label;
-        content.appendChild(lbl2);
+        fixedHeader.appendChild(lbl2);
+        // Pencil button for fixed-2 and fixed-3
+        if(step.id==='fixed-2'||step.id==='fixed-3'){
+          var editBtn=document.createElement('button');
+          editBtn.className='btn-icon';editBtn.title='Bearbeiten';
+          editBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>';
+          (function(sId){
+            editBtn.addEventListener('click',function(e){
+              e.stopPropagation();
+              var formDiv=document.getElementById('ob-inline-form-'+sId);
+              if(!formDiv)return;
+              var open=formDiv.style.maxHeight!=='0px'&&formDiv.style.maxHeight!=='0';
+              formDiv.style.maxHeight=open?'0':'600px';
+              formDiv.style.marginTop=open?'0':'10px';
+            });
+          })(step.id);
+          fixedHeader.appendChild(editBtn);
+        }
+        content.appendChild(fixedHeader);
+        // Inline form (collapsed by default)
+        if(step.id==='fixed-2'||step.id==='fixed-3'){
+          var formDiv=document.createElement('div');
+          formDiv.id='ob-inline-form-'+step.id;
+          formDiv.style.cssText='overflow:hidden;max-height:0;transition:max-height .3s ease,margin-top .3s;margin-top:0;border-top:0';
+          var formInner=document.createElement('div');
+          formInner.style.cssText='padding:10px;background:var(--surface2);border-radius:8px;margin-top:0';
+          if(step.id==='fixed-2'){
+            // Social-Media Zugangsdaten
+            var strat=(d.strategy&&d.strategy.plat)||[];
+            var plats=strat.length?PLATFORMS.filter(function(p){return strat.indexOf(p.label)!==-1;}):PLATFORMS;
+            var sc=d.socialCreds||{};
+            plats.forEach(function(p){
+              var pRow=document.createElement('div');pRow.style.cssText='margin-bottom:10px';
+              var pLbl=document.createElement('div');
+              pLbl.style.cssText='font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:4px';
+              pLbl.innerHTML=p.icon+' '+p.label;
+              pRow.appendChild(pLbl);
+              var row2=document.createElement('div');row2.style.cssText='display:flex;gap:6px';
+              var emailI=document.createElement('input');
+              emailI.type='text';emailI.placeholder='E-Mail / Username';
+              emailI.value=(sc[p.id]&&sc[p.id].email)||'';
+              emailI.style.cssText='flex:1;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+              var passI=document.createElement('input');
+              passI.type='text';passI.placeholder='Passwort';
+              passI.value=(sc[p.id]&&sc[p.id].pass)||'';
+              passI.style.cssText='flex:1;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+              (function(pid,eI,pI){
+                function save(){
+                  if(!d.socialCreds)d.socialCreds={};
+                  if(!d.socialCreds[pid])d.socialCreds[pid]={};
+                  d.socialCreds[pid].email=eI.value.trim();
+                  d.socialCreds[pid].pass=pI.value;
+                  scheduleSave();renderSteps();
+                }
+                eI.addEventListener('change',save);pI.addEventListener('change',save);
+              })(p.id,emailI,passI);
+              row2.appendChild(emailI);row2.appendChild(passI);
+              pRow.appendChild(row2);formInner.appendChild(pRow);
+            });
+          } else {
+            // Onboarding-Fragebogen
+            var qs=d.questions||[];
+            qs.forEach(function(q,qi){
+              var qDiv=document.createElement('div');qDiv.style.marginBottom='8px';
+              var qLbl=document.createElement('div');
+              var cleanQ=q.replace(/^\[CB\]/,'').replace(/ \(.*?\)$/,'');
+              qLbl.style.cssText='font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px';
+              qLbl.textContent=(qi+1)+'. '+cleanQ;
+              var ans=document.createElement('textarea');
+              ans.placeholder='Antwort eingeben...';
+              ans.value=(d.answers&&d.answers[qi])||'';
+              ans.rows=2;
+              ans.style.cssText='width:100%;font-size:10px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;margin:0';
+              (function(idx2,ta){
+                ta.addEventListener('change',function(){
+                  if(!d.answers)d.answers={};
+                  d.answers[idx2]=ta.value.trim();
+                  scheduleSave();renderSteps();
+                });
+              })(qi,ans);
+              qDiv.appendChild(qLbl);qDiv.appendChild(ans);
+              formInner.appendChild(qDiv);
+            });
+          }
+          formDiv.appendChild(formInner);
+          content.appendChild(formDiv);
+        }
       } else {
         var labelInp=document.createElement('input');
         labelInp.type='text'; labelInp.value=step.label;
