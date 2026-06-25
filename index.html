@@ -1693,20 +1693,26 @@ function startClientSession(k){
   document.querySelectorAll('.client-only').forEach(function(el){el.style.display='';});
   // Letzter Login speichern
   if(DATA[k]){DATA[k].lastLogin=Date.now();scheduleSave();}
-  // Erstes Login: "App installieren"-Todo erstellen (einmalig pro Gerät)
+  // "App installieren"-Todo Logik
   var _installKey='app_install_todo_created_'+k;
+  var _isPWA=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   try{
-    if(!localStorage.getItem(_installKey)&&DATA[k]){
-      var _hasTodo=DATA[k].todos&&DATA[k].todos.some(function(t){return t._appInstall;});
-      if(!_hasTodo){
-        DATA[k].todos.unshift({
-          text:'App herunterladen',
-          assign:'client',prio:'high',done:false,
-          _appInstall:true,createdAt:Date.now()
+    if(DATA[k]){
+      if(_isPWA){
+        // Als PWA geöffnet → automatisch abhaken
+        (DATA[k].todos||[]).forEach(function(t){
+          if(t._appInstall&&!t.done){t.done=true;t.completedAt=Date.now();}
         });
         scheduleSave();
+      } else if(!localStorage.getItem(_installKey)){
+        // Erster Browser-Login → Todo erstellen
+        var _hasTodo=(DATA[k].todos||[]).some(function(t){return t._appInstall;});
+        if(!_hasTodo){
+          DATA[k].todos.unshift({text:'App herunterladen',assign:'client',prio:'high',done:false,_appInstall:true,createdAt:Date.now()});
+          scheduleSave();
+        }
+        localStorage.setItem(_installKey,'1');
       }
-      localStorage.setItem(_installKey,'1');
     }
   }catch(e){}
   showPage('overview',document.getElementById('nav-overview'));
@@ -3461,7 +3467,7 @@ function _renderTodoLists(open,done2,isAgency){
     }
     return'<div class="todo-item" style="position:relative;'+(todoJumpTitle?'cursor:pointer':'')+'" '+(todoJumpTitle?'data-jumptitle="'+escHtml(todoJumpTitle)+'" data-jumpcust="'+escHtml(custId)+'"':'')+'>'+
     (!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+
-    chk(isDone,'toggleTodo('+i+',\''+custId+'\')')+
+    (t._appInstall?'':chk(isDone,'toggleTodo('+i+',\''+custId+'\')'))+
     '<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:'+(isDone?'var(--text3)':'var(--text)')+(isDone?';text-decoration:line-through':'')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px">'+t.text+(t.isReset?'<span class="priority-pill p-high">Passwort-Reset</span>':'')+rb+'</div>'+
     '<div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;align-items:center">'+
     custLabel+
