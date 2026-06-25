@@ -3037,7 +3037,19 @@ function addTodo(){
     created++;
   });
   if(!created){showToast('Keine gültigen Kunden ausgewählt');return;}
-  scheduleSave();
+  // Todos für jeden Kunden sofort in DB schreiben (nicht nur für ACTIVE_CUSTOMER)
+  targets.forEach(function(custId){
+    if(!DATA[custId])return;
+    var newTodo=DATA[custId].todos[0]; // gerade oben hinzugefügt
+    if(newTodo&&!newTodo._id){
+      var row={customer_id:custId,text:newTodo.text,due:newTodo.due||null,prio:newTodo.prio,
+        assign:newTodo.assign,done:false,created_at:newTodo.createdAt,is_reset:false};
+      getSB().from('todos').insert(row).select().maybeSingle().then(function(res){
+        if(res&&res.data)newTodo._id=res.data.id;
+      });
+    }
+  });
+  if(targets.length===1&&targets[0]===ACTIVE_CUSTOMER)scheduleSave();
   document.getElementById('new-todo-text').value='';
   document.getElementById('new-todo-date').value='';
   showToast(created+' Todo'+(created>1?'s':'')+' erstellt');
@@ -3306,12 +3318,14 @@ function getTodoOnclick(t,i){
 }
 function renderTodos(){
   updateTodoBadge();
-  // Reset-Todos frisch aus DB laden (kommen asynchron von unangemeldeten Kunden)
-  if(ROLE==='agency'){
+  // Reset-Todos frisch aus DB laden (Guard verhindert Endlosschleife)
+  if(ROLE==='agency'&&!renderTodos._fetchPending){
+    renderTodos._fetchPending=true;
     var allCustIds=getCustomerKeys().filter(function(k){return DATA[k]&&DATA[k].status!=='abgeschlossen';});
     if(allCustIds.length){
       getSB().from('todos').select('*').in('customer_id',allCustIds).eq('is_reset',true).eq('done',false)
       .then(function(res){
+        renderTodos._fetchPending=false;
         if(!res.data||!res.data.length)return;
         var added=false;
         res.data.forEach(function(r){
@@ -3319,14 +3333,16 @@ function renderTodos(){
           if(!DATA[cId])return;
           var existing=DATA[cId].todos||[];
           var existIds=existing.map(function(t){return t._id;});
-          if(existIds.indexOf(r.id)===-1){
+          if(existIds.indexOf(r.id)===-1&&r.id){
             existing.unshift({text:r.text,due:r.due||'',prio:r.prio||'high',assign:'agency',done:false,isReset:true,_id:r.id,createdAt:r.created_at});
             DATA[cId].todos=existing;
             added=true;
           }
         });
         if(added)renderTodos();
-      });
+      }).catch(function(){renderTodos._fetchPending=false;});
+    } else {
+      renderTodos._fetchPending=false;
     }
   }
   // Delegierter Jump-Handler auf #todo-open
@@ -5918,6 +5934,12 @@ async function loadAllCustomers(){
   for(var i=0;i<res.data.length;i++){await loadCustomerData(res.data[i].id,res.data[i]);}
 }
 async function loadCustomerData(custId,custObj){
+  // Pending Save abwarten bevor Daten überschrieben werden (Race Condition Fix)
+  if(_sbSaveTimer){
+    clearTimeout(_sbSaveTimer);_sbSaveTimer=null;
+    try{await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();}
+    catch(e){console.warn('pre-load save failed:',e);}
+  }
   var sb=getSB();var cust=custObj;
   if(!cust){var cr=await sb.from('customers').select('*').eq('id',custId).maybeSingle();if(cr.error||!cr.data)return;cust=cr.data;}
   if(!cust){console.error('loadCustomerData: cust nicht gefunden für',custId);return;}
@@ -6019,9 +6041,21 @@ async function sbSaveAllShoots(overrideCustId){
 }
 async function sbSaveAllContentRows(){
   if(!ACTIVE_CUSTOMER)return;var sb=getSB();var rows=cd().rows||[];var cId=ACTIVE_CUSTOMER;
-  await sb.from('content_rows').delete().eq('customer_id',cId);if(!rows.length)return;
+  // Backup: bestehende Zeilen sichern vor dem Löschen
+  var backup=await sb.from('content_rows').select('*').eq('customer_id',cId);
+  var backupRows=backup.data||[];
+  var delRes=await sb.from('content_rows').delete().eq('customer_id',cId);
+  if(delRes.error){console.error('content_rows delete error:',delRes.error);return;}
+  if(!rows.length)return;
   var dbRows=rows.map(function(r,i){return{customer_id:cId,date:r.date||null,name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',sort_order:i};});
   var res=await sb.from('content_rows').insert(dbRows).select();
+  if(res.error){
+    // Rollback: Backup wiederherstellen
+    console.error('content_rows insert error – rolling back:',res.error);
+    if(backupRows.length)await sb.from('content_rows').insert(backupRows);
+    showToast('Fehler beim Speichern der Content-Liste – wird wiederhergestellt');
+    return;
+  }
   if(res.data)res.data.forEach(function(r,i){if(rows[i])rows[i]._id=r.id;});
 }
 async function sbSaveLegal(){var sb=getSB();await sb.from('legal').upsert({id:1,impressum:LEGAL.impressum,datenschutz:LEGAL.datenschutz});}
