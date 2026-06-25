@@ -1693,6 +1693,22 @@ function startClientSession(k){
   document.querySelectorAll('.client-only').forEach(function(el){el.style.display='';});
   // Letzter Login speichern
   if(DATA[k]){DATA[k].lastLogin=Date.now();scheduleSave();}
+  // Erstes Login: "App installieren"-Todo erstellen (einmalig pro Gerät)
+  var _installKey='app_install_todo_created_'+k;
+  try{
+    if(!localStorage.getItem(_installKey)&&DATA[k]){
+      var _hasTodo=DATA[k].todos&&DATA[k].todos.some(function(t){return t._appInstall;});
+      if(!_hasTodo){
+        DATA[k].todos.unshift({
+          text:'App herunterladen',
+          assign:'client',prio:'high',done:false,
+          _appInstall:true,createdAt:Date.now()
+        });
+        scheduleSave();
+      }
+      localStorage.setItem(_installKey,'1');
+    }
+  }catch(e){}
   showPage('overview',document.getElementById('nav-overview'));
   renderCustomerView();
   updateShootReminder();
@@ -3266,6 +3282,7 @@ function goToOnboarding(){
   },250);
 }
 function getTodoOnclick(t,i){
+  if(t._appInstall)return '__appInstall__'; // special marker
   if(t._autoKey&&(t._autoKey.indexOf('autocap|')===0||t._autoKey.indexOf('autolink|')===0)){
     var parts=t._autoKey.split('|');
     var title=parts[3]||'';
@@ -3305,7 +3322,11 @@ function renderTodos(){
       tl._jumpHandlerSet=true;
       tl.addEventListener('click',function(e){
         var item=e.target.closest('[data-jumptitle]');
-        if(item&&window.innerWidth>768){jumpToContentRow(item.getAttribute('data-jumptitle'),item.getAttribute('data-jumpcust'));}
+        if(item){
+          var jt=item.getAttribute('data-jumptitle');
+          if(jt==='__appInstall__'){localStorage.removeItem('install_guide_shown');showInstallGuide();}
+          else if(window.innerWidth>768){jumpToContentRow(jt,item.getAttribute('data-jumpcust'));}
+        }
       });
     }
   },100);
@@ -6364,9 +6385,27 @@ function updateRowColors(inputEl){
 }
 
 // ── Installationsanleitung ──
+function _igTab(tab){
+  ['desktop','ios','android'].forEach(function(t){
+    var btn=document.getElementById('ig-tab-'+t);
+    var cont=document.getElementById('ig-content-'+t);
+    var active=t===tab;
+    if(btn){btn.style.borderBottomColor=active?'var(--accent)':'transparent';btn.style.color=active?'var(--accent)':'var(--text3)';}
+    if(cont)cont.style.display=active?'block':'none';
+  });
+}
+
+function _igAutoTab(){
+  var ua=navigator.userAgent;
+  if(/iPad|iPhone|iPod/.test(ua))_igTab('ios');
+  else if(/Android/.test(ua))_igTab('android');
+  else _igTab('desktop');
+}
+
 function showInstallGuide(){
   var m=document.getElementById('install-guide-modal');
   if(m)m.style.display='flex';
+  _igAutoTab();
   try{localStorage.setItem('install_guide_shown','1');}catch(e){}
 }
 function closeInstallGuide(){
@@ -6421,24 +6460,40 @@ if('serviceWorker' in navigator){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
 <div id="install-guide-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9500;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;position:relative;box-shadow:0 16px 48px rgba(0,0,0,0.2)">
+  <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:360px;width:100%;position:relative;box-shadow:0 16px 48px rgba(0,0,0,0.2)">
     <button onclick="closeInstallGuide()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3)">✕</button>
-    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">App installieren</div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:20px">Füge das Dashboard zum Homescreen hinzu</div>
-    <div style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="width:28px;height:28px;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
-        <div>
-          <div style="font-size:12px;font-weight:600">iPhone / iPad (Safari)</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Tippe auf <strong>⎙ Teilen</strong> → <strong>„Zum Home-Bildschirm"</strong></div>
-        </div>
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">📲 App installieren</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:16px">Füge das Dashboard als App hinzu – für schnelleren Zugriff ohne Browser</div>
+    <!-- Tabs -->
+    <div id="ig-tabs" style="display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+      <button id="ig-tab-desktop" onclick="_igTab('desktop')" style="flex:1;padding:6px 4px;font-size:11px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--accent);margin-bottom:-2px;color:var(--accent);font-family:inherit">🖥️ Desktop</button>
+      <button id="ig-tab-ios" onclick="_igTab('ios')" style="flex:1;padding:6px 4px;font-size:11px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text3);font-family:inherit"> iPhone/iPad</button>
+      <button id="ig-tab-android" onclick="_igTab('android')" style="flex:1;padding:6px 4px;font-size:11px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text3);font-family:inherit">🤖 Android</button>
+    </div>
+    <!-- Desktop -->
+    <div id="ig-content-desktop" style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text2);line-height:1.6">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span><span>Öffne das Dashboard in <strong>Google Chrome</strong> oder <strong>Microsoft Edge</strong></span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span><span>Klicke in der <strong>Adressleiste</strong> rechts auf das <strong>Installieren-Symbol ⊕</strong> (oder über das ⋮ Menü → <strong>„App installieren"</strong>)</span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span><span>Bestätige mit <strong>„Installieren"</strong> – das Dashboard erscheint als eigenes Fenster ohne Browser-Leiste</span></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;background:#3ddc84;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24C14.54 7.9 12.84 7.5 11 7.5c-1.84 0-3.54.4-5.06 1.09L3.99 5.27c-.18-.3-.54-.39-.83-.22-.3.16-.42.54-.26.85l1.84 3.18C3.57 10.69 2 13.27 2 16h20c0-2.73-1.57-5.31-4.4-6.52zM7 14c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm10 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div>
-        <div>
-          <div style="font-size:12px;font-weight:600">Android (Chrome)</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Tippe auf <strong>⋮ Menü</strong> → <strong>„App installieren"</strong></div>
-        </div>
+    </div>
+    <!-- iOS -->
+    <div id="ig-content-ios" style="display:none;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text2);line-height:1.6">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span><span>Öffne das Dashboard in <strong>Safari</strong> (nicht Chrome!)</span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span><span>Tippe unten auf das <strong>Teilen-Symbol ⎙</strong></span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span><span>Scrolle nach unten und tippe auf <strong>„Zum Home-Bildschirm"</strong></span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span><span>Tippe oben rechts auf <strong>„Hinzufügen"</strong> – fertig!</span></div>
+      </div>
+    </div>
+    <!-- Android -->
+    <div id="ig-content-android" style="display:none;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text2);line-height:1.6">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span><span>Öffne das Dashboard in <strong>Google Chrome</strong></span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span><span>Tippe auf das <strong>⋮ Menü</strong> oben rechts</span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span><span>Tippe auf <strong>„App installieren"</strong> oder <strong>„Zum Startbildschirm hinzufügen"</strong></span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px"><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span><span>Bestätige mit <strong>„Installieren"</strong></span></div>
       </div>
     </div>
     <button onclick="closeInstallGuide()" style="width:100%;background:var(--accent);border:none;color:#fff;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Verstanden</button>
