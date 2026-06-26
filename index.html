@@ -2280,40 +2280,84 @@ function renderAgencyOnboardingPage(){
     var dv=cd();
     if(!dv.questions.length){ansEl.innerHTML='<div style="font-size:11px;color:var(--text3)">Keine Fragen definiert.</div>';}
     else if(ROLE==='agency'){
-      // Agentur: direkt bearbeitbare Felder
       ansEl.innerHTML='';
       dv.questions.forEach(function(q,qi){
         var isC=isCheckboxQ(q);
         var qLabel=isC&&q.indexOf('[CB]')===0?q.slice(4):q;
+        var rawA=(dv.answers&&dv.answers[qi])||'';
+        var dispA=isC?(rawA==='1'?'✓ Ja':rawA==='0'?'✗ Nein':'–'):rawA||'–';
+
         var wrap=document.createElement('div');
         wrap.style.cssText='margin-bottom:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)';
+
+        // Header row: label + pencil
+        var hdr=document.createElement('div');
+        hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
         var lbl=document.createElement('div');
-        lbl.style.cssText='font-size:10px;font-weight:600;color:var(--accent);margin-bottom:6px';
+        lbl.style.cssText='font-size:10px;font-weight:600;color:var(--accent)';
         lbl.textContent=qLabel;
-        wrap.appendChild(lbl);
-        if(isC){
-          var sel=document.createElement('select');
-          sel.style.cssText='font-size:11px;margin:0';
-          var curVal=(dv.answers&&dv.answers[qi])||'';
-          [['','– Auswählen –'],['1','✓ Ja'],['0','✗ Nein']].forEach(function(pair){
-            var o=document.createElement('option');o.value=pair[0];o.textContent=pair[1];
-            if(curVal===pair[0])o.selected=true;
-            sel.appendChild(o);
+        var pencil=document.createElement('button');
+        pencil.className='btn-icon';pencil.title='Bearbeiten';
+        pencil.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>';
+        hdr.appendChild(lbl);hdr.appendChild(pencil);
+        wrap.appendChild(hdr);
+
+        // Display value
+        var disp=document.createElement('div');
+        disp.style.cssText='font-size:11px;color:'+(rawA?'var(--text)':'var(--text3)');
+        disp.textContent=dispA;
+        wrap.appendChild(disp);
+
+        // Edit field (hidden)
+        var editWrap=document.createElement('div');
+        editWrap.style.cssText='display:none;margin-top:6px';
+
+        (function(idx,dispEl,editEl,pBtn,rawVal,isCB){
+          var field;
+          if(isCB){
+            field=document.createElement('select');
+            field.style.cssText='font-size:11px;margin:0;width:100%';
+            [['','– Auswählen –'],['1','✓ Ja'],['0','✗ Nein']].forEach(function(pair){
+              var o=document.createElement('option');o.value=pair[0];o.textContent=pair[1];
+              if(rawVal===pair[0])o.selected=true;
+              field.appendChild(o);
+            });
+            field.addEventListener('change',function(){
+              if(!dv.answers)dv.answers={};dv.answers[idx]=this.value;scheduleSave();
+              dispEl.textContent=this.value==='1'?'✓ Ja':this.value==='0'?'✗ Nein':'–';
+              dispEl.style.color=this.value?'var(--text)':'var(--text3)';
+              editEl.style.display='none';dispEl.style.display='';pBtn.style.color='';
+            });
+          } else {
+            field=document.createElement('textarea');
+            field.value=rawVal;field.placeholder='Antwort eingeben…';field.rows=2;
+            field.style.cssText='width:100%;font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;margin:0';
+            field.addEventListener('blur',function(){
+              var val=this.value.trim();
+              if(!dv.answers)dv.answers={};dv.answers[idx]=val;scheduleSave();
+              dispEl.textContent=val||'–';dispEl.style.color=val?'var(--text)':'var(--text3)';
+              editEl.style.display='none';dispEl.style.display='';pBtn.style.color='';
+            });
+          }
+          editEl.appendChild(field);
+          pBtn.addEventListener('click',function(e){
+            e.stopPropagation();
+            var open=editEl.style.display!=='none';
+            if(open){
+              var val=field.value?(field.tagName==='TEXTAREA'?field.value.trim():field.value):'';
+              if(!dv.answers)dv.answers={};dv.answers[idx]=val;scheduleSave();
+              dispEl.textContent=isCB?(val==='1'?'✓ Ja':val==='0'?'✗ Nein':'–'):val||'–';
+              dispEl.style.color=val?'var(--text)':'var(--text3)';
+              editEl.style.display='none';dispEl.style.display='';pBtn.style.color='';
+            } else {
+              if(field.tagName==='TEXTAREA')field.value=dv.answers&&dv.answers[idx]?dv.answers[idx]:'';
+              editEl.style.display='block';dispEl.style.display='none';pBtn.style.color='var(--accent)';
+              if(field.focus)setTimeout(function(){field.focus();},0);
+            }
           });
-          (function(idx){sel.addEventListener('change',function(){
-            if(!dv.answers)dv.answers={};dv.answers[idx]=this.value;scheduleSave();
-          });})(qi);
-          wrap.appendChild(sel);
-        } else {
-          var ta=document.createElement('textarea');
-          ta.value=(dv.answers&&dv.answers[qi])||'';
-          ta.placeholder='Antwort eingeben…';ta.rows=2;
-          ta.style.cssText='width:100%;font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit;resize:vertical;box-sizing:border-box;margin:0';
-          (function(idx,el){el.addEventListener('change',function(){
-            if(!dv.answers)dv.answers={};dv.answers[idx]=el.value.trim();scheduleSave();
-          });})(qi,ta);
-          wrap.appendChild(ta);
-        }
+        })(qi,disp,editWrap,pencil,rawA,isC);
+
+        wrap.appendChild(editWrap);
         ansEl.appendChild(wrap);
       });
     } else {
