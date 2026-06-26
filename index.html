@@ -2372,17 +2372,16 @@ function renderAgencyOnboardingPage(){
   var scEl=document.getElementById('agency-social-creds');
   if(scEl){
     var sc=cd().socialCreds;
-    var hasCreds=PLATFORMS.some(function(p){return sc[p.id]&&(sc[p.id].email||sc[p.id].pass);});
-    if(!hasCreds){scEl.innerHTML='<div style="font-size:11px;color:var(--text3)">Noch keine Zugangsdaten eingetragen.</div>';}
-    else{
-      var tbl=document.createElement('table');tbl.className='cred-tbl';
-      var thead=document.createElement('thead');thead.innerHTML='<tr><th>Plattform</th><th>E-Mail</th><th>Passwort</th></tr>';tbl.appendChild(thead);
-      var tbody=document.createElement('tbody');
-      PLATFORMS.forEach(function(plat){
-        var cred=sc[plat.id]||{};if(!cred.email&&!cred.pass)return;
+    var tbl=document.createElement('table');tbl.className='cred-tbl';
+    var thead=document.createElement('thead');thead.innerHTML='<tr><th>Plattform</th><th>E-Mail</th><th>Passwort</th></tr>';tbl.appendChild(thead);
+    var tbody=document.createElement('tbody');
+    // Nur Plattformen anzeigen die in der Strategie aktiv sind, sonst alle
+    var activePlats=cd().strategy&&cd().strategy.plat&&cd().strategy.plat.length?PLATFORMS.filter(function(p){return cd().strategy.plat.indexOf(p.label)!==-1;}):PLATFORMS;
+    activePlats.forEach(function(plat){
+        var cred=sc[plat.id]||{};
         var tr=document.createElement('tr');
         var td1=document.createElement('td');td1.style.cssText='font-weight:600;color:var(--text)';td1.innerHTML=plat.icon+' '+escHtml(plat.label);
-        var td2=document.createElement('td');td2.style.color='var(--text2)';td2.textContent=cred.email||'–';
+        var td2=document.createElement('td');td2.style.color=cred.email?'var(--text2)':'var(--text3)';td2.textContent=cred.email||'–';
         var td3=document.createElement('td');
         var rs=document.createElement('span');rs.id='agsc-'+plat.id;rs.style.cssText='letter-spacing:2px;color:var(--text3)';rs.textContent='••••••••';
         var rb=document.createElement('span');rb.style.cssText='cursor:pointer;color:var(--accent);font-size:10px;font-weight:500;margin-left:6px';rb.textContent='anzeigen';
@@ -2390,8 +2389,7 @@ function renderAgencyOnboardingPage(){
         td3.appendChild(rs);td3.appendChild(rb);
         tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tbody.appendChild(tr);
       });
-      tbl.appendChild(tbody);scEl.innerHTML='';scEl.appendChild(tbl);
-    }
+    tbl.appendChild(tbody);scEl.innerHTML='';scEl.appendChild(tbl);
   }
   renderQList();
 }
