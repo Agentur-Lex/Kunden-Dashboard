@@ -5688,12 +5688,31 @@ function renderAnalyticsPage(){
   bcCard.appendChild(bcTitle);
 
   // Dropdown: content pieces from last 40 days
-  var today40 = new Date(); today40.setDate(today40.getDate()-40);
+  // Monatsfilter basierend auf standDatum ("Juni 2026" → 1.6.–30.6.)
+  var _DE_MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  var _sd=an.standDatum||'';
+  var _bcStart=null,_bcEnd=null;
+  if(_sd){
+    var _sdParts=_sd.split(' ');
+    var _sdMonth=_DE_MONTHS.indexOf(_sdParts[0]);
+    var _sdYear=parseInt(_sdParts[1]);
+    if(_sdMonth>=0&&!isNaN(_sdYear)){
+      _bcStart=new Date(_sdYear,_sdMonth,1);
+      _bcStart.setDate(_bcStart.getDate()-10); // 10 Tage vor Monatsstart
+      _bcEnd=new Date(_sdYear,_sdMonth+1,0,23,59,59,999); // letzter Tag des Monats
+    }
+  }
+  if(!_bcStart){
+    // Fallback: aktueller Monat
+    var _now=new Date();
+    _bcStart=new Date(_now.getFullYear(),_now.getMonth(),1);
+    _bcEnd=new Date(_now.getFullYear(),_now.getMonth()+1,0,23,59,59,999);
+  }
   var recentRows = (cd().rows||[]).filter(function(r){
-    if(!r.date||!r.name) return false;
+    if(!r.name) return false;
+    if(!r.date) return false;
     var d = new Date(normalizeDate(r.date));
-    var todayD = new Date(); todayD.setHours(23,59,59,999);
-    return d >= today40 && d <= todayD;
+    return d >= _bcStart && d <= _bcEnd;
   });
 
   var bcInner = document.createElement('div');
