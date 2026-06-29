@@ -3088,6 +3088,9 @@ function renderShootsList(){
         var div=document.createElement('div');
         div.className='shoot-item';
         div.style.marginBottom='8px';
+        div.style.cursor='pointer';
+        div.title='Zu den Drehterminen';
+        div.addEventListener('click',function(){showPage('shoots',document.getElementById('nav-shoots'));});
         div.innerHTML='<div class="shoot-date-box"><div class="shoot-mon">'+monthStr(s.date)+'</div><div class="shoot-day">'+dayStr(s.date)+'</div></div>'
           +'<div style="flex:1"><div class="shoot-title">'+s.title+badge+'</div>'
           +'<div class="shoot-sub">'+(s.location||'')+(s.time?' · '+s.time+' Uhr':'')+'</div></div>'
