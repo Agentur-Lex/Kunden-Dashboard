@@ -2914,14 +2914,20 @@ function renderShootsList(){
       var tdD=document.createElement('td');tdD.style.cssText='text-align:center;padding:6px 10px';
       var chkDiv=document.createElement('div');
       chkDiv.className='todo-chk'+(idea.done?' done':'');
-      (function(idx2){
-        chkDiv.onclick=function(e){
-          e.stopPropagation();
-          cd().shoots[i].ideas[idx2].done=!cd().shoots[i].ideas[idx2].done;
-          scheduleSave();
-          renderShootsList();
-        };
-      })(ri);
+      if(ROLE==='agency'){
+        (function(idx2){
+          chkDiv.onclick=function(e){
+            e.stopPropagation();
+            cd().shoots[i].ideas[idx2].done=!cd().shoots[i].ideas[idx2].done;
+            scheduleSave();
+            renderShootsList();
+          };
+        })(ri);
+      } else {
+        chkDiv.style.opacity='0.5';
+        chkDiv.style.cursor='default';
+        chkDiv.title='Nur die Agentur kann Pieces abhaken';
+      }
       tdD.appendChild(chkDiv);tr.appendChild(tdD);
 
       // Custom Column (zwischen Erledigt und Link)
@@ -2939,6 +2945,13 @@ function renderShootsList(){
 
       // Spez
       var tdS=document.createElement('td');tdS.className='shoot-ideas-spez';tdS.style.padding='4px 10px';
+      if(ROLE!=='agency'){
+        var spezTxt=document.createElement('span');
+        spezTxt.textContent=idea.spez||'';
+        spezTxt.style.cssText='font-size:11px;color:var(--text2)';
+        tdS.appendChild(spezTxt);
+        var sel=null; // nicht definiert für client
+      } else {
       var sel=document.createElement('select');
       sel.style.cssText='width:100%;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:11px;font-family:inherit;border-radius:4px;padding:2px 4px';
       SPEZ_OPTS.forEach(function(o){
@@ -2954,6 +2967,7 @@ function renderShootsList(){
         });
         sel.addEventListener('click',function(e){e.stopPropagation();});
       })(ri);
+      }
       // Link-Icon zwischen Erledigt und Spez.
       var tdL=document.createElement('td');tdL.className='shoot-col-link';tdL.style.cssText='text-align:center;padding:4px 6px';
       var linkBtn=document.createElement('button');
@@ -2987,6 +3001,7 @@ function renderShootsList(){
             }
           }
         });
+        if(ROLE!=='agency')delBtn.style.display='none';
         delBtn.addEventListener('click',function(e){
           e.stopPropagation();
           cd().shoots[i].ideas[idx2].link='';
@@ -3003,7 +3018,7 @@ function renderShootsList(){
       tdL.appendChild(delLinkBtn);
       tr.appendChild(tdL);
 
-      tdS.appendChild(sel);tr.appendChild(tdS);
+      if(sel)tdS.appendChild(sel);tr.appendChild(tdS);
 
 
 
