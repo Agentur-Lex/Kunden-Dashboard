@@ -1,24 +1,22 @@
 {
-  "name": "Kunden-Dashboard Social-Media-Lex",
-  "short_name": "SM-Lex",
-  "description": "Kunden-Dashboard f\u00fcr Social-Media-Lex",
+  "name": "Kunden-Dashboard",
+  "short_name": "LEX Dashboard",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#F4F5F8",
+  "background_color": "#ffffff",
   "theme_color": "#FF5757",
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
