@@ -142,6 +142,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden}
 .cal-nav-btn{padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
 .cal-nav-btn:hover{border-color:var(--border2);color:var(--text)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;grid-auto-rows:100px}
+.cal-slide-wrap{overflow:hidden;position:relative}
+.cal-grid{transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .2s}
 .cal-hdr{font-size:9px;font-weight:600;color:var(--text3);text-align:center;padding:4px 0;letter-spacing:.05em}
 .cal-day{height:100%;min-height:0;box-sizing:border-box;overflow:hidden;background:#fff;border:1px solid var(--border);border-radius:8px;padding:4px 5px;transition:border-color .15s}
 .cal-day:hover{border-color:var(--border2)}
@@ -453,6 +455,8 @@ textarea{resize:vertical;line-height:1.5}
   
   .cal-grid{grid-auto-rows:60px!important}
   .shoot-ideas-spez{display:none!important}
+  body.role-client .shoot-ideas-done{display:none!important}
+  body.role-client .shoot-col-link{display:table-cell!important}
   .tb-name{display:none!important}
   .shoot-header{display:flex;align-items:center;flex-wrap:wrap}
   #analytics-report-btn{margin-left:0!important}
@@ -947,7 +951,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         <div class="card">
           <div class="cal-nav"><button class="cal-nav-btn" onclick="calPrev()">← zurück</button><span class="cal-nav-title" id="cal-month-label"></span><button class="cal-nav-btn" onclick="calNext()">weiter →</button></div>
           <div class="legend"><span style="font-size:10px;font-weight:500;color:var(--text3)">Legende:</span><div class="legend-item"><div class="legend-dot ev-reach"></div>Reach</div><div class="legend-item"><div class="legend-dot ev-trust"></div>Trust</div><div class="legend-item"><div class="legend-dot ev-ad"></div>Werbeanzeige</div><div class="legend-item"><div class="legend-dot ev-shoot"></div>Drehtermin</div></div>
-          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-slide-wrap"><div class="cal-grid" id="cal-grid"></div></div>
         </div>
       </div>
 
@@ -1654,6 +1658,7 @@ function resetForgotForm(){
 
 // ── SESSIONS ──
 function startAgencySession(){
+  document.body.classList.add('role-agency');document.body.classList.remove('role-client');
   // Letzten Kunden wiederherstellen
   var _lc='';
   try{_lc=sessionStorage.getItem('lastCustomer')||localStorage.getItem('lastCustomer')||'';}catch(e){}
@@ -1663,6 +1668,7 @@ function startAgencySession(){
   if(null&&!isInStandaloneMode()){try{if(!sessionStorage.getItem('pwa_dismissed_session')){setTimeout(function(){var b=document.getElementById('pwa-banner');if(b)b.style.display='flex';},2000);}}catch(e){}}
 }
 function startClientSession(k){
+  document.body.classList.add('role-client');document.body.classList.remove('role-agency');
   // Passwort noch nie geändert → First-Login-Screen zeigen
   if(CREDS[k]&&CREDS[k].pwChanged===false){
     var sub=document.getElementById('first-sub');
@@ -2797,12 +2803,12 @@ function renderShootsList(){
     var customCol=(cd().strategy&&cd().strategy.customCol)||'';
     var thDefs=[
       {l:'Content-Thema',w:'160px'},
-      {l:'Erledigt',w:'72px'},
+      {l:'Erledigt',w:'72px',cls:'shoot-ideas-done'},
     ];
     if(customCol){thDefs.push({l:customCol,w:'100px',cls:'shoot-ideas-custom',isCustomCol:true});}
     else if(ROLE==='agency'){thDefs.push({l:'+',w:'36px',isAddCol:true});}
     thDefs.push({l:'Link',w:'44px',cls:'shoot-col-link'});
-    thDefs.push({l:'Spez.',w:'80px',cls:'shoot-ideas-spez'});
+    if(ROLE==='agency')thDefs.push({l:'Spez.',w:'80px',cls:'shoot-ideas-spez'});
     thDefs.push({l:'',w:'36px'});
     thDefs.forEach(function(th){
       var el=document.createElement('th');
@@ -2925,7 +2931,7 @@ function renderShootsList(){
       tr.appendChild(tdT);
 
       // Erledigt
-      var tdD=document.createElement('td');tdD.style.cssText='text-align:center;padding:6px 10px';
+      var tdD=document.createElement('td');tdD.className='shoot-ideas-done';tdD.style.cssText='text-align:center;padding:6px 10px';
       var chkDiv=document.createElement('div');
       chkDiv.className='todo-chk'+(idea.done?' done':'');
       if(ROLE==='agency'){
@@ -3034,7 +3040,8 @@ function renderShootsList(){
       tdL.appendChild(delLinkBtn);
       tr.appendChild(tdL);
 
-      if(sel)tdS.appendChild(sel);tr.appendChild(tdS);
+      if(sel)tdS.appendChild(sel);
+      if(ROLE==='agency')tr.appendChild(tdS);
 
 
 
@@ -4452,8 +4459,34 @@ function renderObPanel(){
   }
 }
 
-function calPrev(){CAL_OFFSET--;buildCalendar();}
-function calNext(){CAL_OFFSET++;buildCalendar();}
+var _calDir=0;
+function calPrev(){_calDir=-1;CAL_OFFSET--;buildCalendarAnimated();}
+function calNext(){_calDir=1;CAL_OFFSET++;buildCalendarAnimated();}
+function buildCalendarAnimated(){
+  var grid=document.getElementById('cal-grid');
+  if(!grid||!_calDir){buildCalendar();_calDir=0;return;}
+  var dir=_calDir;_calDir=0;
+  // Slide out current
+  grid.style.transition='none';
+  grid.style.transform='translateX(0)';grid.style.opacity='1';
+  requestAnimationFrame(function(){
+    grid.style.transition='transform .22s cubic-bezier(.4,0,.2,1),opacity .18s';
+    grid.style.transform='translateX('+(dir<0?'60px':'-60px')+')';
+    grid.style.opacity='0';
+    setTimeout(function(){
+      buildCalendar();
+      // Snap new content in from opposite side
+      grid.style.transition='none';
+      grid.style.transform='translateX('+(dir<0?'-60px':'60px')+')';
+      grid.style.opacity='0';
+      requestAnimationFrame(function(){
+        grid.style.transition='transform .22s cubic-bezier(.4,0,.2,1),opacity .18s';
+        grid.style.transform='translateX(0)';
+        grid.style.opacity='1';
+      });
+    },200);
+  });
+}
 
 // ── ZUGANGSDATEN LISTE ──
 function renderCredList(){
