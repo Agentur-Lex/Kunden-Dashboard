@@ -1,4 +1,4 @@
-const CACHE = 'lex-dashboard-v3';
+const CACHE = 'lex-v4';
 
 const PRECACHE = [
   '/',
@@ -7,21 +7,18 @@ const PRECACHE = [
   '/icon-192.png',
   '/icon-512.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap',
 ];
 
-// Install: precache everything
 self.addEventListener('install', function(e) {
+  // Sofort aktivieren ohne auf alten SW zu warten
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(function(cache) {
       return cache.addAll(PRECACHE);
-    }).then(function() {
-      return self.skipWaiting();
     })
   );
 });
 
-// Activate: clear old caches
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
@@ -30,38 +27,37 @@ self.addEventListener('activate', function(e) {
             .map(function(k) { return caches.delete(k); })
       );
     }).then(function() {
+      // Alle offenen Tabs sofort übernehmen
       return self.clients.claim();
     })
   );
 });
 
-// Fetch: Cache-first für statische Assets, Network-first für API
 self.addEventListener('fetch', function(e) {
   var url = e.request.url;
 
-  // Supabase API: immer Netzwerk
-  if (url.includes('supabase.co')) {
+  // index.html: immer vom Netzwerk (kein Caching)
+  if (url.endsWith('/') || url.endsWith('/index.html')) {
+    e.respondWith(
+      fetch(e.request).catch(function() {
+        return caches.match('/index.html');
+      })
+    );
     return;
   }
+
+  // Supabase API: immer Netzwerk
+  if (url.includes('supabase.co')) return;
 
   // Statische Assets: Cache-first
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       if (cached) return cached;
-
       return fetch(e.request).then(function(response) {
-        // Nur erfolgreiche Antworten cachen
-        if (!response || response.status !== 200 || response.type === 'error') {
-          return response;
-        }
+        if (!response || response.status !== 200) return response;
         var clone = response.clone();
-        caches.open(CACHE).then(function(cache) {
-          cache.put(e.request, clone);
-        });
+        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
         return response;
-      }).catch(function() {
-        // Offline-Fallback: index.html
-        return caches.match('/index.html');
       });
     })
   );
