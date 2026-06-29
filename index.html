@@ -378,8 +378,10 @@ textarea{resize:vertical;line-height:1.5}
   .analytics-kpi-grid .metric-val{font-size:16px!important}
   .analytics-kpi-grid .metric-lbl{font-size:8px!important}
   .two-col,.form-row{grid-template-columns:1fr!important}
-  #page-todos input[type=date]{-webkit-appearance:none!important;appearance:none!important;width:100%!important;box-sizing:border-box!important}
+  #page-todos input[type=date]{-webkit-appearance:none!important;appearance:none!important;width:100%!important;box-sizing:border-box!important;height:100%!important;min-height:0!important;padding:8px 12px!important}
   #page-todos .form-row:has(#new-todo-text){grid-template-columns:1fr 1fr!important}
+  #page-todos .form-row:has(#new-todo-text)>div{display:flex;flex-direction:column}
+  #page-todos .form-row:has(#new-todo-text)>div input{flex:1}
   #analytics-page-content > div[style*="grid-template-columns"]{grid-template-columns:1fr!important}
   /* ── Dashboard ── */
   #page-overview .metrics-grid{grid-template-columns:repeat(2,1fr)!important}
