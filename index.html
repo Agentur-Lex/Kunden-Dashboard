@@ -6759,7 +6759,18 @@ document.addEventListener('keydown',function(e){
 });
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});
+  navigator.serviceWorker.register('/service-worker.js').then(function(reg){
+    // Wenn neuer SW wartet: sofort aktivieren und Seite neu laden
+    reg.addEventListener('updatefound',function(){
+      var sw=reg.installing;
+      sw.addEventListener('statechange',function(){
+        if(sw.state==='installed'&&navigator.serviceWorker.controller){
+          navigator.serviceWorker.controller.postMessage('skipWaiting');
+          window.location.reload();
+        }
+      });
+    });
+  }).catch(function(e){console.log('SW:',e);});
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
