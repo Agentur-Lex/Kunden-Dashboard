@@ -2554,7 +2554,21 @@ function renderShootsList(){
 
     // ── Header row ──
     var header=document.createElement('div');
-    header.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:default;position:relative';
+    header.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:pointer;position:relative';
+    (function(shootIdx){
+      header.addEventListener('click',function(){
+        var p=document.querySelector('[data-panel-idx="'+shootIdx+'"]');
+        var btn=header.querySelector('button');
+        // Find the collapseBtn specifically
+        var cBtn=header.querySelector('[title="Content-Themen ein-/ausklappen"]');
+        if(!p)return;
+        var isOpen=p.style.maxHeight!=='0px'&&p.style.maxHeight!=='';
+        p.style.maxHeight=isOpen?'0':'2000px';
+        p.style.opacity=isOpen?'0':'1';
+        if(cBtn)cBtn.style.transform=isOpen?'rotate(-90deg)':'';
+        OPEN_SHOOT_PANELS[ACTIVE_CUSTOMER+':'+shootIdx]=!isOpen;
+      });
+    })(i);
 
     // Date box
     var dateBox=document.createElement('div');
@@ -2981,7 +2995,7 @@ function renderShootsList(){
       var delLinkBtn=document.createElement('button');
       delLinkBtn.textContent='×';
       delLinkBtn.title='Link entfernen';
-      delLinkBtn.style.cssText='display:'+(idea.link?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:0 0 0 3px;align-items:center;flex-shrink:0;transition:color .15s';
+      delLinkBtn.style.cssText='display:'+(idea.link&&ROLE==='agency'?'inline-flex':'none')+';background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:0 0 0 3px;align-items:center;flex-shrink:0;transition:color .15s';
       delLinkBtn.addEventListener('mouseenter',function(){this.style.color='var(--accent)';});
       delLinkBtn.addEventListener('mouseleave',function(){this.style.color='var(--text3)';});
 
