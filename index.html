@@ -3466,19 +3466,13 @@ function renderClientTodosOnOverview(){
 function goToOnboarding(){
   showPage('overview',document.getElementById('nav-overview'));
   setTimeout(function(){
-    // Panel öffnen falls geschlossen
-    var ob=document.getElementById('ob-panel');
-    if(ob&&ob.style.display==='none'){
-      OB_PANEL_OPEN=false; // damit toggleObPanel es öffnet
-      toggleObPanel();
-    } else if(!ob||ob.style.display==='none'){
-      toggleObPanel();
-    }
+    // Panel öffnen falls geschlossen (max-height basiert, nicht display)
+    if(!OB_PANEL_OPEN) toggleObPanel();
     // Zur Onboarding-Box scrollen
     setTimeout(function(){
       var bloc=document.getElementById('ov-ob-inline');
       if(bloc)bloc.scrollIntoView({behavior:'smooth',block:'start'});
-    },100);
+    },150);
   },250);
 }
 function getTodoOnclick(t,i){
