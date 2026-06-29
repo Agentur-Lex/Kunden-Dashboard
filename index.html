@@ -6390,7 +6390,7 @@ async function doAgencyReset(k){
     // Über Supabase RPC-Funktion Auth-Passwort + customer_creds gleichzeitig updaten
     var rpcRes=await sb.rpc('reset_customer_password',{cust_id:k,new_pw:newPw});
     if(rpcRes.error)throw new Error(rpcRes.error.message);
-    if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;CREDS[k].tempPw=newPw;}
+    if(CREDS[k]){CREDS[k].pwChanged=false;CREDS[k].resetPending=true;CREDS[k].tempPw=newPw;CREDS[k].password=newPw;}
     // Reset-Todos automatisch abschließen
     if(DATA[k]&&DATA[k].todos){
       var changed=false;
