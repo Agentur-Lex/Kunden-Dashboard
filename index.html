@@ -3790,9 +3790,16 @@ function renderContentTable(){if(ROLE==='agency')setTimeout(checkMissingCaptionA
         var v=(inp.tagName==='SELECT'?inp.options[inp.selectedIndex].value:inp.value||inp.textContent||'').trim();
         return v&&v!=='-'&&v!=='https://...'&&v!==ART_OPTS[0]&&v!==SPEZ_OPTS[0];
       }).length;
+      // Light-Ad: Drive-Link und Caption immer weiß
+      var artSel=row.querySelector('.cell-select');
+      var isLightAd=artSel&&artSel.value==='Light-Ad';
       inputs.forEach(function(inp){
         var v=(inp.tagName==='SELECT'?inp.options[inp.selectedIndex].value:inp.value||inp.textContent||'').trim();
         var hasVal=!!(v&&v!=='-'&&v!=='https://...'&&v!==ART_OPTS[0]&&v!==SPEZ_OPTS[0]);
+        // Bei Light-Ad: Link-Chip-Wrapper und Caption-Zelle immer als has-value behandeln
+        if(isLightAd&&(inp.classList.contains('caption-input')||inp.closest('.link-chip-wrap'))){
+          inp.classList.remove('needs-value');inp.classList.add('has-value');return;
+        }
         inp.classList.remove('has-value','needs-value');
         if(hasVal){inp.classList.add('has-value');}
         else if(filled>=total-1&&total>1){inp.classList.add('needs-value');}
@@ -6745,11 +6752,16 @@ function updateRowColors(inputEl){
   if(!row)return;
   var inputs=Array.from(row.querySelectorAll('input[type=text],input[type=url],textarea.caption-input'));
   if(!inputs.length)return;
+  var artSel=row.querySelector('.cell-select');
+  var isLightAd=artSel&&artSel.value==='Light-Ad';
   var filled=inputs.filter(function(inp){var v=(inp.value||'').trim();return v&&v!=='https://...';}).length;
   var total=inputs.length;
   inputs.forEach(function(inp){
     var v=(inp.value||'').trim();
     var hasVal=!!(v&&v!=='https://...');
+    if(isLightAd&&(inp.classList.contains('caption-input')||inp.closest('.link-chip-wrap'))){
+      inp.classList.remove('needs-value');inp.classList.add('has-value');return;
+    }
     inp.classList.remove('has-value','needs-value');
     if(hasVal){inp.classList.add('has-value');}
     else if(filled>=total-1&&total>1){inp.classList.add('needs-value');}
