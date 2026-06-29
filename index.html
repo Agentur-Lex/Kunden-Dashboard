@@ -1410,8 +1410,8 @@ var SESSION={type:null,key:null},ROLE='agency',ACTIVE_CUSTOMER='',EDITING_TODO=-
 var SHOW_PAST=false,SHOW_PAST_SHOOTS=false,SHOW_ADD_FORM=false,CURRENT_SHOOT_IDX=-1,CURRENT_IDEA_IDX=-1,CAL_OFFSET=0,OB_DRAG_IDX=-1,OPEN_SHOOT_PANELS={};
 var ART_OPTS=['Reach-Content','Trust-Content','Light-Ad','Hard-Ad'];
 var SPEZ_OPTS=['-','Trends','Infotainment','Talking Heads','Branchen News','Unternehmens News','Kundenstory'];
-var ART_COLORS={'Reach-Content':{bg:'#DBEAFE',color:'#1E40AF'},'Trust-Content':{bg:'#D1FAE5',color:'#065F46'},'Light-Ad':{bg:'#FEF3C7',color:'#92400E'},'Hard-Ad':{bg:'#FFE4E6',color:'#9F1239'}};
-var SPEZ_COLORS={'-':{bg:'#F3F4F6',color:'#6B7280'},'Trends':{bg:'#EDE9FE',color:'#5B21B6'},'Infotainment':{bg:'#FCE7F3',color:'#9D174D'},'Talking Heads':{bg:'#FFEDD5',color:'#9A3412'},'Branchen News':{bg:'#E0F2FE',color:'#0C4A6E'},'Unternehmens News':{bg:'#DCFCE7',color:'#14532D'},'Kundenstory':{bg:'#FEF9C3',color:'#713F12'}};
+var ART_COLORS={'Reach-Content':{bg:'#EFF6FF',color:'#3B82F6'},'Trust-Content':{bg:'#F0FDF4',color:'#22C55E'},'Light-Ad':{bg:'#FFFBEB',color:'#F59E0B'},'Hard-Ad':{bg:'#FFF1F2',color:'#FB7185'}};
+var SPEZ_COLORS={'-':{bg:'#F9FAFB',color:'#9CA3AF'},'Trends':{bg:'#F5F3FF',color:'#A78BFA'},'Infotainment':{bg:'#FDF2F8',color:'#E879A0'},'Talking Heads':{bg:'#FFF7ED',color:'#FB923C'},'Branchen News':{bg:'#F0F9FF',color:'#38BDF8'},'Unternehmens News':{bg:'#F0FDF4',color:'#4ADE80'},'Kundenstory':{bg:'#FEFCE8',color:'#FACC15'}};
 var PLATFORMS=[{id:'instagram',label:'Instagram',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'},{id:'facebook',label:'Facebook',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>'},{id:'linkedin',label:'LinkedIn',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>'},{id:'tiktok',label:'TikTok',icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>'},{id:'youtube',label:'YouTube',icon:'▶️'}];
 var CREDS = {};
 function makeEmptyCustomer(l){return{name:l,analytics:{followers:'0',fdelta:'+0%',reach:'0',rdelta:'+0%',eng:'0%',edelt:'+0%',posts:'0',pdelta:'–',growth:[{month:"Dez 25",f:0,p:0},{month:"Jan 26",f:0,p:0},{month:"Feb 26",f:0,p:0},{month:"Mär 26",f:0,p:0},{month:"Apr 26",f:0,p:0},{month:"Mai 26",f:0,p:0}],startFollowers:0,startMonth:'',createdMonth:'',plat:[{name:'Instagram',color:'#E1306C',pct:60},{name:'LinkedIn',color:'#0A66C2',pct:25},{name:'TikTok',color:'#EE1D52',pct:15}],engDetail:{ig_likes:'–',ig_comments:'–',ig_shares:'–',ig_saves:'–',fb_likes:'–',fb_comments:'–',fb_shares:'–',fb_saves:'–',tk_likes:'–',tk_comments:'–',tk_shares:'–',li_reactions:'–',li_comments:'–',li_clicks:'–',yt_likes:'–',yt_comments:'–'},linkClicks:'',linkClicksDelta:'',engTotal:'',engDelta:'',convFactor:0.05,contentPsych:{emotional:0,faktenbasiert:0,behindScenes:0},standDatum:'',bestContent:{rowIdx:-1,watchtime:'',aufrufe:'',engagement:''},blockVis:{kpis:true,growth:true,plat:true,linkClicks:true,contentPsych:true,bestContent:true,kpiCards:{lc:true,anfragen:true,eng:true,reach:true,er:true}}},strategy:{audience:'Noch nicht definiert.',plat:['Instagram','Facebook'],freq:[],beginnZusammenarbeit:'',saeuleData:[{label:'Value',pct:40,color:'var(--accent)'},{label:'Werbend',pct:25,color:'var(--green)'},{label:'Persönlich',pct:20,color:'#E1306C'},{label:'Awareness',pct:15,color:'var(--amber)'}],pdfUrl:'',pdfName:'',spezFreq:{},customCol:''},agencyNote:'',shoots:[],todos:[],rows:[],obSteps:[{id:'c1',label:'Content-Strategie freigeben',desc:'',done:false}],socialCreds:{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}},questions:DEFAULT_QUESTIONS.slice(),answers:{},brainstorms:[]};}
@@ -3804,7 +3804,7 @@ function renderContentTable(){if(ROLE==='agency')setTimeout(checkMissingCaptionA
         return v&&v!=='-'&&v!=='https://...'&&v!==ART_OPTS[0]&&v!==SPEZ_OPTS[0];
       }).length;
       // Light-Ad: Drive-Link und Caption immer weiß
-      var artSel=row.querySelector('.cell-select');
+      var artSel=row.querySelector('.opt-chip-select,td:nth-child(5) select');
       var isLightAd=artSel&&artSel.value==='Light-Ad';
       inputs.forEach(function(inp){
         var v=(inp.tagName==='SELECT'?inp.options[inp.selectedIndex].value:inp.value||inp.textContent||'').trim();
@@ -6765,7 +6765,7 @@ function updateRowColors(inputEl){
   if(!row)return;
   var inputs=Array.from(row.querySelectorAll('input[type=text],input[type=url],textarea.caption-input'));
   if(!inputs.length)return;
-  var artSel=row.querySelector('.cell-select');
+  var artSel=row.querySelector('.opt-chip-select,td:nth-child(5) select');
   var isLightAd=artSel&&artSel.value==='Light-Ad';
   var filled=inputs.filter(function(inp){var v=(inp.value||'').trim();return v&&v!=='https://...';}).length;
   var total=inputs.length;
