@@ -1,28 +1,33 @@
-const CACHE_NAME = 'sm-lex-v5';
-const STATIC_ASSETS = [
+const CACHE = 'lex-dashboard-v3';
+
+const PRECACHE = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap',
 ];
 
-// Installation: statische Assets cachen
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(STATIC_ASSETS);
+// Install: precache everything
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(CACHE).then(function(cache) {
+      return cache.addAll(PRECACHE);
     }).then(function() {
       return self.skipWaiting();
     })
   );
 });
 
-// Aktivierung: alte Caches löschen
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
+// Activate: clear old caches
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
     caches.keys().then(function(keys) {
       return Promise.all(
-        keys.filter(function(key) { return key !== CACHE_NAME; })
-            .map(function(key) { return caches.delete(key); })
+        keys.filter(function(k) { return k !== CACHE; })
+            .map(function(k) { return caches.delete(k); })
       );
     }).then(function() {
       return self.clients.claim();
@@ -30,61 +35,34 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Fetch: Network-first für Supabase, Cache-first für Assets
-self.addEventListener('fetch', function(event) {
-  var url = event.request.url;
+// Fetch: Cache-first für statische Assets, Network-first für API
+self.addEventListener('fetch', function(e) {
+  var url = e.request.url;
 
-  // Supabase-Anfragen: immer Network, kein Cache
+  // Supabase API: immer Netzwerk
   if (url.includes('supabase.co')) {
-    event.respondWith(
-      fetch(event.request).catch(function() {
-        return new Response(JSON.stringify({ error: 'offline' }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
-    );
     return;
   }
 
-  // HTML: Network-first (immer aktuelle Version), Fallback auf Cache
-  if (event.request.mode === 'navigate' || url.endsWith('.html')) {
-    event.respondWith(
-      fetch(event.request).then(function(response) {
-        var clone = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, clone);
-        });
-        return response;
-      }).catch(function() {
-        return caches.match(event.request).then(function(cached) {
-          return cached || caches.match('/index.html');
-        });
-      })
-    );
-    return;
-  }
-
-  // Alles andere: Cache-first, Network-Fallback
-  event.respondWith(
-    caches.match(event.request).then(function(cached) {
+  // Statische Assets: Cache-first
+  e.respondWith(
+    caches.match(e.request).then(function(cached) {
       if (cached) return cached;
-      return fetch(event.request).then(function(response) {
-        if (!response || response.status !== 200 || response.type === 'opaque') {
+
+      return fetch(e.request).then(function(response) {
+        // Nur erfolgreiche Antworten cachen
+        if (!response || response.status !== 200 || response.type === 'error') {
           return response;
         }
         var clone = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, clone);
+        caches.open(CACHE).then(function(cache) {
+          cache.put(e.request, clone);
         });
         return response;
+      }).catch(function() {
+        // Offline-Fallback: index.html
+        return caches.match('/index.html');
       });
     })
   );
-});
-
-// Push-Nachricht empfangen (für zukünftige Erweiterung)
-self.addEventListener('message', function(event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
 });
