@@ -3201,7 +3201,7 @@ function addTodo(){
     if(v==='__agency__')agencyChecked=true;
     else custIds.push(v);
   });
-  var asgn=agencyChecked?'agency':'client';
+  var asgn=agencyChecked&&custIds.length>0?'both':agencyChecked?'agency':'client';
   var targets=custIds.length>0?custIds:[ACTIVE_CUSTOMER];
   var created=0;
   targets.forEach(function(custId){
@@ -3259,7 +3259,8 @@ function deleteTodo(idx,custId){
 }
 function startEdit(idx,custId){EDITING_TODO=idx;EDITING_TODO_CUST=custId||ACTIVE_CUSTOMER;renderTodos();}
 function cancelEdit(){EDITING_TODO=-1;renderTodos();}
-function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var custId=EDITING_TODO_CUST||ACTIVE_CUSTOMER;var td=(custId&&DATA[custId]?DATA[custId]:cd()).todos[idx];td.text=txt;td.due=(document.getElementById('edit-due-'+idx)||{}).value;td.prio=(document.getElementById('edit-prio-'+idx)||{}).value;td.assign=(document.getElementById('edit-assign-'+idx)||{}).value;EDITING_TODO=-1;EDITING_TODO_CUST='';scheduleSave();renderTodos();}
+function saveEdit(idx){var txt=((document.getElementById('edit-text-'+idx)||{}).value||'').trim();if(!txt)return;var custId=EDITING_TODO_CUST||ACTIVE_CUSTOMER;var td=(custId&&DATA[custId]?DATA[custId]:cd()).todos[idx];td.text=txt;td.due=(document.getElementById('edit-due-'+idx)||{}).value;td.prio=(document.getElementById('edit-prio-'+idx)||{}).value;// assign bleibt unverändert
+EDITING_TODO=-1;EDITING_TODO_CUST='';scheduleSave();renderTodos();}
 // doAgencyReset → weiter unten implementiert
 // ── Analytics Badge ──
 var ANALYTICS_BADGE_KEY='analytics_badge_';
@@ -3660,7 +3661,7 @@ function _renderTodoLists(open,done2,isAgency){
     var todoJumpTitle=getTodoOnclick(t,i);
     var custLabel=isAgency&&custName?'<span style="font-size:9px;font-weight:600;color:#fff;background:var(--accent);border-radius:10px;padding:1px 7px;flex-shrink:0">'+escHtml(custName)+'</span>':'';
     if(EDITING_TODO===i&&EDITING_TODO_CUST===custId&&isAgency){
-      return'<div class="todo-edit-form"><span class="flbl">Aufgabe</span><input type="text" id="edit-text-'+i+'" value="'+t.text.replace(/"/g,'&quot;')+'" style="margin-bottom:8px"><div class="form-row"><div><span class="flbl">Fällig</span><input type="date" id="edit-due-'+i+'" value="'+(t.due||'')+'" style="margin:0"></div><div><span class="flbl">Priorität</span><select id="edit-prio-'+i+'" style="margin:0"><option value="high"'+(t.prio==='high'?' selected':'')+'>Hoch</option><option value="med"'+(t.prio==='med'?' selected':'')+'>Mittel</option><option value="low"'+(t.prio==='low'?' selected':'')+'>Niedrig</option></select></div></div><div style="margin-top:8px"><span class="flbl">Zugewiesen an</span><select id="edit-assign-'+i+'" style="margin:0"><option value="agency"'+(t.assign==='agency'?' selected':'')+'>Agentur</option><option value="client"'+(t.assign==='client'?' selected':'')+'>Kunde</option><option value="both"'+(t.assign==='both'?' selected':'')+'>Beide</option></select></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn-primary" onclick="saveEdit('+i+')">Speichern</button><button class="btn-outline" onclick="cancelEdit()">Abbrechen</button></div></div>';
+      return'<div class="todo-edit-form"><span class="flbl">Aufgabe</span><input type="text" id="edit-text-'+i+'" value="'+t.text.replace(/"/g,'&quot;')+'" style="margin-bottom:8px"><div class="form-row"><div><span class="flbl">Fällig</span><input type="date" id="edit-due-'+i+'" value="'+(t.due||'')+'" style="margin:0"></div><div><span class="flbl">Priorität</span><select id="edit-prio-'+i+'" style="margin:0"><option value="high"'+(t.prio==='high'?' selected':'')+'>Hoch</option><option value="med"'+(t.prio==='med'?' selected':'')+'>Mittel</option><option value="low"'+(t.prio==='low'?' selected':'')+'>Niedrig</option></select></div></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn-primary" onclick="saveEdit('+i+')">Speichern</button><button class="btn-outline" onclick="cancelEdit()">Abbrechen</button></div></div>';
     }
     return'<div class="todo-item" style="position:relative;'+(todoJumpTitle?'cursor:pointer':'')+'" '+(todoJumpTitle?'data-jumptitle="'+escHtml(todoJumpTitle)+'" data-jumpcust="'+escHtml(custId)+'"':'')+'>'+
     (!isDone&&t.createdAt&&(Date.now()-t.createdAt<604800000)?'<span style="position:absolute;top:-5px;right:-5px;background:#FF5757;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2">NEU</span>':'')+
