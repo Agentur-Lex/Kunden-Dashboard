@@ -2973,7 +2973,9 @@ function renderShootsList(){
       var linkBtn=document.createElement('button');
       linkBtn.className='btn-icon';
       linkBtn.title=idea.link?'Link öffnen: '+idea.link:'Link hinzufügen';
-      linkBtn.style.cssText='color:'+(idea.link?'var(--accent)':'var(--text3)')+';background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;transition:color .15s';
+      // Kunde sieht Link-Button nur wenn ein Link vorhanden ist
+      if(ROLE!=='agency'&&!idea.link)linkBtn.style.display='none';
+      linkBtn.style.cssText='color:'+(idea.link?'var(--accent)':'var(--text3)')+';background:none;border:none;cursor:pointer;padding:2px;display:'+(ROLE!=='agency'&&!idea.link?'none':'flex')+';align-items:center;justify-content:center;transition:color .15s';
       linkBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
       // X-Button zum Löschen des Links
       var delLinkBtn=document.createElement('button');
