@@ -14,7 +14,12 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23FF5757'/><text x='16' y='23' font-family='Arial' font-weight='bold' font-size='20' text-anchor='middle' fill='white'>L</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Kunden-Dashboard – Social-Media-Lex</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://kvytyavgosxhvijmfxef.supabase.co">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#F4F5F8;--surface:#FFFFFF;--surface2:#F0F2F7;--surface3:#E4E7EF;--border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.12);--accent:#FF5757;--accent-soft:rgba(255,87,87,0.10);--accent-glow:rgba(255,87,87,0.20);--text:#1A1D2E;--text2:#5A5F7A;--text3:#9096B0;--green:#16A34A;--green-soft:rgba(22,163,74,0.1);--blue:#2563EB;--blue-soft:rgba(37,99,235,0.1);--purple:#7C3AED;--amber:#D97706;--amber-soft:rgba(217,119,6,0.1);--radius:14px;--radius-sm:8px;--radius-lg:20px;--shadow:0 2px 12px rgba(0,0,0,0.08);--shadow-lg:0 8px 32px rgba(0,0,0,0.12)}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
@@ -6750,16 +6755,7 @@ document.addEventListener('keydown',function(e){
 });
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(r){r.unregister();});
-    regs.forEach(function(r){r.unregister();});
-  }).then(function(){
-    if('caches' in window){
-      caches.keys().then(function(keys){
-        keys.forEach(function(k){caches.delete(k);});
-      });
-    }
-    navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});
-  });
+  navigator.serviceWorker.register('/service-worker.js').catch(function(e){console.log('SW:',e);});
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
