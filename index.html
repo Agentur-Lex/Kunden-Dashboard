@@ -703,7 +703,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
         
-        <button id="manual-save-btn" onclick="manualSave()" title="Jetzt speichern" style="display:none;background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;opacity:0.6"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+        <button id="manual-save-btn" onclick="manualSave()" title="Jetzt speichern" style="display:none;background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;opacity:0.6;position:relative"><span id="save-dirty-dot" style="display:none;position:absolute;top:0;right:2px;width:7px;height:7px;border-radius:50%;background:var(--accent);border:1.5px solid var(--surface)"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
         <button id="undo-btn" onclick="undoLast()" title="Rückgängig (Strg+Z)" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;opacity:0.35"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-1"/></svg></button>
         <div class="tb-chip" id="agency-chip" style="display:none"><div class="tb-av">AG</div><span class="tb-name">Social-Media-Lex</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
         <div class="tb-chip" id="client-chip" style="display:none"><div class="tb-av" id="client-chip-av">K</div><span class="tb-name" id="client-chip-name">Kunde</span><button class="tb-logout" onclick="doLogout()">Abmelden</button></div>
@@ -4702,6 +4702,7 @@ function formatFollowers(n){
   return String(n);
 }
 function buildFollowerChart(){
+  if(typeof Chart==='undefined'){setTimeout(function(){buildFollowerChart.apply(null,arguments);},300);return;}
   if(!ACTIVE_CUSTOMER)return;
   var an=cd().analytics;
   var isEdit=ANALYTICS_EDIT_MODE&&ROLE==='agency';
@@ -6410,6 +6411,7 @@ async function manualSave(){
     await sbSaveAllShoots();
     await sbSaveAllContentRows();
     showToast('✓ Gespeichert');
+    _setDirty(false);
     // Kurz grün färben als Bestätigung
     if(btn){btn.style.color='#22C55E';setTimeout(function(){btn.style.color='var(--text3)';btn.style.opacity='0.6';},1200);}
   }catch(e){
@@ -6418,8 +6420,18 @@ async function manualSave(){
   }
   if(btn)btn.disabled=false;
 }
+function _setDirty(on){
+  var dot=document.getElementById('save-dirty-dot');
+  if(dot)dot.style.display=on?'block':'none';
+}
 function scheduleSave(){
-  clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();},0);
+  _setDirty(true);
+  clearTimeout(_sbSaveTimer);_sbSaveTimer=setTimeout(async function(){
+    try{
+      await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();
+      _setDirty(false);
+    }catch(e){console.warn('autosave failed:',e);}
+  },0);
 }
 function scheduleAnalyticsSave(){
   // Nur für Analytics-Änderungen: lastUpdated setzen
