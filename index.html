@@ -3608,10 +3608,13 @@ function renderTodos(){
     });
   });
 
-  // Sort: by customer name, then by priority within customer
+  // Sort: Agentur-Todos zuerst, dann nach Kundenname, dann Prio
   var prioOrder={high:0,med:1,low:2};
   function sortEntries(arr){
     arr.sort(function(a,b){
+      var aAg=a.t.assign==='agency'?0:1;
+      var bAg=b.t.assign==='agency'?0:1;
+      if(aAg!==bAg)return aAg-bAg;
       var nc=a.custName.localeCompare(b.custName,'de');
       if(nc!==0)return nc;
       return(prioOrder[a.t.prio]||1)-(prioOrder[b.t.prio]||1);
@@ -3712,9 +3715,10 @@ function _renderTodoLists(open,done2,isAgency){
     var html='';
     var lastCust='';
     entries.forEach(function(entry){
-      if(isAgency&&entry.custName!==lastCust){
-        html+='<div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.05em;padding:8px 0 4px;border-top:'+(lastCust?'1px solid var(--border2)':'none')+'">'+escHtml(entry.custName)+'</div>';
-        lastCust=entry.custName;
+      var groupLabel=(entry.t.assign==='agency')?'Nur Agentur':entry.custName;
+      if(isAgency&&groupLabel!==lastCust){
+        html+='<div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.05em;padding:8px 0 4px;border-top:'+(lastCust?'1px solid var(--border2)':'none')+'">'+escHtml(groupLabel)+'</div>';
+        lastCust=groupLabel;
       }
       html+=buildItem(entry,isDone);
     });
