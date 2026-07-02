@@ -3601,6 +3601,7 @@ function renderTodos(){
     var todos=(DATA[custId]||{}).todos||[];
     var custName=(DATA[custId]||{}).name||custId;
     todos.forEach(function(t,i){
+      if(t._appInstall)return; // Nur für Kunden sichtbar
       var entry={t:t,i:i,custId:custId,custName:custName};
       if(!t.done)allOpen.push(entry);
       else allDone.push(entry);
@@ -6150,6 +6151,7 @@ function updateTodoBadge(){
     getCustomerKeys().forEach(function(k){
       if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
       (DATA[k].todos||[]).forEach(function(t){
+        if(t._appInstall)return;
         if(!t.done)count++;
       });
     });
