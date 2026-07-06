@@ -916,6 +916,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
         </div>
         <div class="card"><div class="card-title">Offen <span style="font-size:10px;color:var(--text3);font-weight:400" id="open-count"></span></div><div id="todo-open"></div><div id="todo-empty" style="display:none;font-size:11px;color:var(--text3);padding:6px 0">Keine offenen Aufgaben.</div></div>
         <div class="card"><div class="card-title">Erledigt <span style="font-size:10px;color:var(--text3);font-weight:400" id="done-count"></span></div><div id="todo-done"></div><div id="done-empty" style="display:none;font-size:11px;color:var(--text3);padding:6px 0">Nichts erledigt.</div></div>
+        <div class="card agency-only" id="client-only-card" style="display:none;opacity:0.65"><div class="card-title">Nur-Kunden-To-dos <span style="font-size:10px;color:var(--text3);font-weight:400" id="client-only-count"></span></div><div id="todo-client-only"></div></div>
       </div>
 
       <!-- CONTENT LISTE -->
@@ -3596,13 +3597,18 @@ function renderTodos(){
     return DATA[k]&&DATA[k].status!=='abgeschlossen';
   });
 
-  var allOpen=[],allDone=[];
+  var allOpen=[],allDone=[],clientOnly=[];
+  var isAgencyView=ROLE==='agency';
   custs.forEach(function(custId){
     var todos=(DATA[custId]||{}).todos||[];
     var custName=(DATA[custId]||{}).name||custId;
     todos.forEach(function(t,i){
       if(t._appInstall)return; // Nur für Kunden sichtbar
       var entry={t:t,i:i,custId:custId,custName:custName};
+      // Agentur: reine Kunden-Todos in separate Kachel
+      if(isAgencyView&&t.assign==='client'&&!t.done){
+        clientOnly.push(entry);return;
+      }
       if(!t.done)allOpen.push(entry);
       else allDone.push(entry);
     });
@@ -3621,7 +3627,7 @@ function renderTodos(){
     });
     return arr;
   }
-  sortEntries(allOpen);sortEntries(allDone);
+  sortEntries(allOpen);sortEntries(allDone);sortEntries(clientOnly);
 
   // Update badge
   var badge=document.getElementById('todo-badge');if(badge){badge.style.display=allOpen.length?'inline':'none';badge.textContent=allOpen.length;}
@@ -3641,7 +3647,7 @@ function renderTodos(){
       +'<span style="font-weight:700;color:var(--green);font-size:13px">'+allDone.length+'</span></div>';
   }
 
-  _renderTodoLists(allOpen,allDone,true);
+  _renderTodoLists(allOpen,allDone,true,clientOnly);
 }
 
 
@@ -3680,7 +3686,7 @@ function _updateAssignLabel(){
 }
 
 
-function _renderTodoLists(open,done2,isAgency){
+function _renderTodoLists(open,done2,isAgency,clientOnly){
   function chk(checked,fn){return'<button class="todo-chk'+(checked?' checked':'')+'" onclick="event.stopPropagation();'+fn+'" style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid '+(checked?'var(--accent)':'var(--border2)')+';background:'+(checked?'var(--accent)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">'+(checked?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9 10.5,3"/></svg>':'')+'</button>';}
   function pCls(p){return p==='high'?'p-high':p==='med'?'p-med':'p-low';}
   function pLbl(p){return p==='high'?'Hoch':p==='med'?'Mittel':'Niedrig';}
@@ -3729,6 +3735,20 @@ function _renderTodoLists(open,done2,isAgency){
   var del=document.getElementById('todo-done');var dem=document.getElementById('done-empty');
   if(oel){oel.innerHTML=renderGrouped(open,false);if(oem)oem.style.display=open.length?'none':'block';}
   if(del){del.innerHTML=renderGrouped(done2,true);if(dem)dem.style.display=done2.length?'none':'block';}
+  // Nur-Kunden-To-dos Kachel
+  var coCard=document.getElementById('client-only-card');
+  var coEl=document.getElementById('todo-client-only');
+  var coCount=document.getElementById('client-only-count');
+  if(coCard&&coEl){
+    if(isAgency&&clientOnly&&clientOnly.length>0){
+      coCard.style.display='';
+      if(coCount)coCount.textContent='('+clientOnly.length+')';
+      coEl.innerHTML=renderGrouped(clientOnly,false);
+    } else {
+      coCard.style.display='none';
+      coEl.innerHTML='';
+    }
+  }
 }
 
 
