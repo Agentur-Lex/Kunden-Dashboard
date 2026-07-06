@@ -6176,6 +6176,7 @@ function updateTodoBadge(){
       if(!DATA[k]||DATA[k].status==='abgeschlossen')return;
       (DATA[k].todos||[]).forEach(function(t){
         if(t._appInstall)return;
+        if(t.assign==='client')return; // Nur-Kunden-Todos nicht zählen
         if(!t.done)count++;
       });
     });
