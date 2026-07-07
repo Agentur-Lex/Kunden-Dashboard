@@ -6262,7 +6262,6 @@ async function loadCustomerData(custId,custObj){
   if(contentRowsData.length>1){
     var seen={};var dupIds=[];
     contentRowsData.forEach(function(row){
-      // Duplikat = gleiches Datum + name + link + art (Content-Piece Kennung)
       var key=(row.date||'')+'|'+(row.name||'')+'|'+(row.link||'')+'|'+(row.art||'');
       if(seen[key]){dupIds.push(row.id);}
       else{seen[key]=row.id;}
@@ -6272,9 +6271,40 @@ async function loadCustomerData(custId,custObj){
       sb.from('content_rows').delete().in('id',dupIds).then(function(){
         showToast(dupIds.length+' doppelte Content-Pieces bereinigt');
       });
-      // Duplikate auch aus dem lokalen Array entfernen
       contentRowsData=contentRowsData.filter(function(r){return dupIds.indexOf(r.id)===-1;});
       r[3].data=contentRowsData;
+    }
+  }
+  // Duplikate in todos bereinigen
+  var todosData=r[0].data||[];
+  if(todosData.length>1){
+    var seenT={};var dupTIds=[];
+    todosData.forEach(function(row){
+      var key=(row.text||'')+'|'+(row.created_at||'')+'|'+(row.assign||'');
+      if(seenT[key]){dupTIds.push(row.id);}
+      else{seenT[key]=row.id;}
+    });
+    if(dupTIds.length>0){
+      console.warn('todos: '+dupTIds.length+' Duplikate erkannt, werden bereinigt...');
+      sb.from('todos').delete().in('id',dupTIds).then(function(){});
+      todosData=todosData.filter(function(r){return dupTIds.indexOf(r.id)===-1;});
+      r[0].data=todosData;
+    }
+  }
+  // Duplikate in shoots bereinigen
+  var shootsData=r[1].data||[];
+  if(shootsData.length>1){
+    var seenS={};var dupSIds=[];
+    shootsData.forEach(function(row){
+      var key=(row.date||'')+'|'+(row.title||'')+'|'+(row.time||'');
+      if(seenS[key]){dupSIds.push(row.id);}
+      else{seenS[key]=row.id;}
+    });
+    if(dupSIds.length>0){
+      console.warn('shoots: '+dupSIds.length+' Duplikate erkannt, werden bereinigt...');
+      sb.from('shoots').delete().in('id',dupSIds).then(function(){});
+      shootsData=shootsData.filter(function(r){return dupSIds.indexOf(r.id)===-1;});
+      r[1].data=shootsData;
     }
   }
   DATA[custId]=sbRowToData(cust,r[0].data||[],r[1].data||[],r[2].data||[],r[3].data||[],r[4].data||{},r[5].data||{});
@@ -6317,8 +6347,13 @@ async function sbSaveCustomer(){
   // agencyNote + lastLogin in customers speichern
   await sb.from('customers').update({agency_note:d.agencyNote||'',last_login:d.lastLogin||null}).eq('id',cId);
 }
+var _sbSaveTodosInFlight=false;
 async function sbSaveAllTodos(){
-  if(!ACTIVE_CUSTOMER)return;var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
+  if(!ACTIVE_CUSTOMER)return;
+  if(_sbSaveTodosInFlight){setTimeout(function(){sbSaveAllTodos();},250);return;}
+  _sbSaveTodosInFlight=true;
+  try{
+  var sb=getSB();var todos=cd().todos||[];var cId=ACTIVE_CUSTOMER;
   // Einzelne Todos upserten statt delete+insert (RLS-sicher für Kunden)
   for(var i=0;i<todos.length;i++){
     var t=todos[i];
@@ -6347,10 +6382,16 @@ async function sbSaveAllTodos(){
     // Nur nicht-offene-Reset Todos löschen wenn lokale Liste leer ist
     await sb.from('todos').delete().eq('customer_id',cId).or('is_reset.eq.false,done.eq.true');
   }
+  } finally { _sbSaveTodosInFlight=false; }
 }
+var _sbSaveShootsInFlight=false;
 async function sbSaveAllShoots(overrideCustId){
   var cId=overrideCustId||ACTIVE_CUSTOMER;
-  if(!cId)return;var sb=getSB();var shoots=(DATA[cId]&&DATA[cId].shoots)||[];
+  if(!cId)return;
+  if(_sbSaveShootsInFlight){setTimeout(function(){sbSaveAllShoots(overrideCustId);},250);return;}
+  _sbSaveShootsInFlight=true;
+  try{
+  var sb=getSB();var shoots=(DATA[cId]&&DATA[cId].shoots)||[];
   // Upsert per Eintrag (RLS-sicher für Kunden)
   for(var i=0;i<shoots.length;i++){
     var s=shoots[i];
@@ -6371,6 +6412,7 @@ async function sbSaveAllShoots(overrideCustId){
       if(toDelete.length)await sb.from('shoots').delete().in('id',toDelete);
     }
   }
+  } finally { _sbSaveShootsInFlight=false; }
 }
 var _sbSaveContentInFlight=false;
 async function sbSaveAllContentRows(){
@@ -6490,7 +6532,7 @@ function scheduleSave(){
       await sbSaveCustomer();await sbSaveAllTodos();await sbSaveAllShoots();await sbSaveAllContentRows();
       _setDirty(false);
     }catch(e){console.warn('autosave failed:',e);}
-  },0);
+  },400);
 }
 function scheduleAnalyticsSave(){
   // Nur für Analytics-Änderungen: lastUpdated setzen
