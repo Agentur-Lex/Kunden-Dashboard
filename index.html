@@ -6257,6 +6257,26 @@ async function loadCustomerData(custId,custObj){
     sb.from('strategy').select('*').eq('customer_id',custId).maybeSingle(),
     sb.from('customer_creds').select('*').eq('customer_id',custId).maybeSingle()
   ]);
+  // DB-Reparatur: Duplikate in content_rows automatisch bereinigen
+  var contentRowsData=r[3].data||[];
+  if(contentRowsData.length>1){
+    var seen={};var dupIds=[];
+    contentRowsData.forEach(function(row){
+      // Duplikat = gleiches Datum + name + link + art (Content-Piece Kennung)
+      var key=(row.date||'')+'|'+(row.name||'')+'|'+(row.link||'')+'|'+(row.art||'');
+      if(seen[key]){dupIds.push(row.id);}
+      else{seen[key]=row.id;}
+    });
+    if(dupIds.length>0){
+      console.warn('content_rows: '+dupIds.length+' Duplikate erkannt, werden bereinigt...');
+      sb.from('content_rows').delete().in('id',dupIds).then(function(){
+        showToast(dupIds.length+' doppelte Content-Pieces bereinigt');
+      });
+      // Duplikate auch aus dem lokalen Array entfernen
+      contentRowsData=contentRowsData.filter(function(r){return dupIds.indexOf(r.id)===-1;});
+      r[3].data=contentRowsData;
+    }
+  }
   DATA[custId]=sbRowToData(cust,r[0].data||[],r[1].data||[],r[2].data||[],r[3].data||[],r[4].data||{},r[5].data||{});
   // DB-Reparatur: leere Fragen-Array zurückschreiben mit Standardfragen
   if(r[4].data&&r[4].data.questions&&r[4].data.questions.length===0){
@@ -6352,24 +6372,36 @@ async function sbSaveAllShoots(overrideCustId){
     }
   }
 }
+var _sbSaveContentInFlight=false;
 async function sbSaveAllContentRows(){
-  if(!ACTIVE_CUSTOMER)return;var sb=getSB();var rows=cd().rows||[];var cId=ACTIVE_CUSTOMER;
-  // Backup: bestehende Zeilen sichern vor dem Löschen
-  var backup=await sb.from('content_rows').select('*').eq('customer_id',cId);
-  var backupRows=backup.data||[];
-  var delRes=await sb.from('content_rows').delete().eq('customer_id',cId);
-  if(delRes.error){console.error('content_rows delete error:',delRes.error);return;}
-  if(!rows.length)return;
-  var dbRows=rows.map(function(r,i){return{customer_id:cId,date:r.date||null,name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',sort_order:i};});
-  var res=await sb.from('content_rows').insert(dbRows).select();
-  if(res.error){
-    // Rollback: Backup wiederherstellen
-    console.error('content_rows insert error – rolling back:',res.error);
-    if(backupRows.length)await sb.from('content_rows').insert(backupRows);
-    showToast('Fehler beim Speichern der Content-Liste – wird wiederhergestellt');
+  if(!ACTIVE_CUSTOMER)return;
+  // Mutex: verhindert parallele Saves die Duplikate erzeugen
+  if(_sbSaveContentInFlight){
+    // Erneut planen sobald der laufende Save fertig ist
+    setTimeout(function(){sbSaveAllContentRows();},250);
     return;
   }
-  if(res.data)res.data.forEach(function(r,i){if(rows[i])rows[i]._id=r.id;});
+  _sbSaveContentInFlight=true;
+  try{
+    var sb=getSB();var rows=cd().rows||[];var cId=ACTIVE_CUSTOMER;
+    // Backup: bestehende Zeilen sichern vor dem Löschen
+    var backup=await sb.from('content_rows').select('*').eq('customer_id',cId);
+    var backupRows=backup.data||[];
+    var delRes=await sb.from('content_rows').delete().eq('customer_id',cId);
+    if(delRes.error){console.error('content_rows delete error:',delRes.error);return;}
+    if(!rows.length)return;
+    var dbRows=rows.map(function(r,i){return{customer_id:cId,date:r.date||null,name:r.name||'',link:r.link||'',art:r.art||'',spez:r.spez||'',caption:r.caption||'',plat:r.plat||'',sort_order:i};});
+    var res=await sb.from('content_rows').insert(dbRows).select();
+    if(res.error){
+      console.error('content_rows insert error – rolling back:',res.error);
+      if(backupRows.length)await sb.from('content_rows').insert(backupRows);
+      showToast('Fehler beim Speichern der Content-Liste – wird wiederhergestellt');
+      return;
+    }
+    if(res.data)res.data.forEach(function(r,i){if(rows[i])rows[i]._id=r.id;});
+  } finally {
+    _sbSaveContentInFlight=false;
+  }
 }
 async function sbSaveLegal(){var sb=getSB();await sb.from('legal').upsert({id:1,impressum:LEGAL.impressum,datenschutz:LEGAL.datenschutz});}
 async function sbLoadLegal(){var sb=getSB();var res=await sb.from('legal').select('*').eq('id',1).maybeSingle();if(res.data){LEGAL.impressum=res.data.impressum||'';LEGAL.datenschutz=res.data.datenschutz||'';}}
