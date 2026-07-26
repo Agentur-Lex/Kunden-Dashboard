@@ -1225,7 +1225,7 @@ function calcAutoEngRate(an){
   var eng=parseVal(String(an.engTotal||0));
   var lc=parseVal(String(an.linkClicks||0));
   var reach=parseVal(String(an.reach||0));
-  if(!reach||!(eng||lc)) return null;
+  if(!reach) return 0;
   return Math.round((eng+lc)/reach*10000)/100;
 }
 
@@ -5463,7 +5463,7 @@ function importAnalyticsData(){
 
   // ── Auto-Engagement-Rate: (engagement + link_klicks) / reichweite ──
   var autoER=calcAutoEngRate(an);
-  if(autoER)an.eng=autoER+'%';
+  an.eng=autoER+'%';
 
   // ── Sync Stand Pickers ──
   var mSelI=document.getElementById('analytics-stand-month');
@@ -5670,12 +5670,9 @@ function renderAnalyticsPage(){
       if(isEdit&&md){
         if(m.key==='eng'){
           // Engagement-Rate: auto-calculated, not editable
-          var autoER=null;
-          autoER=calcAutoEngRate(an);
-          var autoVal=autoER?autoER+'%':(an[m.key]||'–');
-          // Update the stored value too
-          if(autoER) an.eng=autoER+'%';
-          mv.textContent=autoVal;
+          var autoER=calcAutoEngRate(an);
+          an.eng=autoER+'%'; // Immer aktualisieren, auch bei 0
+          mv.textContent=autoER+'%';
           mv.style.color='var(--accent)';
           mv.title='Automatisch berechnet aus Engagement-Detail';
           // Delta stays editable
@@ -5690,8 +5687,9 @@ function renderAnalyticsPage(){
         if(m.key==='eng'){
           // Also auto-calc in view mode
           var autoER3=calcAutoEngRate(an);
-          mv.textContent=autoER3?autoER3+'%':(an[m.key]||'–');
-          if(autoER3) mv.style.color='var(--accent)';
+          an.eng=autoER3+'%';
+          mv.textContent=autoER3+'%';
+          mv.style.color='var(--accent)';
         } else {
           mv.textContent=an[m.key]||'–';
         }
