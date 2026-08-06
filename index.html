@@ -5214,7 +5214,27 @@ function renderStrategyPage() {
       var pSub   = document.createElement('div'); pSub.style.cssText = 'font-size:10px;color:var(--text3)'; pSub.textContent = 'PDF-Datei';
       pInfo.appendChild(pTitle); pInfo.appendChild(pSub);
       var pLink = document.createElement('a'); pLink.href = pdfUrl; pLink.target = '_blank';
+      pLink.rel = 'noopener noreferrer';
       pLink.className = 'btn-primary'; pLink.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Öffnen'; pLink.style.cssText = 'font-size:10px;padding:5px 12px;text-decoration:none';
+      // Data-URLs: in Blob umwandeln damit modern Browser sie öffnen
+      if(pdfUrl.indexOf('data:application/pdf')===0){
+        pLink.onclick = function(e){
+          e.preventDefault();
+          try {
+            var b64 = pdfUrl.split(',')[1];
+            var byteChars = atob(b64);
+            var byteNumbers = new Array(byteChars.length);
+            for(var i=0;i<byteChars.length;i++) byteNumbers[i] = byteChars.charCodeAt(i);
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], {type:'application/pdf'});
+            var blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl,'_blank');
+            setTimeout(function(){URL.revokeObjectURL(blobUrl);},60000);
+          } catch(err) {
+            alert('PDF konnte nicht geöffnet werden: '+err.message);
+          }
+        };
+      }
       linkRow.appendChild(pIcon); linkRow.appendChild(pInfo); linkRow.appendChild(pLink);
       if (isEdit) {
         var rmBtn = document.createElement('button'); rmBtn.className = 'btn-outline'; rmBtn.textContent = 'Entfernen';
@@ -6255,12 +6275,14 @@ async function loadCustomerData(custId,custObj){
     sb.from('strategy').select('*').eq('customer_id',custId).maybeSingle(),
     sb.from('customer_creds').select('*').eq('customer_id',custId).maybeSingle()
   ]);
-  // DB-Reparatur: Duplikate in content_rows automatisch bereinigen
+  // DB-Reparatur: Duplikate in content_rows – nur bei identischen und nicht-leeren Feldern
   var contentRowsData=r[3].data||[];
   if(contentRowsData.length>1){
     var seen={};var dupIds=[];
     contentRowsData.forEach(function(row){
-      var key=(row.date||'')+'|'+(row.name||'')+'|'+(row.link||'')+'|'+(row.art||'');
+      // Ohne Namen: nie als Duplikat behandeln
+      if(!row.name||row.name.trim()==='')return;
+      var key=(row.date||'')+'|'+row.name+'|'+(row.link||'')+'|'+(row.art||'');
       if(seen[key]){dupIds.push(row.id);}
       else{seen[key]=row.id;}
     });
@@ -6273,12 +6295,14 @@ async function loadCustomerData(custId,custObj){
       r[3].data=contentRowsData;
     }
   }
-  // Duplikate in todos bereinigen
+  // Duplikate in todos bereinigen – nur bei identischem Text UND identischem created_at
   var todosData=r[0].data||[];
   if(todosData.length>1){
     var seenT={};var dupTIds=[];
     todosData.forEach(function(row){
-      var key=(row.text||'')+'|'+(row.created_at||'')+'|'+(row.assign||'');
+      // Ohne Text: NIE als Duplikat behandeln
+      if(!row.text||row.text.trim()==='')return;
+      var key=row.text+'|'+(row.created_at||'')+'|'+(row.assign||'');
       if(seenT[key]){dupTIds.push(row.id);}
       else{seenT[key]=row.id;}
     });
@@ -6289,12 +6313,17 @@ async function loadCustomerData(custId,custObj){
       r[0].data=todosData;
     }
   }
-  // Duplikate in shoots bereinigen
+  // Duplikate in shoots bereinigen – SEHR strikt: nur wenn ALLE Felder inkl. created_at gleich
   var shootsData=r[1].data||[];
   if(shootsData.length>1){
     var seenS={};var dupSIds=[];
     shootsData.forEach(function(row){
-      var key=(row.date||'')+'|'+(row.title||'')+'|'+(row.time||'');
+      // Ohne Datum: NIE als Duplikat behandeln
+      if(!row.date||row.date==='')return;
+      // Nur mit vollständigen Feldern + created_at Zeitstempel
+      var key=row.date+'|'+(row.title||'')+'|'+(row.time||'')+'|'+(row.location||'')+'|'+(row.created_at||'');
+      // Zusätzlicher Schutz: Title muss nicht-leer sein
+      if(!row.title||row.title.trim()==='')return;
       if(seenS[key]){dupSIds.push(row.id);}
       else{seenS[key]=row.id;}
     });
