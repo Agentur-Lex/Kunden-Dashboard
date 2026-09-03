@@ -5636,17 +5636,23 @@ function renderAnalyticsPage(){
           });
           // Summe darunter
           var engSumDiv=document.createElement('div');
-          engSumDiv.style.cssText='margin-top:4px;padding-top:4px;border-top:1px dashed var(--border2);font-size:10px;color:var(--text3);text-align:right';
+          engSumDiv.style.cssText='margin-top:4px;padding-top:4px;border-top:1px dashed var(--border2);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;align-items:center;gap:8px';
+          var engDeltaSpan=document.createElement('span');
+          engDeltaSpan.className='metric-delta delta-up';
+          engDeltaSpan.style.cssText='font-size:10px';
+          var engSumSpan=document.createElement('span');
           var updateEngSum=function(){
             var s=0;
             Object.keys(an.engByPlat||{}).forEach(function(k){
               var v=parseVal(String(an.engByPlat[k]||0));
               if(v)s+=v;
             });
-            engSumDiv.textContent='Summe: '+fmtThousands(s);
+            engSumSpan.textContent='Summe: '+fmtThousands(s);
+            engDeltaSpan.textContent=an.engDelta?fmtDelta(an.engDelta)+' (Ø)':'–';
           };
           updateEngSum();
           engWrap.querySelectorAll('input').forEach(function(el){el.addEventListener('input',updateEngSum);});
+          engSumDiv.appendChild(engDeltaSpan);engSumDiv.appendChild(engSumSpan);
           engWrap.appendChild(engSumDiv);
           egv.appendChild(engWrap);
         }
@@ -5655,7 +5661,7 @@ function renderAnalyticsPage(){
       }
       egc.appendChild(egl);egc.appendChild(egv);
       if(!isEdit){var egd2=document.createElement('div');egd2.className='metric-delta delta-up';egd2.textContent=an.engDelta?fmtDelta(an.engDelta):'–';egc.appendChild(egd2);}
-      if(isEdit){var egd3=document.createElement('div');egd3.className='metric-delta delta-up';egd3.style.marginTop='4px';egd3.textContent=(an.engDelta?fmtDelta(an.engDelta)+' (Ø)':'–');egd3.title='Durchschnitt der Plattform-Deltas';egc.appendChild(egd3);}
+      // Im Bearbeitungsmodus ist Delta jetzt schon in der Summenzeile
       var bvKcEg=getBlockVis().kpiCards||{};
       var egVis=bv.kpi_eng!==false;
       if(!egVis){
@@ -5761,30 +5767,32 @@ function renderAnalyticsPage(){
               row.appendChild(lbl);row.appendChild(inp);row.appendChild(deltaInp);row.appendChild(pctSuffix);
               reachWrap.appendChild(row);
             });
-            // Summe darunter
+            // Delta + Summe in einer Zeile
             var sumDiv=document.createElement('div');
-            sumDiv.style.cssText='margin-top:4px;padding-top:4px;border-top:1px dashed var(--border2);font-size:10px;color:var(--text3);text-align:right';
+            sumDiv.style.cssText='margin-top:4px;padding-top:4px;border-top:1px dashed var(--border2);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;align-items:center;gap:8px';
+            var rDeltaSpan=document.createElement('span');
+            rDeltaSpan.className='metric-delta delta-up';
+            rDeltaSpan.style.cssText='font-size:10px';
+            var rSumSpan=document.createElement('span');
             var updateSum=function(){
               var s=0;
               Object.keys(an.reachByPlat||{}).forEach(function(k){
                 var v=parseVal(String(an.reachByPlat[k]||0));
                 if(v)s+=v;
               });
-              sumDiv.textContent='Summe: '+fmtThousands(s);
+              rSumSpan.textContent='Summe: '+fmtThousands(s);
+              rDeltaSpan.textContent=an.rdelta?an.rdelta+' (Ø)':'–';
             };
             updateSum();
             reachWrap.querySelectorAll('input').forEach(function(el){el.addEventListener('input',updateSum);});
+            sumDiv.appendChild(rDeltaSpan);sumDiv.appendChild(rSumSpan);
             reachWrap.appendChild(sumDiv);
             mv.appendChild(reachWrap);
           }
           if(m.dkey){
-            // Delta-Feld ausblenden bei Reichweite (wird automatisch berechnet)
+            // Delta-Feld: bei Reichweite (mit Plattformen) ausblenden – ist in der Summenzeile
             if(m.key==='reach' && stratPlats.length){
-              // rdelta wird automatisch als Mittelwert gesetzt
-              if(md){
-                md.textContent=an.rdelta||'–';
-                md.style.opacity='0.85';md.title='Automatisch berechnet aus Durchschnitt der Plattform-Deltas';
-              }
+              if(md){md.style.display='none';}
             } else {
               var dInp2=mkEditInput(m.dkey);dInp2.style.width='80px';md&&md.appendChild(dInp2);
             }
