@@ -1258,18 +1258,9 @@ function exportMonthlyReport(){
   // KPIs
   if(bv.kpis!==false){
     var autoER=calcAutoEngRate(an);
-    // Follower gesamt: aus letztem Wert der Wachstumskurve wenn vorhanden (zuverlässiger als an.followers)
-    var lastFollowers=an.followers||'';
-    var gr2=an.growth||[];
-    if(gr2.length){
-      var lastGr=gr2[gr2.length-1];
-      if(lastGr&&lastGr.f){lastFollowers=fmtThousands(lastGr.f);}
-    } else if(lastFollowers){
-      lastFollowers=fmtThousands(lastFollowers);
-    }
     var bvKc=(bv.kpiCards||{});
     body += '<h2>Kennzahlen</h2><div class="kpi-grid">';
-    body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(lastFollowers||'–')+'</div><div class="kpi-d'+(((an.fdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.fdelta||'')+'</div></div>';
+    body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(fmtThousands(an.followers)||'–')+'</div></div>';
     if(bvKc.reach!==false)
       body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
     if(bvKc.eng!==false)
