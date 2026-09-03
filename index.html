@@ -1347,24 +1347,38 @@ function exportMonthlyReport(){
       reachData=pl.map(function(p){return {name:p.name,val:parseInt(p.pct)||0,color:p.color||PLAT_C_RP[p.name]||'#8B90A7'};}).filter(function(x){return x.val>0;});
       reachTotal=reachData.reduce(function(s,it){return s+it.val;},0);
     }
-    if(reachData.length&&reachTotal>0){
+    // Engagement nach Plattform (Kreisdiagramm) – parallel berechnen
+    var engData=[],engTotal=0;
+    if(bv.engPlat!==false){
+      var stratPl=(d.strategy&&d.strategy.plat)||[];
+      var epb=an.engByPlat||{};
+      engData=stratPl.map(function(p){return {name:p,val:parseVal(String(epb[p]||0)),color:PLAT_C_RP[p]||'#8B90A7'};}).filter(function(x){return x.val>0;});
+      engTotal=engData.reduce(function(s,it){return s+it.val;},0);
+    }
+    var showReach=reachData.length&&reachTotal>0;
+    var showEng=engData.length&&engTotal>0;
+    if(showReach&&showEng){
+      // Beide nebeneinander in einem Grid
+      body += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">'
+        +'<div><h2 style="margin-top:0">Reichweite nach Plattform</h2>'
+        +'<div class="card" style="display:flex;flex-direction:column;align-items:center;gap:14px">'
+        +_pieSVG(reachData,reachTotal)+_pieLegend(reachData,reachTotal)
+        +'</div></div>'
+        +'<div><h2 style="margin-top:0">Engagement nach Plattform</h2>'
+        +'<div class="card" style="display:flex;flex-direction:column;align-items:center;gap:14px">'
+        +_pieSVG(engData,engTotal)+_pieLegend(engData,engTotal)
+        +'</div></div>'
+        +'</div>';
+    } else if(showReach){
       body += '<h2>Reichweite nach Plattform</h2>'
         +'<div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">'
         +_pieSVG(reachData,reachTotal)+_pieLegend(reachData,reachTotal)
         +'</div>';
-    }
-    // Engagement nach Plattform (Kreisdiagramm)
-    if(bv.engPlat!==false){
-      var stratPl=(d.strategy&&d.strategy.plat)||[];
-      var epb=an.engByPlat||{};
-      var engData=stratPl.map(function(p){return {name:p,val:parseVal(String(epb[p]||0)),color:PLAT_C_RP[p]||'#8B90A7'};}).filter(function(x){return x.val>0;});
-      var engTotal=engData.reduce(function(s,it){return s+it.val;},0);
-      if(engData.length&&engTotal>0){
-        body += '<h2>Engagement nach Plattform</h2>'
-          +'<div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">'
-          +_pieSVG(engData,engTotal)+_pieLegend(engData,engTotal)
-          +'</div>';
-      }
+    } else if(showEng){
+      body += '<h2>Engagement nach Plattform</h2>'
+        +'<div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">'
+        +_pieSVG(engData,engTotal)+_pieLegend(engData,engTotal)
+        +'</div>';
     }
   }
 
