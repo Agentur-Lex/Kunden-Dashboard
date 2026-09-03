@@ -1275,7 +1275,7 @@ function exportMonthlyReport(){
     if(bvKc.eng!==false)
       body += '<div class="kpi"><div class="kpi-lbl">Engagement (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.engTotal)||'–')+'</div><div class="kpi-d'+(((an.engDelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.engDelta||'')+'</div></div>';
     if(bvKc.er!==false)
-      body += '<div class="kpi kpi-eng"><div class="kpi-lbl">Engagement-Rate</div><div class="kpi-val">'+(autoER?autoER+'%':escHtml(an.eng||'–'))+'</div><div class="kpi-d'+(((an.edelt||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.edelt||'')+'</div></div>';
+      body += '<div class="kpi kpi-eng"><div class="kpi-lbl">Engagement-Rate</div><div class="kpi-val">'+(autoER?autoER+'%':escHtml(an.eng||'–'))+'</div></div>';
     if(bvKc.lc!==false && an.linkClicks)
       body += '<div class="kpi"><div class="kpi-lbl">Link-Klicks (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.linkClicks)||'–')+'</div><div class="kpi-d'+(((an.linkClicksDelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.linkClicksDelta||'')+'</div></div>';
     // Voraussichtl. Kundenanfragen
@@ -1288,52 +1288,74 @@ function exportMonthlyReport(){
     body += '</div>';
   }
 
-  // Follower growth bars
-  if(bv.growth!==false){
-    var gr=an.growth||[];
-    if(gr.length){
-      var maxF=Math.max.apply(null,gr.map(function(g){return parseVal(g.f);}));
-      var growthD='';
-      if(gr.length>=2){
-        var lp=gr[gr.length-1],pp=gr[gr.length-2];
-        var dp=parseVal(lp.f)-parseVal(pp.f);
-        if(parseVal(pp.f)>0){var ppp=Math.round(dp/parseVal(pp.f)*100);growthD=(dp>=0?'+':'')+dp+' ('+(ppp>=0?'+':'')+ppp+'% vs. '+escHtml(pp.month)+')';}
-      }
-      body += '<h2>Follower-Wachstum'+(growthD?' <span style="font-size:10px;font-weight:600;color:#34D399;text-transform:none;letter-spacing:0">'+escHtml(growthD)+'</span>':'')+'</h2>';
-      body += '<div class="card">';
-      if(maxF>0) gr.forEach(function(g){
-        var pct=Math.round(parseVal(g.f)/maxF*100);
-        body+='<div class="bar-row"><div class="bar-lbl">'+escHtml(g.month)+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:#FF5757"></div></div><div class="bar-val">'+escHtml(String(g.f||0))+'</div></div>';
+  // Follower-Wachstum aus dem Report entfernt
+
+  // Helper: SVG-Pie-Chart als HTML-String
+  function _pieSVG(dataItems, totalVal){
+    var size=180, cx=size/2, cy=size/2, r=size/2-8;
+    var s='<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">';
+    if(dataItems.length===1){
+      s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+dataItems[0].color+'"/>';
+    } else {
+      var startA=-Math.PI/2;
+      dataItems.forEach(function(dItem){
+        var pct=dItem.val/totalVal;
+        var endA=startA+pct*Math.PI*2;
+        var x1=cx+r*Math.cos(startA), y1=cy+r*Math.sin(startA);
+        var x2=cx+r*Math.cos(endA),  y2=cy+r*Math.sin(endA);
+        var largeArc=pct>0.5?1:0;
+        s+='<path d="M '+cx+' '+cy+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+largeArc+' 1 '+x2+' '+y2+' Z" fill="'+dItem.color+'"/>';
+        startA=endA;
       });
-      body += '</div>';
     }
+    s+='</svg>';
+    return s;
   }
+  function _pieLegend(dataItems, totalVal){
+    var s='<div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:150px">';
+    dataItems.forEach(function(dItem){
+      var pct=Math.round(dItem.val/totalVal*100);
+      s+='<div style="display:flex;align-items:center;gap:8px;font-size:12px">'
+        +'<span style="width:10px;height:10px;border-radius:50%;background:'+dItem.color+';display:inline-block;flex-shrink:0"></span>'
+        +'<span style="color:#212121">'+escHtml(dItem.name)+'</span>'
+        +'<span style="margin-left:auto;color:#6b7280;font-weight:600">'+pct+'%</span>'
+        +'</div>';
+    });
+    s+='</div>';
+    return s;
+  }
+  var PLAT_C_RP={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
 
   // Plattformen
   if(bv.plat!==false){
     var pl=an.plat||[];
-    if(pl.length){
-      body += '<h2>Reichweite nach Plattform</h2><div class="card">';
-      pl.forEach(function(p){
-        var pct=Math.min(parseInt(p.pct)||0,100);
-        body+='<div class="bar-row"><div class="bar-lbl">'+escHtml(p.name)+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+escHtml(p.color||'#FF5757')+'"></div></div><div class="bar-val">'+pct+'%</div></div>';
-      });
-      body += '</div>';
+    // Reichweite nach Plattform (Kreisdiagramm)
+    var rpb=an.reachByPlat||{};
+    var stratPlR=(d.strategy&&d.strategy.plat)||[];
+    var reachData=stratPlR.map(function(p){return {name:p,val:parseVal(String(rpb[p]||0)),color:PLAT_C_RP[p]||'#8B90A7'};}).filter(function(x){return x.val>0;});
+    var reachTotal=reachData.reduce(function(s,it){return s+it.val;},0);
+    // Fallback: falls kein reachByPlat vorhanden ist, aus an.plat rekonstruieren
+    if(!reachData.length&&pl.length){
+      reachData=pl.map(function(p){return {name:p.name,val:parseInt(p.pct)||0,color:p.color||PLAT_C_RP[p.name]||'#8B90A7'};}).filter(function(x){return x.val>0;});
+      reachTotal=reachData.reduce(function(s,it){return s+it.val;},0);
     }
-    // Engagement nach Plattform (nur wenn Kachel sichtbar)
+    if(reachData.length&&reachTotal>0){
+      body += '<h2>Reichweite nach Plattform</h2>'
+        +'<div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">'
+        +_pieSVG(reachData,reachTotal)+_pieLegend(reachData,reachTotal)
+        +'</div>';
+    }
+    // Engagement nach Plattform (Kreisdiagramm)
     if(bv.engPlat!==false){
-      var PLAT_C_R={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
       var stratPl=(d.strategy&&d.strategy.plat)||[];
       var epb=an.engByPlat||{};
-      var engData=stratPl.map(function(p){return {name:p,val:parseVal(String(epb[p]||0)),color:PLAT_C_R[p]||'#8B90A7'};}).filter(function(x){return x.val>0;});
-      var engTotal=engData.reduce(function(s,d){return s+d.val;},0);
+      var engData=stratPl.map(function(p){return {name:p,val:parseVal(String(epb[p]||0)),color:PLAT_C_RP[p]||'#8B90A7'};}).filter(function(x){return x.val>0;});
+      var engTotal=engData.reduce(function(s,it){return s+it.val;},0);
       if(engData.length&&engTotal>0){
-        body += '<h2>Engagement nach Plattform</h2><div class="card">';
-        engData.forEach(function(p){
-          var pct=Math.round(p.val/engTotal*100);
-          body+='<div class="bar-row"><div class="bar-lbl">'+escHtml(p.name)+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+escHtml(p.color)+'"></div></div><div class="bar-val">'+pct+'%</div></div>';
-        });
-        body += '</div>';
+        body += '<h2>Engagement nach Plattform</h2>'
+          +'<div class="card" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">'
+          +_pieSVG(engData,engTotal)+_pieLegend(engData,engTotal)
+          +'</div>';
       }
     }
   }
@@ -6680,18 +6702,19 @@ function scheduleSave(){
   },400);
 }
 function scheduleAnalyticsSave(){
-  // Nur für Analytics-Änderungen: lastUpdated setzen + Stand automatisch auf aktuellen Monat
+  // Nur für Analytics-Änderungen: lastUpdated setzen + Stand automatisch auf VORHERIGEN Monat
   if(ROLE==='agency'&&ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
     if(!DATA[ACTIVE_CUSTOMER].analytics)DATA[ACTIVE_CUSTOMER].analytics={};
     DATA[ACTIVE_CUSTOMER].analytics.lastUpdated=new Date().toISOString();
-    // Stand automatisch aktualisieren
+    // Stand automatisch: vorheriger Monat (Auswertungsmonat)
     var mNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
     var now=new Date();
-    DATA[ACTIVE_CUSTOMER].analytics.standDatum=mNames[now.getMonth()]+' '+now.getFullYear();
+    var prev=new Date(now.getFullYear(),now.getMonth()-1,1);
+    DATA[ACTIVE_CUSTOMER].analytics.standDatum=mNames[prev.getMonth()]+' '+prev.getFullYear();
     // Stand-Anzeige/Dropdowns aktualisieren wenn sichtbar
     var mSel=document.getElementById('stand-month-sel');var ySel=document.getElementById('stand-year-sel');
-    if(mSel)mSel.value=String(now.getMonth()+1);
-    if(ySel)ySel.value=String(now.getFullYear());
+    if(mSel)mSel.value=String(prev.getMonth()+1);
+    if(ySel)ySel.value=String(prev.getFullYear());
     var sd=document.getElementById('stand-display');
     if(sd)sd.textContent='Stand: '+DATA[ACTIVE_CUSTOMER].analytics.standDatum;
   }
