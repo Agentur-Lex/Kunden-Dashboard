@@ -4845,48 +4845,72 @@ function renderPlatBars() {
   var PLAT_COLORS={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
   var container = document.getElementById('plat-bars-container');
   if (!container) return;
-  var stratPlat = cd().strategy.plat || [];
-  if ((!cd().analytics.plat || cd().analytics.plat.length === 0) && stratPlat.length > 0) {
-    syncPlatToAnalytics();syncLinkedInQuestion(); return;
-  }
-  var platData = cd().analytics.plat || [];
-  // Show strategy platforms; use pct from an.plat if available
-  if(stratPlat.length>0){
-    platData=stratPlat.map(function(name){
-      var existing=platData.find(function(p){return p.name===name;});
-      return existing||{name:name,color:PLAT_COLORS[name]||'#8B90A7',pct:0};
-    });
-  } else if(platData.length>0){
-    // No strategy: show all platforms with data
-    platData=platData.filter(function(p){return p.pct>0;});
-  }
-  if (platData.length === 0) {
-    container.innerHTML = '<div style="font-size:11px;color:var(--text3)">Keine Plattformen in der Strategie ausgewählt.</div>';
+  var an=cd().analytics||{};
+  var stratPlats=(cd().strategy&&cd().strategy.plat)||[];
+  var rpb=an.reachByPlat||{};
+  var data=stratPlats.map(function(p){
+    return {name:p,val:parseVal(String(rpb[p]||0)),color:PLAT_COLORS[p]||'#8B90A7'};
+  }).filter(function(d){return d.val>0;});
+  var total=data.reduce(function(s,d){return s+d.val;},0);
+  container.innerHTML='';
+  container.style.minHeight='180px';
+  container.style.display='flex';
+  container.style.alignItems='center';
+  container.style.justifyContent='center';
+  if(!stratPlats.length){
+    container.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:30px 0">Keine Plattformen in der Strategie ausgewählt.</div>';
     return;
   }
-  var isEdit = false; // Reichweite/Plattform: nicht mehr manuell bearbeitbar – berechnet sich automatisch
-  container.innerHTML = '';
-
-  platData.forEach(function(p, i) {
-    var row = document.createElement('div');
-    row.className = 'plat-bar-row';
-    row.style.alignItems = 'center';
-
-    var lbl = document.createElement('div');
-    lbl.className = 'plat-bar-lbl'; lbl.textContent = p.name;
-    row.appendChild(lbl);
-
-    var track = document.createElement('div'); track.className = 'plat-bar-track';
-    var fill  = document.createElement('div'); fill.className = 'plat-bar-fill';
-    fill.style.width = (p.pct||0) + '%';
-    fill.style.background = p.color || PLAT_COLOR_MAP[p.name] || '#8B90A7';
-    track.appendChild(fill); row.appendChild(track);
-
-      var pctLbl = document.createElement('div');
-      pctLbl.className = 'plat-bar-pct'; pctLbl.textContent = (p.pct||0) + '%';
-      row.appendChild(pctLbl);
-    container.appendChild(row);
+  if(!total||!data.length){
+    container.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:30px 0">Keine Reichweite-Daten</div>';
+    return;
+  }
+  var size=160,cx=size/2,cy=size/2,r=size/2-8;
+  var svgNS='http://www.w3.org/2000/svg';
+  var wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;width:100%';
+  var svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',size);svg.setAttribute('height',size);
+  svg.setAttribute('viewBox','0 0 '+size+' '+size);
+  var startAngle=-Math.PI/2;
+  data.forEach(function(d){
+    var pct=d.val/total;
+    var endAngle=startAngle+pct*Math.PI*2;
+    var x1=cx+r*Math.cos(startAngle),y1=cy+r*Math.sin(startAngle);
+    var x2=cx+r*Math.cos(endAngle),y2=cy+r*Math.sin(endAngle);
+    var largeArc=pct>0.5?1:0;
+    if(data.length===1){
+      var c=document.createElementNS(svgNS,'circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);
+      c.setAttribute('fill',d.color);
+      svg.appendChild(c);
+    } else {
+      var path=document.createElementNS(svgNS,'path');
+      path.setAttribute('d','M '+cx+' '+cy+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+largeArc+' 1 '+x2+' '+y2+' Z');
+      path.setAttribute('fill',d.color);
+      svg.appendChild(path);
+    }
+    startAngle=endAngle;
   });
+  wrap.appendChild(svg);
+  var legend=document.createElement('div');
+  legend.style.cssText='display:flex;flex-direction:column;gap:6px';
+  data.forEach(function(d){
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;font-size:11px;min-width:140px';
+    var dot=document.createElement('span');
+    dot.style.cssText='width:10px;height:10px;border-radius:50%;background:'+d.color+';flex-shrink:0';
+    var lbl=document.createElement('span');
+    lbl.style.cssText='color:var(--text)';
+    lbl.textContent=d.name;
+    var pct=document.createElement('span');
+    pct.style.cssText='color:var(--text3);margin-left:auto;font-weight:600';
+    pct.textContent=Math.round(d.val/total*100)+'%';
+    row.appendChild(dot);row.appendChild(lbl);row.appendChild(pct);
+    legend.appendChild(row);
+  });
+  wrap.appendChild(legend);
+  container.appendChild(wrap);
 }
 
 
@@ -5610,14 +5634,28 @@ function renderAnalyticsPage(){
             row.appendChild(lbl);row.appendChild(inp);row.appendChild(deltaInp);row.appendChild(pctSuf);
             engWrap.appendChild(row);
           });
+          // Summe darunter
+          var engSumDiv=document.createElement('div');
+          engSumDiv.style.cssText='margin-top:4px;padding-top:4px;border-top:1px dashed var(--border2);font-size:10px;color:var(--text3);text-align:right';
+          var updateEngSum=function(){
+            var s=0;
+            Object.keys(an.engByPlat||{}).forEach(function(k){
+              var v=parseVal(String(an.engByPlat[k]||0));
+              if(v)s+=v;
+            });
+            engSumDiv.textContent='Summe: '+fmtThousands(s);
+          };
+          updateEngSum();
+          engWrap.querySelectorAll('input').forEach(function(el){el.addEventListener('input',updateEngSum);});
+          engWrap.appendChild(engSumDiv);
           egv.appendChild(engWrap);
         }
       }else{
         egv.textContent=fmtThousands(an.engTotal||'–');
       }
       egc.appendChild(egl);egc.appendChild(egv);
-      if(!isEdit&&an.engDelta){var egd2=document.createElement('div');egd2.className='metric-delta delta-up';egd2.textContent=fmtDelta(an.engDelta);egc.appendChild(egd2);}
-      if(isEdit&&an.engDelta){var egd3=document.createElement('div');egd3.className='metric-delta delta-up';egd3.style.marginTop='4px';egd3.textContent=fmtDelta(an.engDelta)+' (Ø)';egd3.title='Durchschnitt der Plattform-Deltas';egc.appendChild(egd3);}
+      if(!isEdit){var egd2=document.createElement('div');egd2.className='metric-delta delta-up';egd2.textContent=an.engDelta?fmtDelta(an.engDelta):'–';egc.appendChild(egd2);}
+      if(isEdit){var egd3=document.createElement('div');egd3.className='metric-delta delta-up';egd3.style.marginTop='4px';egd3.textContent=(an.engDelta?fmtDelta(an.engDelta)+' (Ø)':'–');egd3.title='Durchschnitt der Plattform-Deltas';egc.appendChild(egd3);}
       var bvKcEg=getBlockVis().kpiCards||{};
       var egVis=bv.kpi_eng!==false;
       if(!egVis){
@@ -5714,6 +5752,7 @@ function renderAnalyticsPage(){
                       return {name:pn,color:color,pct:pct};
                     });
                   }
+                  renderPlatBars();
                   scheduleAnalyticsSave();
                 }
                 el.addEventListener('input',recalc);
@@ -5743,7 +5782,7 @@ function renderAnalyticsPage(){
             if(m.key==='reach' && stratPlats.length){
               // rdelta wird automatisch als Mittelwert gesetzt
               if(md){
-                md.textContent=an.rdelta||'';
+                md.textContent=an.rdelta||'–';
                 md.style.opacity='0.85';md.title='Automatisch berechnet aus Durchschnitt der Plattform-Deltas';
               }
             } else {
