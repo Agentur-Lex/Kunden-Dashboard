@@ -1300,7 +1300,7 @@ function exportMonthlyReport(){
 
   // Helper: SVG-Pie-Chart als HTML-String
   function _pieSVG(dataItems, totalVal){
-    var size=180, cx=size/2, cy=size/2, r=size/2-8;
+    var size=126, cx=size/2, cy=size/2, r=size/2-6;
     var s='<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">';
     if(dataItems.length===1){
       s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+dataItems[0].color+'"/>';
