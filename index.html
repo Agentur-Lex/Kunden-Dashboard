@@ -1260,7 +1260,24 @@ function exportMonthlyReport(){
     var autoER=calcAutoEngRate(an);
     var bvKc=(bv.kpiCards||{});
     body += '<h2>Kennzahlen</h2><div class="kpi-grid">';
-    body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(fmtThousands(an.followers)||'–')+'</div></div>';
+    // Followerentwicklung: Wert aus dem Monat der dem Stand-Datum entspricht
+    var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+    var mLong=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var _sdParts=String(an.standDatum||'').split(' ');
+    var _sdMon=mLong.indexOf(_sdParts[0]);
+    var _sdYr=parseInt(_sdParts[1]);
+    var _curLbl='';
+    if(_sdMon>=0&&_sdYr>2000)_curLbl=mShort[_sdMon]+' '+String(_sdYr).slice(2);
+    var gr2=an.growth||[];
+    var curGrEntry=gr2.filter(function(e){return e.month===_curLbl;})[0];
+    // Fallback: letzter Eintrag mit Wert>0, sonst letzter
+    if(!curGrEntry&&gr2.length){
+      for(var _i=gr2.length-1;_i>=0;_i--){if(parseInt(gr2[_i].f)>0){curGrEntry=gr2[_i];break;}}
+      if(!curGrEntry)curGrEntry=gr2[gr2.length-1];
+    }
+    var followerDev=curGrEntry&&curGrEntry.f?parseInt(curGrEntry.f)||0:0;
+    var followerDevStr=(followerDev>=0?'+':'')+followerDev.toLocaleString('de-DE');
+    body += '<div class="kpi"><div class="kpi-lbl">Followerentwicklung (letzte 30T)</div><div class="kpi-val">'+escHtml(followerDevStr)+'</div></div>';
     if(bvKc.reach!==false)
       body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
     if(bvKc.eng!==false)
@@ -5722,7 +5739,7 @@ function renderAnalyticsPage(){
           var autoER=calcAutoEngRate(an);
           an.eng=autoER+'%'; // Immer aktualisieren, auch bei 0
           mv.textContent=autoER+'%';
-          mv.style.color='var(--accent)';
+          mv.style.color='var(--text)';
           mv.title='Automatisch berechnet aus Engagement-Detail';
           // Delta stays editable
           md.appendChild(mkEditInput(m.dkey));
@@ -5847,7 +5864,7 @@ function renderAnalyticsPage(){
           var autoER3=calcAutoEngRate(an);
           an.eng=autoER3+'%';
           mv.textContent=autoER3+'%';
-          mv.style.color='var(--accent)';
+          mv.style.color='var(--text)';
         } else {
           if(m.key==='reach'||m.key==='engTotal') mv.textContent=fmtThousands(an[m.key])||'–';
           else mv.textContent=an[m.key]||'–';
