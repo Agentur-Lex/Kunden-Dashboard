@@ -5681,18 +5681,23 @@ function renderAnalyticsPage(){
                   if(v)sum+=v;
                 });
                 an.engTotal=String(sum);
-                // Mittelwert der Deltas
-                var dSum=0,dCount=0;
-                Object.keys(an.engDeltaByPlat).forEach(function(k){
-                  var dv=String(an.engDeltaByPlat[k]||'').trim();
+                // Gewichteter Delta: aus Ist-Werten und Vormonaten
+                var sumIst=0,sumPrev=0,anyDelta=false;
+                Object.keys(an.engByPlat).forEach(function(k){
+                  var ist=parseVal(String(an.engByPlat[k]||0));
+                  var dv=String((an.engDeltaByPlat||{})[k]||'').trim();
+                  var pct=0;
                   if(dv!==''){
                     var n=parseFloat(dv.replace(',','.').replace(/[^0-9.-]/g,''));
-                    if(!isNaN(n)){dSum+=n;dCount++;}
+                    if(!isNaN(n)){pct=n;anyDelta=true;}
                   }
+                  var prev=ist/(1+pct/100);
+                  if(!isFinite(prev))prev=ist;
+                  sumIst+=ist;sumPrev+=prev;
                 });
-                if(dCount>0){
-                  var avg=Math.round((dSum/dCount)*10)/10;
-                  an.engDelta=(avg>=0?'+':'')+avg+'%';
+                if(anyDelta&&sumPrev>0){
+                  var totalDelta=Math.round(((sumIst-sumPrev)/sumPrev*100)*10)/10;
+                  an.engDelta=(totalDelta>=0?'+':'')+totalDelta+'%';
                 } else {
                   an.engDelta='';
                 }
@@ -5725,7 +5730,7 @@ function renderAnalyticsPage(){
               if(v)s+=v;
             });
             engSumSpan.textContent='Summe: '+fmtThousands(s);
-            engDeltaSpan.textContent=an.engDelta?fmtDelta(an.engDelta)+' (Ø)':'–';
+            engDeltaSpan.textContent=an.engDelta?fmtDelta(an.engDelta)+' gesamt':'–';
           };
           updateEngSum();
           engWrap.querySelectorAll('input').forEach(function(el){el.addEventListener('input',updateEngSum);});
@@ -5810,18 +5815,23 @@ function renderAnalyticsPage(){
                     if(v)sum+=v;
                   });
                   an.reach=String(sum);
-                  // Mittelwert der Deltas – nur nicht-leere zählen
-                  var deltaSum=0,deltaCount=0;
-                  Object.keys(an.reachDeltaByPlat).forEach(function(k){
-                    var dv=String(an.reachDeltaByPlat[k]||'').trim();
+                  // Gewichteter Delta: aus Ist-Werten und rekonstruierten Vormonaten
+                  var sumIstR=0,sumPrevR=0,anyDeltaR=false;
+                  Object.keys(an.reachByPlat).forEach(function(k){
+                    var ist=parseVal(String(an.reachByPlat[k]||0));
+                    var dv=String((an.reachDeltaByPlat||{})[k]||'').trim();
+                    var pct=0;
                     if(dv!==''){
                       var n=parseFloat(dv.replace(',','.').replace(/[^0-9.-]/g,''));
-                      if(!isNaN(n)){deltaSum+=n;deltaCount++;}
+                      if(!isNaN(n)){pct=n;anyDeltaR=true;}
                     }
+                    var prev=ist/(1+pct/100);
+                    if(!isFinite(prev))prev=ist;
+                    sumIstR+=ist;sumPrevR+=prev;
                   });
-                  if(deltaCount>0){
-                    var avg=Math.round((deltaSum/deltaCount)*10)/10;
-                    an.rdelta=(avg>=0?'+':'')+avg+'%';
+                  if(anyDeltaR&&sumPrevR>0){
+                    var totalDeltaR=Math.round(((sumIstR-sumPrevR)/sumPrevR*100)*10)/10;
+                    an.rdelta=(totalDeltaR>=0?'+':'')+totalDeltaR+'%';
                   } else {
                     an.rdelta='';
                   }
@@ -5858,7 +5868,7 @@ function renderAnalyticsPage(){
                 if(v)s+=v;
               });
               rSumSpan.textContent='Summe: '+fmtThousands(s);
-              rDeltaSpan.textContent=an.rdelta?an.rdelta+' (Ø)':'–';
+              rDeltaSpan.textContent=an.rdelta?an.rdelta+' gesamt':'–';
             };
             updateSum();
             reachWrap.querySelectorAll('input').forEach(function(el){el.addEventListener('input',updateSum);});
