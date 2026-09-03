@@ -5637,7 +5637,8 @@ function renderAnalyticsPage(){
           mv.textContent=autoER3+'%';
           mv.style.color='var(--accent)';
         } else {
-          mv.textContent=an[m.key]||'–';
+          if(m.key==='reach'||m.key==='engTotal') mv.textContent=fmtThousands(an[m.key])||'–';
+          else mv.textContent=an[m.key]||'–';
         }
         if(md)md.textContent=fmtDelta(an[m.dkey])||'–';
       }
