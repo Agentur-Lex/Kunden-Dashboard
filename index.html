@@ -1258,10 +1258,33 @@ function exportMonthlyReport(){
   // KPIs
   if(bv.kpis!==false){
     var autoER=calcAutoEngRate(an);
+    // Follower gesamt: aus letztem Wert der Wachstumskurve wenn vorhanden (zuverlässiger als an.followers)
+    var lastFollowers=an.followers||'';
+    var gr2=an.growth||[];
+    if(gr2.length){
+      var lastGr=gr2[gr2.length-1];
+      if(lastGr&&lastGr.f){lastFollowers=fmtThousands(lastGr.f);}
+    } else if(lastFollowers){
+      lastFollowers=fmtThousands(lastFollowers);
+    }
+    var bvKc=(bv.kpiCards||{});
     body += '<h2>Kennzahlen</h2><div class="kpi-grid">';
-    body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(an.followers||'–')+'</div><div class="kpi-d'+(((an.fdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.fdelta||'')+'</div></div>';
-    body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
-    body += '<div class="kpi kpi-eng"><div class="kpi-lbl">Engagement-Rate</div><div class="kpi-val">'+(autoER?autoER+'%':escHtml(an.eng||'–'))+'</div><div class="kpi-d'+(((an.edelt||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.edelt||'')+'</div></div>';
+    body += '<div class="kpi"><div class="kpi-lbl">Follower gesamt</div><div class="kpi-val">'+escHtml(lastFollowers||'–')+'</div><div class="kpi-d'+(((an.fdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.fdelta||'')+'</div></div>';
+    if(bvKc.reach!==false)
+      body += '<div class="kpi"><div class="kpi-lbl">Reichweite (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.reach)||'–')+'</div><div class="kpi-d'+(((an.rdelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.rdelta||'')+'</div></div>';
+    if(bvKc.eng!==false)
+      body += '<div class="kpi"><div class="kpi-lbl">Engagement (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.engTotal)||'–')+'</div><div class="kpi-d'+(((an.engDelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.engDelta||'')+'</div></div>';
+    if(bvKc.er!==false)
+      body += '<div class="kpi kpi-eng"><div class="kpi-lbl">Engagement-Rate</div><div class="kpi-val">'+(autoER?autoER+'%':escHtml(an.eng||'–'))+'</div><div class="kpi-d'+(((an.edelt||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.edelt||'')+'</div></div>';
+    if(bvKc.lc!==false && an.linkClicks)
+      body += '<div class="kpi"><div class="kpi-lbl">Link-Klicks (30T)</div><div class="kpi-val">'+escHtml(fmtThousands(an.linkClicks)||'–')+'</div><div class="kpi-d'+(((an.linkClicksDelta||'').indexOf('-')===0)?' neg':'')+'">'+escHtml(an.linkClicksDelta||'')+'</div></div>';
+    // Voraussichtl. Kundenanfragen
+    if(bvKc.anfragen!==false){
+      var lcVal=parseVal(String(an.linkClicks||0));
+      var cf=an.convFactor||0.05;
+      var anfragen=Math.round(lcVal*cf);
+      if(anfragen>0)body += '<div class="kpi"><div class="kpi-lbl">Voraussichtl. Kundenanfragen (30T)</div><div class="kpi-val">~ '+fmtThousands(String(anfragen))+'</div></div>';
+    }
     body += '</div>';
   }
 
@@ -1297,32 +1320,25 @@ function exportMonthlyReport(){
       });
       body += '</div>';
     }
-  }
-
-  // Engagement-Detail
-  
-
-  // Link-Klicks
-  if(bv.linkClicks!==false){
-    var lc=an.linkClicks;
-    var lcd=an.linkClicksDelta;
-    if(lc&&lc!=='–'&&lc!==''){
-      body += '<h2>Link-Klicks</h2><div class="card">'
-        +'<div class="link-box"><div class="kpi-lbl">Klicks auf Website (30T)</div><div class="link-val">'+escHtml(lc)+'</div>'
-        +(lcd&&lcd!=='–'?'<div class="link-d">'+escHtml(lcd)+'</div>':'')
-        +'</div></div>';
+    // Engagement nach Plattform (nur wenn Kachel sichtbar)
+    if(bv.engPlat!==false){
+      var PLAT_C_R={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
+      var stratPl=(d.strategy&&d.strategy.plat)||[];
+      var epb=an.engByPlat||{};
+      var engData=stratPl.map(function(p){return {name:p,val:parseVal(String(epb[p]||0)),color:PLAT_C_R[p]||'#8B90A7'};}).filter(function(x){return x.val>0;});
+      var engTotal=engData.reduce(function(s,d){return s+d.val;},0);
+      if(engData.length&&engTotal>0){
+        body += '<h2>Engagement nach Plattform</h2><div class="card">';
+        engData.forEach(function(p){
+          var pct=Math.round(p.val/engTotal*100);
+          body+='<div class="bar-row"><div class="bar-lbl">'+escHtml(p.name)+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+escHtml(p.color)+'"></div></div><div class="bar-val">'+pct+'%</div></div>';
+        });
+        body += '</div>';
+      }
     }
   }
 
-  // Content-Psychologie
-    if(bv.contentPsych!==false||isAgency){
-    var cp=an.contentPsych||{};   if(cp.avgViews||cp.topTime){
-      body += '<h2>Content-Psychologie</h2><div class="card"><div class="cp-grid">';
-      if(cp.avgViews) body+='<div class="kpi"><div class="kpi-lbl">Ø Aufrufe pro Video</div><div class="kpi-val" style="font-size:18px">'+escHtml(String(cp.avgViews))+'</div></div>';
-      if(cp.topTime)  body+='<div class="kpi"><div class="kpi-lbl">Beste Posting-Zeit</div><div class="kpi-val" style="font-size:18px">'+escHtml(cp.topTime)+'</div></div>';
-      body += '</div></div>';
-    }
-  }
+  // Content-Psychologie entfernt
 
   // Best Content
   var bc=an.bestContent;
@@ -5350,7 +5366,7 @@ function renderBrainstormHistory() {
 }
 
 // ── ANALYTICS FULL PAGE ──
-var AN_BLOCK_LABELS = {kpis:'KPI-Übersicht', growth:'Follower-Wachstum', plat:'Reichweite nach Plattform', linkClicks:'Link-Klicks', contentPsych:'Content-Psychologie'};
+var AN_BLOCK_LABELS = {kpis:'KPI-Übersicht', growth:'Follower-Wachstum', plat:'Reichweite nach Plattform', engPlat:'Engagement nach Plattform', linkClicks:'Link-Klicks'};
 function getBlockVis() {
   var d=cd();
   var def={kpis:true,kpi_lc:true,kpi_anfragen:true,kpi_eng:true,kpi_reach:true,kpi_er:true,growth:true,plat:true,linkClicks:true,contentPsych:true,bestContent:true};
@@ -5486,7 +5502,7 @@ function renderAnalyticsPage(){
     var cc=document.createElement('div');cc.className='card';cc.style.marginBottom='14px';
     var ct=document.createElement('div');ct.className='card-title';ct.textContent='Blöcke für Kunden ein-/ausblenden';cc.appendChild(ct);
     var cr=document.createElement('div');cr.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
-    var blockLabels={kpi_lc:'KPI: Link-Klicks',kpi_anfragen:'KPI: Kundenanfragen',kpi_eng:'KPI: Engagement',kpi_reach:'KPI: Reichweite',kpi_er:'KPI: Engagementrate',growth:'Follower-Wachstum',plat:'Reichweite/Plattform',contentPsych:'Content-Psychologie',bestContent:'Best Content des Monats'};
+    var blockLabels={kpi_lc:'KPI: Link-Klicks',kpi_anfragen:'KPI: Kundenanfragen',kpi_eng:'KPI: Engagement',kpi_reach:'KPI: Reichweite',kpi_er:'KPI: Engagementrate',growth:'Follower-Wachstum',plat:'Reichweite/Plattform',engPlat:'Engagement/Plattform',bestContent:'Best Content des Monats'};
     Object.keys(blockLabels).forEach(function(key){
       var lbl=document.createElement('label');
       lbl.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;cursor:pointer;font-size:11px;color:var(--text)';
@@ -5877,20 +5893,26 @@ function renderAnalyticsPage(){
     }
     if(bv.plat!==false||isAgency){
       // Beide Plattform-Kacheln in 2-Spalten-Grid
+      var showEngPlat=bv.engPlat!==false;
+      var showEngPlatAg=isAgency&&bv.engPlat===false;
       var platGrid=document.createElement('div');
-      platGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0';
+      platGrid.style.cssText='display:grid;grid-template-columns:'+(showEngPlat||showEngPlatAg?'1fr 1fr':'1fr')+';gap:14px;margin-top:0';
       // Reichweite nach Plattform
       var pc=document.createElement('div');pc.className='card';
       if(isAgency&&bv.plat===false)pc.classList.add('kpi-card-hidden-agency');
       var pt=document.createElement('div');pt.className='card-title';pt.textContent='Reichweite nach Plattform';
       var pb=document.createElement('div');pb.id='plat-bars-container';pb.style.marginTop='8px';
       pc.appendChild(pt);pc.appendChild(pb);
+      platGrid.appendChild(pc);
       // Engagement nach Plattform
-      var ec=document.createElement('div');ec.className='card';
-      var et=document.createElement('div');et.className='card-title';et.textContent='Engagement nach Plattform';
-      var eb=document.createElement('div');eb.id='eng-plat-chart';eb.style.cssText='margin-top:8px;display:flex;align-items:center;justify-content:center;min-height:180px';
-      ec.appendChild(et);ec.appendChild(eb);
-      platGrid.appendChild(pc);platGrid.appendChild(ec);
+      if(showEngPlat||showEngPlatAg){
+        var ec=document.createElement('div');ec.className='card';
+        if(showEngPlatAg)ec.classList.add('kpi-card-hidden-agency');
+        var et=document.createElement('div');et.className='card-title';et.textContent='Engagement nach Plattform';
+        var eb=document.createElement('div');eb.id='eng-plat-chart';eb.style.cssText='margin-top:8px;display:flex;align-items:center;justify-content:center;min-height:180px';
+        ec.appendChild(et);ec.appendChild(eb);
+        platGrid.appendChild(ec);
+      }
       tc.appendChild(platGrid);
     }
     container.appendChild(tc);
