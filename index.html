@@ -5514,10 +5514,20 @@ function renderAnalyticsPage(){
         var lkvi=document.createElement('input');lkvi.type='text';lkvi.value=an.linkClicks||'';lkvi.placeholder='z.B. 3.246';
         lkvi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:inherit;font-weight:inherit;width:166px;padding:2px 6px;font-family:inherit';
         (function(){lkvi.addEventListener('change',function(){cd().analytics.linkClicks=this.value;scheduleAnalyticsSave();renderAnalyticsPage();});})();
-        var lkdi=document.createElement('input');lkdi.type='text';lkdi.value=an.linkClicksDelta||'';lkdi.placeholder='+15.3%';
-        lkdi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-weight:normal;width:80px;padding:2px 4px;font-family:inherit';
-        (function(){lkdi.addEventListener('change',function(){cd().analytics.linkClicksDelta=this.value;scheduleAnalyticsSave();renderAnalyticsPage();});})();
-        lkv.appendChild(lkvi);lkd.appendChild(lkdi);
+        var lkdi=document.createElement('input');lkdi.type='text';
+        var _lkdVal=String(an.linkClicksDelta||'').replace(/%/g,'').replace(/\+/g,'');
+        lkdi.value=_lkdVal;lkdi.placeholder='±%';
+        lkdi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-weight:normal;width:60px;padding:2px 4px;font-family:inherit';
+        var lkdiPct=document.createElement('span');lkdiPct.textContent='%';lkdiPct.style.cssText='font-size:11px;color:var(--text3);margin-left:2px';
+        (function(){lkdi.addEventListener('change',function(){
+          var v=this.value.trim();
+          if(v===''){cd().analytics.linkClicksDelta='';}
+          else{var n=parseFloat(v.replace(',','.').replace(/[^0-9.-]/g,''));
+            if(!isNaN(n)){cd().analytics.linkClicksDelta=(n>=0?'+':'')+n+'%';}
+            else{cd().analytics.linkClicksDelta='';}}
+          scheduleAnalyticsSave();renderAnalyticsPage();
+        });})();
+        lkv.appendChild(lkvi);lkd.appendChild(lkdi);lkd.appendChild(lkdiPct);
       }else{
         lkv.textContent=fmtThousands(an.linkClicks||'–');
         lkd.textContent=fmtDelta(an.linkClicksDelta)||'';
@@ -5909,9 +5919,18 @@ function renderAnalyticsPage(){
         lvi.style.cssText='width:120px;padding:4px 8px;margin:0;font-size:16px;font-weight:700;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit';
         (function(){lvi.addEventListener('change',function(){cd().analytics.linkClicks=this.value;scheduleAnalyticsSave();syncAnalyticsDisplay();});})();
         lv.appendChild(lvi);
-        var ldi=document.createElement('input');ldi.type='text';ldi.value=an.linkClicksDelta||'';ldi.placeholder='+15.3%';
-        ldi.style.cssText='width:90px;padding:3px 6px;margin:0;font-size:10px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit';
-        (function(){ldi.addEventListener('change',function(){cd().analytics.linkClicksDelta=this.value;scheduleAnalyticsSave();syncAnalyticsDisplay();});})();
+        var ldi=document.createElement('input');ldi.type='text';
+        var _ldiVal=String(an.linkClicksDelta||'').replace(/%/g,'').replace(/\+/g,'');
+        ldi.value=_ldiVal;ldi.placeholder='±%';
+        ldi.style.cssText='width:60px;padding:3px 6px;margin:0;font-size:10px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit';
+        (function(){ldi.addEventListener('change',function(){
+          var v=this.value.trim();
+          if(v===''){cd().analytics.linkClicksDelta='';}
+          else{var n=parseFloat(v.replace(',','.').replace(/[^0-9.-]/g,''));
+            if(!isNaN(n)){cd().analytics.linkClicksDelta=(n>=0?'+':'')+n+'%';}
+            else{cd().analytics.linkClicksDelta='';}}
+          scheduleAnalyticsSave();syncAnalyticsDisplay();
+        });})();
         ld.appendChild(ldi);
       }else{lv.textContent=an.linkClicks||'–';ld.textContent=fmtDelta(an.linkClicksDelta)||'';}
       lbox.appendChild(ll);lbox.appendChild(lv);lbox.appendChild(ld);
