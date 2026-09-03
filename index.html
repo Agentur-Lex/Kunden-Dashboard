@@ -1178,10 +1178,17 @@ function fmtThousands(v){
 }
 function parseVal(v){
   if(!v||v==='-'||v==='–') return 0;
-  var s=String(v).trim().toLowerCase().replace(/[^0-9.,km]/g,'');
-  if(s.indexOf('k')>-1) return Math.round(parseFloat(s)*1000);
-  if(s.indexOf('m')>-1) return Math.round(parseFloat(s)*1000000);
-  return Math.round(parseFloat(s.replace(',','.'))||0);
+  var s=String(v).trim().toLowerCase();
+  // K/M-Suffix
+  if(/k$/.test(s)){var kn=parseFloat(s.replace(',','.').replace(/[^\d.-]/g,''));return Math.round(kn*1000);}
+  if(/m$/.test(s)){var mn=parseFloat(s.replace(',','.').replace(/[^\d.-]/g,''));return Math.round(mn*1000000);}
+  // Nur Ziffern, Punkt, Komma, Leerzeichen, Minus behalten
+  s=s.replace(/[^0-9.,\s-]/g,'');
+  // Punkte und Leerzeichen sind Tausendertrenner → entfernen
+  // Komma ist Dezimaltrenner → zu Punkt
+  s=s.replace(/[.\s]/g,'').replace(',','.');
+  var n=parseFloat(s);
+  return isNaN(n)?0:Math.round(n);
 }
 function calcAutoEngRate(an){
   var eng=parseVal(String(an.engTotal||0));
@@ -5520,6 +5527,7 @@ function renderAnalyticsPage(){
             mv.appendChild(errDiv);
           } else {
             if(!an.reachByPlat)an.reachByPlat={};
+            if(!an.reachDeltaByPlat)an.reachDeltaByPlat={};
             var reachWrap=document.createElement('div');
             reachWrap.style.cssText='display:flex;flex-direction:column;gap:4px';
             stratPlats.forEach(function(platName){
@@ -5532,11 +5540,22 @@ function renderAnalyticsPage(){
               inp.type='text';
               inp.value=an.reachByPlat[platName]||'';
               inp.placeholder='0';
-              inp.style.cssText='width:100px;font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
-              (function(p,el){
-                el.addEventListener('input',function(){
+              inp.style.cssText='width:90px;font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+              // Delta-Feld daneben
+              var deltaInp=document.createElement('input');
+              deltaInp.type='text';
+              deltaInp.value=an.reachDeltaByPlat[platName]||'';
+              deltaInp.placeholder='±%';
+              deltaInp.style.cssText='width:56px;font-size:10px;padding:3px 5px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+              var pctSuffix=document.createElement('span');
+              pctSuffix.textContent='%';
+              pctSuffix.style.cssText='font-size:10px;color:var(--text3);margin-left:-2px';
+              (function(p,el,dEl){
+                function recalc(){
                   if(!an.reachByPlat)an.reachByPlat={};
+                  if(!an.reachDeltaByPlat)an.reachDeltaByPlat={};
                   an.reachByPlat[p]=el.value.trim();
+                  an.reachDeltaByPlat[p]=dEl.value.trim();
                   // Summe berechnen
                   var sum=0;
                   Object.keys(an.reachByPlat).forEach(function(k){
@@ -5544,6 +5563,21 @@ function renderAnalyticsPage(){
                     if(v)sum+=v;
                   });
                   an.reach=String(sum);
+                  // Mittelwert der Deltas – nur nicht-leere zählen
+                  var deltaSum=0,deltaCount=0;
+                  Object.keys(an.reachDeltaByPlat).forEach(function(k){
+                    var dv=String(an.reachDeltaByPlat[k]||'').trim();
+                    if(dv!==''){
+                      var n=parseFloat(dv.replace(',','.').replace(/[^0-9.-]/g,''));
+                      if(!isNaN(n)){deltaSum+=n;deltaCount++;}
+                    }
+                  });
+                  if(deltaCount>0){
+                    var avg=Math.round((deltaSum/deltaCount)*10)/10;
+                    an.rdelta=(avg>=0?'+':'')+avg+'%';
+                  } else {
+                    an.rdelta='';
+                  }
                   // Prozente für Plattform-Anzeige berechnen
                   if(sum>0){
                     an.plat=stratPlats.map(function(pn){
@@ -5555,9 +5589,11 @@ function renderAnalyticsPage(){
                     });
                   }
                   scheduleAnalyticsSave();
-                });
-              })(platName,inp);
-              row.appendChild(lbl);row.appendChild(inp);
+                }
+                el.addEventListener('input',recalc);
+                dEl.addEventListener('input',recalc);
+              })(platName,inp,deltaInp);
+              row.appendChild(lbl);row.appendChild(inp);row.appendChild(deltaInp);row.appendChild(pctSuffix);
               reachWrap.appendChild(row);
             });
             // Summe darunter
@@ -5576,7 +5612,18 @@ function renderAnalyticsPage(){
             reachWrap.appendChild(sumDiv);
             mv.appendChild(reachWrap);
           }
-          if(m.dkey){var dInp2=mkEditInput(m.dkey);dInp2.style.width='80px';md&&md.appendChild(dInp2);}
+          if(m.dkey){
+            // Delta-Feld ausblenden bei Reichweite (wird automatisch berechnet)
+            if(m.key==='reach' && stratPlats.length){
+              // rdelta wird automatisch als Mittelwert gesetzt
+              if(md){
+                md.textContent=an.rdelta||'';
+                md.style.opacity='0.85';md.title='Automatisch berechnet aus Durchschnitt der Plattform-Deltas';
+              }
+            } else {
+              var dInp2=mkEditInput(m.dkey);dInp2.style.width='80px';md&&md.appendChild(dInp2);
+            }
+          }
         } else {
           var mainInp2=mkEditInput(m.key);
           mv.appendChild(mainInp2);
