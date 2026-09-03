@@ -444,7 +444,6 @@ textarea{resize:vertical;line-height:1.5}
   .nav-item svg{width:16px;height:16px}
   .nav-item{font-size:9px}
   .auth-card{width:90%;padding:20px}
-  #analytics-import-panel, #analytics-import-btn{display:none!important}
   #agency-ov-grid{grid-template-columns:1fr!important}
   #nav-contentlist{display:none!important}
   #analytics-tc{grid-template-columns:1fr!important;width:100%!important}
@@ -810,7 +809,7 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       <!-- ANALYSE -->
       <div class="page" id="page-analytics">
         <div class="page-title" style="flex-wrap:wrap;gap:8px">Analysedaten
-          <button class="btn-outline agency-only" onclick="toggleAnalyticsImport()" id="analytics-import-btn" style="margin-left:4px;font-size:11px;padding:5px 11px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Daten einfügen</button>
+          
           <div class="agency-only" style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--text2);margin-left:4px">
             <span style="color:var(--text3)">Stand:</span>
             <select id="analytics-stand-month" onchange="updateStandDatum()" style="font-size:11px;padding:2px 4px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);margin:0;cursor:pointer;width:90px">
@@ -830,45 +829,6 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
             <button id="analytics-edit-btn" class="btn-outline agency-only" onclick="toggleAnalyticsEdit()" style="font-size:11px;padding:5px 12px;margin-left:auto">✎ Bearbeiten</button>
         </div>
         <!-- Dynamic analytics blocks rendered by renderAnalyticsPage() -->
-        <div id="analytics-import-panel" class="card agency-only" style="display:none;margin-bottom:14px">
-          <div class="card-title">Analysedaten einfügen</div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:8px">
-            Kopiere die Zeile mit den Werten aus deiner Excel-Tabelle und füge sie hier ein.<br>
-            <span style="font-size:10px">Erwartete Spalten (15, Tab-getrennt): <code style="font-size:9px;background:var(--surface2);padding:1px 4px;border-radius:3px">Stand Datum · Follower-Zuwachs · Reichweite Instagram · Reichweite Facebook · Reichweite LinkedIn · Reichweite YouTube · Reichweite TikTok · Reichweite-Delta · Link-Klicks · Link-Klicks-Delta · Engagement Gesamt · Engagement-Delta · Content Emotional · Content Behind-the-Scenes · Content Faktenbasiert</code></span>
-          </div>
-          <textarea id="analytics-import-input" rows="3" style="width:100%;font-size:11px;font-family:monospace;margin-bottom:8px" placeholder="Werte hier einfügen (Tab-getrennt aus Excel)..."></textarea>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn-primary" onclick="importAnalyticsData()" style="padding:6px 16px">Importieren</button>
-            <button class="btn-outline" onclick="toggleAnalyticsImport()" style="padding:6px 12px">Abbrechen</button>
-            <span id="analytics-import-status" style="font-size:11px;color:var(--green);display:none">✓ Importiert!</span>
-          </div>
-        </div>
-        <div id="analytics-page-content"></div>
-      </div>
-
-      <!-- ONBOARDING (Agentur) -->
-      <div class="page agency-only" id="page-onboarding">
-        <div class="page-title">Onboarding <span class="badge b-high">Agentur</span>
-          <button class="btn-outline agency-only" onclick="exportOnboardingPDF()" style="margin-left:auto;font-size:10px;padding:5px 11px;display:flex;align-items:center;gap:5px">
-            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M3 15v2h14v-2"/></svg>
-            PDF
-          </button>
-        </div>
-        <div class="card">
-          <div class="card-title">Fortschritt</div>
-          <div class="prog-wrap"><div id="ag-ob-fill" class="prog-fill" style="width:0%"></div></div>
-          <div id="ag-ob-lbl" style="font-size:10px;color:var(--text3);margin-bottom:16px"></div>
-          <div id="agency-onboarding-steps"></div>
-          <div id="ob-step-form" style="display:flex;align-items:center;gap:8px;margin-top:10px" class="agency-only">
-            <input type="text" id="new-ob-step-input" placeholder="Neuer Schritt..." style="width:470px;flex:none;margin:0;font-size:11px" onkeydown="if(event.key==='Enter'){event.preventDefault();addObStep();}else if(event.key==='Escape'){this.value='';this.blur();}">
-            <button class="btn-primary" onclick="addObStep()" style="flex-shrink:0;padding:6px 14px;font-size:11px">Hinzufügen</button>
-          </div>
-        </div>
-        <div class="card"><div class="card-title">Onboarding-Fragen</div><div id="q-list"></div><div id="q-add-form" style="display:flex;gap:8px;margin-top:8px;align-items:center"><input type="text" id="new-q-input" placeholder="Neue Frage..." style="flex:1;margin:0"><label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);white-space:nowrap;cursor:pointer"><input type="checkbox" id="new-q-checkbox" style="accent-color:var(--accent);width:14px;height:14px;margin:0"> Kontrollkästchen</label><button class="btn-primary" onclick="addQuestion()">Hinzufügen</button></div>
-            <button class="btn-outline agency-only" onclick="resetObQuestions()" style="margin-top:6px;font-size:11px;padding:4px 12px;color:var(--text3)">↺ Zurücksetzen</button><div style="font-size:10px;color:var(--text3);margin-top:5px" id="q-count-note">0 / 8</div></div>
-        <div class="card"><div class="card-title">Kunden-Antworten</div><div id="agency-q-answers"></div></div>
-        <div class="card"><div class="card-title">Kunden-Zugangsdaten Social Media</div><div id="agency-social-creds"></div></div>
-      </div>
 
       <!-- DREHTERMINE -->
       <div class="page" id="page-shoots">
@@ -1785,9 +1745,7 @@ function resetAllEditStates(){
   if(typeof ANALYTICS_EDIT_MODE!=='undefined'){ANALYTICS_EDIT_MODE=false;}
   var aeb=document.getElementById('analytics-edit-btn');
   if(aeb)aeb.textContent='✎ Bearbeiten';
-  var imp=document.getElementById('analytics-import-panel');
   if(imp){imp.style.display='none';imp.dataset.open='0';}
-  var aib=document.getElementById('analytics-import-btn');
   if(aib)aib.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Daten einfügen';
   if(typeof STRAT_EDIT_MODE!=='undefined'){STRAT_EDIT_MODE=false;}
   var seb=document.getElementById('strat-edit-btn');
@@ -4831,18 +4789,8 @@ function renderPlatBars() {
     container.innerHTML = '<div style="font-size:11px;color:var(--text3)">Keine Plattformen in der Strategie ausgewählt.</div>';
     return;
   }
-  var isEdit = ANALYTICS_EDIT_MODE && ROLE === 'agency';
+  var isEdit = false; // Reichweite/Plattform: nicht mehr manuell bearbeitbar – berechnet sich automatisch
   container.innerHTML = '';
-
-  // Sum indicator
-  var total = platData.reduce(function(s,p){return s+(p.pct||0);}, 0);
-  if (isEdit) {
-    var sumRow = document.createElement('div');
-    sumRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:6px 10px;border-radius:6px;background:' + (total===100?'rgba(22,163,74,0.08)':'rgba(255,87,87,0.08)') + ';border:1px solid ' + (total===100?'rgba(22,163,74,0.25)':'rgba(255,87,87,0.25)') + ';font-size:10px;font-weight:600';
-    sumRow.textContent = 'Summe: ' + total + '%' + (total===100?' ✓':' – muss 100% ergeben');
-    sumRow.style.color = total===100 ? 'var(--green)' : 'var(--accent)';
-    container.appendChild(sumRow);
-  }
 
   platData.forEach(function(p, i) {
     var row = document.createElement('div');
@@ -4859,27 +4807,9 @@ function renderPlatBars() {
     fill.style.background = p.color || PLAT_COLOR_MAP[p.name] || '#8B90A7';
     track.appendChild(fill); row.appendChild(track);
 
-    if (isEdit) {
-      var pctInp = document.createElement('input');
-      pctInp.type = 'number'; pctInp.min = '0'; pctInp.max = '100';
-      pctInp.value = p.pct || 0;
-      pctInp.setAttribute('data-pi', i);
-      pctInp.style.cssText = 'width:46px;font-size:10px;padding:2px 5px;margin:0 0 0 4px;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text)';
-      pctInp.addEventListener('change', function() {
-        var idx2 = parseInt(this.getAttribute('data-pi'));
-        cd().analytics.plat[idx2].pct = Math.min(100, Math.max(0, parseInt(this.value) || 0));
-        renderPlatBars();
-        scheduleSave();
-      });
-      row.appendChild(pctInp);
-      var sym = document.createElement('span');
-      sym.textContent = '%'; sym.style.cssText = 'font-size:10px;color:var(--text3);margin-left:2px;flex-shrink:0';
-      row.appendChild(sym);
-    } else {
       var pctLbl = document.createElement('div');
       pctLbl.className = 'plat-bar-pct'; pctLbl.textContent = (p.pct||0) + '%';
       row.appendChild(pctLbl);
-    }
     container.appendChild(row);
   });
 }
@@ -5384,130 +5314,13 @@ function updateStandDatum(){
     scheduleAnalyticsSave();
   }
 }
-function toggleAnalyticsImport(){
-  var panel=document.getElementById('analytics-import-panel');
-  var btn=document.getElementById('analytics-import-btn');
-  if(!panel)return;
-  var open=panel.dataset.open==='1';
-  panel.dataset.open=open?'0':'1';
-  panel.style.display=open?'none':'block';
-  btn.innerHTML=open?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Daten einfügen':'✕ Schließen';
-  if(!open){
-    var inp=document.getElementById('analytics-import-input');
-    if(inp)inp.value='';
-    var st=document.getElementById('analytics-import-status');
-    if(st)st.style.display='none';
-  }
-}
 
-function importAnalyticsData(){
-  if(!ACTIVE_CUSTOMER)return;
-  var inp=document.getElementById('analytics-import-input');
-  if(!inp||!inp.value.trim()){alert('Bitte Daten einfügen.');return;}
-
-  var rows=inp.value.trim().split('\n');
-  var dataRow=rows[0];
-  if(rows.length>1 && /stand datum/i.test(rows[0])){dataRow=rows[1];}
-
-  var cols=dataRow.split('\t');
-  if(cols.length<2){alert('Keine Tab-getrennten Daten erkannt. Bitte direkt aus Excel kopieren.');return;}
-
-  var an=cd().analytics;
-
-  function val(i){return(cols[i]||'').trim().replace(/,/g,'.');}
-  function numVal(i){var v=val(i).replace(/[^0-9.\-+%]/g,'');return v||'–';}
-  function pv(i){return parseVal(numVal(i));}
-
-  // ── Step 1: Normalize Stand Datum FIRST ──
-  var shortMapG={'Januar':'Jan','Februar':'Feb','März':'Mär','April':'Apr','Mai':'Mai','Juni':'Jun','Juli':'Jul','August':'Aug','September':'Sep','Oktober':'Okt','November':'Nov','Dezember':'Dez'};
-  var mNamesG=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  var rawStand=val(0).trim();
-  var partsG=rawStand.split(' ');
-  var longMG=shortMapG[partsG[0]]?partsG[0]:(mNamesG.find(function(m){return m.slice(0,3)===partsG[0]||m===partsG[0];})||partsG[0]);
-  var yearG=partsG[1]||'';
-  var fullYear=yearG.length===2?'20'+yearG:yearG;
-  var shortMG=shortMapG[longMG]||partsG[0].slice(0,3);
-  var yearShortG=fullYear.slice(2);
-  var canonLabel=shortMG+' '+yearShortG; // e.g. "Apr 26"
-  var fullLabel=longMG+' '+fullYear;      // e.g. "April 2026"
-  an.standDatum=fullLabel;
-  var anchorM=mNamesG.indexOf(longMG);
-  var anchorY=parseInt(fullYear);
-  var mShort=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-
-  // ── Step 2: Follower-Zuwachs direkt speichern ──
-  var growthArr=an.growth;if(!growthArr){growthArr=[];an.growth=growthArr;}
-  var deltaRaw=val(1).replace(/[^0-9\-]/g,'');
-  var delta=parseInt(deltaRaw)||0;
-  var curIdx=growthArr.findIndex(function(g){
-    return g.month===canonLabel||g.month===fullLabel||g.month===longMG+' '+yearG;
-  });
-  if(curIdx>=0){
-    growthArr[curIdx].f=delta;
-  }else{
-    growthArr.push({month:canonLabel,f:delta,p:0});
-  }
-  if(delta!==0)an.fdelta=(delta>=0?'+':'')+delta;
-  if(val(1))an.followers=String(delta);
-
-  // ── Step 3: Reichweite nach Plattform (cols 2-6) ──
-  var PLAT_COLORS={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
-  var platReach=[{name:'Instagram',col:2},{name:'Facebook',col:3},{name:'LinkedIn',col:4},{name:'YouTube',col:5},{name:'TikTok',col:6}];
-  var reachVals=platReach.map(function(p){return{name:p.name,reach:pv(p.col)};}).filter(function(p){return p.reach>0;});
-  var totalReach=reachVals.reduce(function(s,p){return s+p.reach;},0);
-  if(totalReach>0){
-    an.reach=String(totalReach);
-    var stratPlatI=cd().strategy&&cd().strategy.plat||[];
-    var filtered=stratPlatI.length>0?reachVals.filter(function(p){return stratPlatI.indexOf(p.name)!==-1;}):reachVals;
-    var totF=filtered.reduce(function(s,p){return s+p.reach;},0)||totalReach;
-    var platArr=filtered.map(function(p){return{name:p.name,color:PLAT_COLORS[p.name]||'#888',pct:Math.round(p.reach/totF*100)};});
-    if(platArr.length>0){var s2=platArr.reduce(function(s,p){return s+p.pct;},0);if(s2!==100)platArr[0].pct+=100-s2;}
-    an.plat=platArr;
-  }
-
-  // Col 7: reichweite_delta
-  if(val(7))an.rdelta=val(7);
-  // Col 8-9: link_klicks
-  if(pv(8)>0)an.linkClicks=numVal(8);
-  if(val(9))an.linkClicksDelta=val(9);
-
-  // Col 10: Engagement Gesamt, Col 11: engagement_delta
-  if(pv(10)>0) an.engTotal=numVal(10);
-  if(val(11)) an.engDelta=val(11);
-
-  // Content-Psychologie (12-14)
-  if(!an.contentPsych)an.contentPsych={emotional:0,behindScenes:0,faktenbasiert:0};
-  if(val(12))an.contentPsych.emotional=parseInt(val(12))||0;
-  if(val(13))an.contentPsych.behindScenes=parseInt(val(13))||0;
-  if(val(14))an.contentPsych.faktenbasiert=parseInt(val(14))||0;
-
-  // ── Auto-Engagement-Rate: (engagement + link_klicks) / reichweite ──
-  var autoER=calcAutoEngRate(an);
-  an.eng=autoER+'%';
-
-  // ── Sync Stand Pickers ──
-  var mSelI=document.getElementById('analytics-stand-month');
-  var ySelI=document.getElementById('analytics-stand-year');
-  if(mSelI&&ySelI){
-    mSelI.value=mNamesG.indexOf(longMG)+1;
-    ySelI.value=parseInt(fullYear);
-  }
-
-  inp.value='';
-  var st=document.getElementById('analytics-import-status');
-  if(st){st.style.display='inline';setTimeout(function(){st.style.display='none';},3000);}
-  if(ROLE==='agency'&&ACTIVE_CUSTOMER){if(!cd().analytics)cd().analytics={};}
-  renderAnalyticsPage();
-  syncAnalyticsDisplay();
-  scheduleAnalyticsSave();
-}
 
 function renderAnalyticsPage(){
   if(!ACTIVE_CUSTOMER)return;
   var container=document.getElementById('analytics-page-content');
   if(!container)return;
   // Ensure import panel stays closed unless explicitly opened
-  var _ip=document.getElementById('analytics-import-panel');if(_ip&&_ip.dataset.open!=='1')_ip.style.display='none';
   var an=cd().analytics;
   var bv=getBlockVis();
   var isEdit=ANALYTICS_EDIT_MODE&&ROLE==='agency';
@@ -5697,11 +5510,77 @@ function renderAnalyticsPage(){
           mv.title='Automatisch berechnet aus Engagement-Detail';
           // Delta stays editable
           md.appendChild(mkEditInput(m.dkey));
+        } else if(m.key==='reach') {
+          // Reichweite: Pro Plattform ein Feld (basierend auf Strategie)
+          var stratPlats=(cd().strategy&&cd().strategy.plat)||[];
+          if(!stratPlats.length){
+            var errDiv=document.createElement('div');
+            errDiv.style.cssText='font-size:10px;color:#EF4444;padding:6px;background:#FEF2F2;border-radius:4px;font-weight:500';
+            errDiv.textContent='Keine Plattformen in der Strategie festgelegt';
+            mv.appendChild(errDiv);
+          } else {
+            if(!an.reachByPlat)an.reachByPlat={};
+            var reachWrap=document.createElement('div');
+            reachWrap.style.cssText='display:flex;flex-direction:column;gap:4px';
+            stratPlats.forEach(function(platName){
+              var row=document.createElement('div');
+              row.style.cssText='display:flex;align-items:center;gap:6px;font-size:11px';
+              var lbl=document.createElement('span');
+              lbl.style.cssText='min-width:70px;color:var(--text3);font-size:10px;font-weight:500';
+              lbl.textContent=platName;
+              var inp=document.createElement('input');
+              inp.type='text';
+              inp.value=an.reachByPlat[platName]||'';
+              inp.placeholder='0';
+              inp.style.cssText='width:100px;font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+              (function(p,el){
+                el.addEventListener('input',function(){
+                  if(!an.reachByPlat)an.reachByPlat={};
+                  an.reachByPlat[p]=el.value.trim();
+                  // Summe berechnen
+                  var sum=0;
+                  Object.keys(an.reachByPlat).forEach(function(k){
+                    var v=parseVal(String(an.reachByPlat[k]||0));
+                    if(v)sum+=v;
+                  });
+                  an.reach=String(sum);
+                  // Prozente für Plattform-Anzeige berechnen
+                  if(sum>0){
+                    an.plat=stratPlats.map(function(pn){
+                      var pv=parseVal(String((an.reachByPlat||{})[pn]||0))||0;
+                      var pct=Math.round((pv/sum)*100);
+                      var existing=(an.plat||[]).find(function(x){return x.name===pn;});
+                      var color=existing?existing.color:(pn==='Instagram'?'#E1306C':pn==='LinkedIn'?'#0A66C2':pn==='TikTok'?'#EE1D52':pn==='Facebook'?'#1877F2':pn==='YouTube'?'#FF0000':'#888');
+                      return {name:pn,color:color,pct:pct};
+                    });
+                  }
+                  scheduleAnalyticsSave();
+                });
+              })(platName,inp);
+              row.appendChild(lbl);row.appendChild(inp);
+              reachWrap.appendChild(row);
+            });
+            // Summe darunter
+            var sumDiv=document.createElement('div');
+            sumDiv.style.cssText='margin-top:4px;padding-top:4px;border-top:1px dashed var(--border2);font-size:10px;color:var(--text3);text-align:right';
+            var updateSum=function(){
+              var s=0;
+              Object.keys(an.reachByPlat||{}).forEach(function(k){
+                var v=parseVal(String(an.reachByPlat[k]||0));
+                if(v)s+=v;
+              });
+              sumDiv.textContent='Summe: '+fmtThousands(s);
+            };
+            updateSum();
+            reachWrap.querySelectorAll('input').forEach(function(el){el.addEventListener('input',updateSum);});
+            reachWrap.appendChild(sumDiv);
+            mv.appendChild(reachWrap);
+          }
+          if(m.dkey){var dInp2=mkEditInput(m.dkey);dInp2.style.width='80px';md&&md.appendChild(dInp2);}
         } else {
           var mainInp2=mkEditInput(m.key);
-          if(m.key==='reach')mainInp2.style.width='166px';
           mv.appendChild(mainInp2);
-          if(m.dkey){var dInp2=mkEditInput(m.dkey);dInp2.style.width='80px';md&&md.appendChild(dInp2);}
+          if(m.dkey){var dInp2b=mkEditInput(m.dkey);dInp2b.style.width='80px';md&&md.appendChild(dInp2b);}
         }
       } else {
         if(m.key==='eng'){
@@ -5807,41 +5686,7 @@ function renderAnalyticsPage(){
       lcard.appendChild(lbox);lcpGrid.appendChild(lcard);
     }
 
-    if(showCP||showCPAg){
-      var cp=an.contentPsych||{emotional:0,faktenbasiert:0,behindScenes:0};
-      var cpCard=document.createElement('div');cpCard.className='card';if(showCPAg)cpCard.classList.add('kpi-card-hidden-agency');
-      var cpTitle=document.createElement('div');cpTitle.className='card-title';cpTitle.style.marginBottom='2px';cpTitle.textContent='Content-Psychologie';
-      var cpSub=document.createElement('div');cpSub.style.cssText='font-size:10px;color:var(--text3);margin-bottom:14px';cpSub.textContent='durchschnittliche Aufrufe pro Video';
-      cpCard.appendChild(cpTitle);cpCard.appendChild(cpSub);
-      var cpBars=[
-        {key:'emotional',    label:'Emotional',       color:'#E1306C'},
-        {key:'faktenbasiert',label:'Faktenbasiert',    color:'#0A66C2'},
-        {key:'behindScenes', label:'Behind the Scenes',color:'#34D399'}
-      ];
-      var maxCp=Math.max.apply(null,cpBars.map(function(b){return cp[b.key]||0;}));
-      if(maxCp===0)maxCp=1;
-      cpBars.forEach(function(bar){
-        var val=cp[bar.key]||0;
-        var pct=Math.round((val/maxCp)*100);
-        var rowWrap=document.createElement('div');rowWrap.style.cssText='margin-bottom:14px';
-        var rowTop=document.createElement('div');rowTop.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:5px';
-        var lbl2=document.createElement('span');lbl2.style.cssText='font-size:11px;font-weight:600;color:var(--text)';lbl2.textContent=bar.label;
-        var valSpan=document.createElement('span');valSpan.style.cssText='font-size:11px;font-weight:700;color:'+bar.color+';font-family:"DM Mono",monospace';
-        if(isEdit){
-          var cpInp=document.createElement('input');cpInp.type='text';cpInp.value=val||'';cpInp.placeholder='0';
-          cpInp.style.cssText='width:80px;padding:2px 6px;margin:0;font-size:11px;font-weight:700;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:'+bar.color+';text-align:right;font-family:"DM Mono",monospace';
-          (function(k){cpInp.addEventListener('change',function(){if(!cd().analytics.contentPsych)cd().analytics.contentPsych={};cd().analytics.contentPsych[k]=parseInt(this.value.replace(/[^0-9]/g,''))||0;scheduleAnalyticsSave();renderAnalyticsPage();});})(bar.key);
-          valSpan.appendChild(cpInp);
-        }else{valSpan.textContent=val?val.toLocaleString('de-DE'):'–';}
-        rowTop.appendChild(lbl2);rowTop.appendChild(valSpan);
-        var track=document.createElement('div');track.style.cssText='height:8px;background:var(--surface3);border-radius:4px;overflow:hidden';
-        var fill=document.createElement('div');fill.style.cssText='height:100%;width:'+pct+'%;background:'+bar.color+';border-radius:4px;transition:width .4s ease';
-        track.appendChild(fill);
-        rowWrap.appendChild(rowTop);rowWrap.appendChild(track);
-        cpCard.appendChild(rowWrap);
-      });
-      lcpGrid.appendChild(cpCard);
-    }
+    // Content-Psychologie-Kachel entfernt
 
     container.appendChild(lcpGrid);
   }
@@ -6562,10 +6407,20 @@ function scheduleSave(){
   },400);
 }
 function scheduleAnalyticsSave(){
-  // Nur für Analytics-Änderungen: lastUpdated setzen
+  // Nur für Analytics-Änderungen: lastUpdated setzen + Stand automatisch auf aktuellen Monat
   if(ROLE==='agency'&&ACTIVE_CUSTOMER&&DATA[ACTIVE_CUSTOMER]){
     if(!DATA[ACTIVE_CUSTOMER].analytics)DATA[ACTIVE_CUSTOMER].analytics={};
     DATA[ACTIVE_CUSTOMER].analytics.lastUpdated=new Date().toISOString();
+    // Stand automatisch aktualisieren
+    var mNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var now=new Date();
+    DATA[ACTIVE_CUSTOMER].analytics.standDatum=mNames[now.getMonth()]+' '+now.getFullYear();
+    // Stand-Anzeige/Dropdowns aktualisieren wenn sichtbar
+    var mSel=document.getElementById('stand-month-sel');var ySel=document.getElementById('stand-year-sel');
+    if(mSel)mSel.value=String(now.getMonth()+1);
+    if(ySel)ySel.value=String(now.getFullYear());
+    var sd=document.getElementById('stand-display');
+    if(sd)sd.textContent='Stand: '+DATA[ACTIVE_CUSTOMER].analytics.standDatum;
   }
   scheduleSave();
 }
