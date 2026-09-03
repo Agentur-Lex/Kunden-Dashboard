@@ -4772,6 +4772,74 @@ function syncPlatToAnalytics() {
   renderPlatBars();
 }
 
+function renderEngPlatChart(){
+  if(!ACTIVE_CUSTOMER)return;
+  var container=document.getElementById('eng-plat-chart');
+  if(!container)return;
+  var an=cd().analytics||{};
+  var stratPlats=(cd().strategy&&cd().strategy.plat)||[];
+  var PLAT_C={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
+  var epb=an.engByPlat||{};
+  // Nur Plattformen aus Strategie berücksichtigen
+  var data=stratPlats.map(function(p){
+    return {name:p,val:parseVal(String(epb[p]||0)),color:PLAT_C[p]||'#8B90A7'};
+  }).filter(function(d){return d.val>0;});
+  var total=data.reduce(function(s,d){return s+d.val;},0);
+  container.innerHTML='';
+  if(!total||!data.length){
+    container.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:30px 0">Keine Engagement-Daten</div>';
+    return;
+  }
+  // SVG Kreisdiagramm
+  var size=160,cx=size/2,cy=size/2,r=size/2-8;
+  var svgNS='http://www.w3.org/2000/svg';
+  var wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;width:100%';
+  var svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',size);svg.setAttribute('height',size);
+  svg.setAttribute('viewBox','0 0 '+size+' '+size);
+  var startAngle=-Math.PI/2;
+  data.forEach(function(d){
+    var pct=d.val/total;
+    var endAngle=startAngle+pct*Math.PI*2;
+    var x1=cx+r*Math.cos(startAngle),y1=cy+r*Math.sin(startAngle);
+    var x2=cx+r*Math.cos(endAngle),y2=cy+r*Math.sin(endAngle);
+    var largeArc=pct>0.5?1:0;
+    var path=document.createElementNS(svgNS,'path');
+    if(data.length===1){
+      // Voller Kreis
+      var c=document.createElementNS(svgNS,'circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);
+      c.setAttribute('fill',d.color);
+      svg.appendChild(c);
+    } else {
+      path.setAttribute('d','M '+cx+' '+cy+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+largeArc+' 1 '+x2+' '+y2+' Z');
+      path.setAttribute('fill',d.color);
+      svg.appendChild(path);
+    }
+    startAngle=endAngle;
+  });
+  wrap.appendChild(svg);
+  // Legende
+  var legend=document.createElement('div');
+  legend.style.cssText='display:flex;flex-direction:column;gap:6px';
+  data.forEach(function(d){
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;font-size:11px';
+    var dot=document.createElement('span');
+    dot.style.cssText='width:10px;height:10px;border-radius:50%;background:'+d.color+';flex-shrink:0';
+    var lbl=document.createElement('span');
+    lbl.style.cssText='color:var(--text)';
+    lbl.textContent=d.name;
+    var pct=document.createElement('span');
+    pct.style.cssText='color:var(--text3);margin-left:auto;font-weight:600';
+    pct.textContent=Math.round(d.val/total*100)+'%';
+    row.appendChild(dot);row.appendChild(lbl);row.appendChild(pct);
+    legend.appendChild(row);
+  });
+  wrap.appendChild(legend);
+  container.appendChild(wrap);
+}
 function renderPlatBars() {
   if (!ACTIVE_CUSTOMER) return;
   var PLAT_COLORS={'Instagram':'#E1306C','Facebook':'#1877F2','TikTok':'#EE1D52','LinkedIn':'#0A66C2','YouTube':'#FF0000'};
@@ -5464,34 +5532,92 @@ function renderAnalyticsPage(){
       } else { kg.appendChild(kac); }
     })();
 
-    // ── Engagement gesamt (manuell eingebbar) ──
+    // ── Engagement gesamt (pro Plattform, analog zu Reichweite) ──
     (function(){
       var egc=document.createElement('div');egc.className='metric-card';
       var egl=document.createElement('div');egl.className='metric-lbl';egl.textContent='Engagement (letzte 30T)';
       var egv=document.createElement('div');egv.className='metric-val';
       if(isEdit){
-        var egi=document.createElement('input');egi.type='text';egi.value=an.engTotal||'';egi.placeholder='z.B. 1.240';
-        egi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:inherit;font-weight:inherit;width:166px;padding:2px 6px;font-family:inherit';
-        var egdi=document.createElement('input');egdi.type='text';egdi.value=an.engDelta||'';egdi.placeholder='+15%';
-        egdi.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-weight:normal;width:80px;padding:2px 6px;font-family:inherit;margin-top:4px';
-        (function(){egdi.addEventListener('change',function(){an.engDelta=this.value;scheduleAnalyticsSave();});})();
-        (function(){egi.addEventListener('change',function(){
-          var v=this.value.trim();
-          an.engTotal=v;
-          // Auto-recalculate engagement rate
-          var reach=parseVal(String(an.reach||0));
-          var eng=parseVal(v.replace(/,/g,'.'));
-          var lc2=parseVal(String(an.linkClicks||0));if(reach>0&&(eng||lc2)) an.eng=(Math.round((eng+lc2)/reach*10000)/100)+'%';
-          renderAnalyticsPage();
-        });})();
-        egv.appendChild(egi);
+        var stratPlatsE=(cd().strategy&&cd().strategy.plat)||[];
+        if(!stratPlatsE.length){
+          var errDivE=document.createElement('div');
+          errDivE.style.cssText='font-size:10px;color:#EF4444;padding:6px;background:#FEF2F2;border-radius:4px;font-weight:500';
+          errDivE.textContent='Keine Plattformen in der Strategie festgelegt';
+          egv.appendChild(errDivE);
+        } else {
+          if(!an.engByPlat)an.engByPlat={};
+          if(!an.engDeltaByPlat)an.engDeltaByPlat={};
+          var engWrap=document.createElement('div');
+          engWrap.style.cssText='display:flex;flex-direction:column;gap:4px';
+          stratPlatsE.forEach(function(platName){
+            var row=document.createElement('div');
+            row.style.cssText='display:flex;align-items:center;gap:6px;font-size:11px';
+            var lbl=document.createElement('span');
+            lbl.style.cssText='min-width:70px;color:var(--text3);font-size:10px;font-weight:500';
+            lbl.textContent=platName;
+            var inp=document.createElement('input');
+            inp.type='text';
+            inp.value=an.engByPlat[platName]||'';
+            inp.placeholder='0';
+            inp.style.cssText='width:90px;font-size:11px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+            var deltaInp=document.createElement('input');
+            deltaInp.type='text';
+            deltaInp.value=an.engDeltaByPlat[platName]||'';
+            deltaInp.placeholder='±%';
+            deltaInp.style.cssText='width:56px;font-size:10px;padding:3px 5px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;margin:0';
+            var pctSuf=document.createElement('span');
+            pctSuf.textContent='%';pctSuf.style.cssText='font-size:10px;color:var(--text3);margin-left:-2px';
+            (function(p,el,dEl){
+              function recalc(){
+                if(!an.engByPlat)an.engByPlat={};
+                if(!an.engDeltaByPlat)an.engDeltaByPlat={};
+                an.engByPlat[p]=el.value.trim();
+                an.engDeltaByPlat[p]=dEl.value.trim();
+                // Summe
+                var sum=0;
+                Object.keys(an.engByPlat).forEach(function(k){
+                  var v=parseVal(String(an.engByPlat[k]||0));
+                  if(v)sum+=v;
+                });
+                an.engTotal=String(sum);
+                // Mittelwert der Deltas
+                var dSum=0,dCount=0;
+                Object.keys(an.engDeltaByPlat).forEach(function(k){
+                  var dv=String(an.engDeltaByPlat[k]||'').trim();
+                  if(dv!==''){
+                    var n=parseFloat(dv.replace(',','.').replace(/[^0-9.-]/g,''));
+                    if(!isNaN(n)){dSum+=n;dCount++;}
+                  }
+                });
+                if(dCount>0){
+                  var avg=Math.round((dSum/dCount)*10)/10;
+                  an.engDelta=(avg>=0?'+':'')+avg+'%';
+                } else {
+                  an.engDelta='';
+                }
+                // Engagement Rate neu berechnen
+                var reach=parseVal(String(an.reach||0));
+                var lc2=parseVal(String(an.linkClicks||0));
+                if(reach>0)an.eng=(Math.round((sum+lc2)/reach*10000)/100)+'%';
+                else an.eng='0%';
+                // Engagement-nach-Plattform-Kachel aktualisieren
+                renderEngPlatChart();
+                scheduleAnalyticsSave();
+              }
+              el.addEventListener('input',recalc);
+              dEl.addEventListener('input',recalc);
+            })(platName,inp,deltaInp);
+            row.appendChild(lbl);row.appendChild(inp);row.appendChild(deltaInp);row.appendChild(pctSuf);
+            engWrap.appendChild(row);
+          });
+          egv.appendChild(engWrap);
+        }
       }else{
         egv.textContent=fmtThousands(an.engTotal||'–');
-        
       }
       egc.appendChild(egl);egc.appendChild(egv);
-      if(isEdit){var egdDiv=document.createElement('div');egdDiv.className='metric-delta delta-up';egdDiv.style.marginTop='4px';egdDiv.appendChild(egdi);egc.appendChild(egdDiv);}
       if(!isEdit&&an.engDelta){var egd2=document.createElement('div');egd2.className='metric-delta delta-up';egd2.textContent=fmtDelta(an.engDelta);egc.appendChild(egd2);}
+      if(isEdit&&an.engDelta){var egd3=document.createElement('div');egd3.className='metric-delta delta-up';egd3.style.marginTop='4px';egd3.textContent=fmtDelta(an.engDelta)+' (Ø)';egd3.title='Durchschnitt der Plattform-Deltas';egc.appendChild(egd3);}
       var bvKcEg=getBlockVis().kpiCards||{};
       var egVis=bv.kpi_eng!==false;
       if(!egVis){
@@ -5693,11 +5819,22 @@ function renderAnalyticsPage(){
       gc.appendChild(gt);gc.appendChild(fb);gc.appendChild(fl);gc.appendChild(ge);tc.appendChild(gc);
     }
     if(bv.plat!==false||isAgency){
+      // Beide Plattform-Kacheln in 2-Spalten-Grid
+      var platGrid=document.createElement('div');
+      platGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0';
+      // Reichweite nach Plattform
       var pc=document.createElement('div');pc.className='card';
       if(isAgency&&bv.plat===false)pc.classList.add('kpi-card-hidden-agency');
       var pt=document.createElement('div');pt.className='card-title';pt.textContent='Reichweite nach Plattform';
       var pb=document.createElement('div');pb.id='plat-bars-container';pb.style.marginTop='8px';
-      pc.appendChild(pt);pc.appendChild(pb);tc.appendChild(pc);
+      pc.appendChild(pt);pc.appendChild(pb);
+      // Engagement nach Plattform
+      var ec=document.createElement('div');ec.className='card';
+      var et=document.createElement('div');et.className='card-title';et.textContent='Engagement nach Plattform';
+      var eb=document.createElement('div');eb.id='eng-plat-chart';eb.style.cssText='margin-top:8px;display:flex;align-items:center;justify-content:center;min-height:180px';
+      ec.appendChild(et);ec.appendChild(eb);
+      platGrid.appendChild(pc);platGrid.appendChild(ec);
+      tc.appendChild(platGrid);
     }
     container.appendChild(tc);
   }
@@ -5845,7 +5982,7 @@ function renderAnalyticsPage(){
   container.appendChild(bcCard);
   } // end bcVis
 
-  setTimeout(function(){buildFollowerChart();renderPlatBars();},0);
+  setTimeout(function(){buildFollowerChart();renderPlatBars();renderEngPlatChart();},0);
   // Strategie-Card für Kunden am Ende (aufklappbar, mit Kacheln)
   if(ROLE==='client'){
     var existStrat=document.getElementById('client-strat-card');
