@@ -952,6 +952,48 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
       </div>
 
       <!-- STRATEGIE -->
+      <!-- ONBOARDING (Agentur) -->
+      <div class="page" id="page-onboarding">
+        <div class="page-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>Onboarding</span>
+          <span id="ob-progress-pct" style="font-size:11px;color:var(--text3);font-weight:500"></span>
+        </div>
+        <!-- Onboarding-Schritte -->
+        <div class="card">
+          <div class="card-title">Onboarding-Schritte</div>
+          <div id="agency-onboarding-steps"></div>
+          <div id="ob-step-form" style="display:flex;align-items:center;gap:8px;margin-top:10px" class="agency-only">
+            <input type="text" id="ob-new-step" placeholder="Neuen Schritt hinzufügen…" style="flex:1;margin:0">
+            <button class="btn-primary" onclick="addObStep()">＋ Hinzufügen</button>
+          </div>
+        </div>
+        <!-- Onboarding-Fragen (Verwaltung) -->
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Onboarding-Fragen an den Kunden</span>
+            <span id="q-count-note" style="font-size:10px;color:var(--text3);font-weight:500"></span>
+          </div>
+          <div id="q-list" style="margin-bottom:8px"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+            <input type="text" id="q-new-input" placeholder="Neue Frage hinzufügen…" style="flex:1;margin:0">
+            <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);cursor:pointer;user-select:none">
+              <input type="checkbox" id="q-new-checkbox" style="margin:0"> Ja/Nein
+            </label>
+            <button class="btn-primary" onclick="addQuestion()">＋ Hinzufügen</button>
+          </div>
+        </div>
+        <!-- Antworten des Kunden -->
+        <div class="card">
+          <div class="card-title">Antworten des Kunden</div>
+          <div id="agency-q-answers"></div>
+        </div>
+        <!-- Zugangsdaten Social Media -->
+        <div class="card">
+          <div class="card-title">Zugangsdaten Social Media</div>
+          <div id="agency-social-creds"></div>
+        </div>
+      </div>
+
       <div class="page" id="page-strategy">
         <div class="page-title">Content-Strategie
           <button id="strat-edit-btn" class="btn-outline agency-only" onclick="toggleStratEdit()" style="margin-left:auto;font-size:11px;padding:5px 12px">✎ Bearbeiten</button>
