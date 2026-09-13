@@ -959,12 +959,12 @@ function hideLoading(){var el=document.getElementById('sb-loading');if(el)el.sty
           <span id="ob-progress-pct" style="font-size:11px;color:var(--text3);font-weight:500"></span>
         </div>
         <!-- Onboarding-Schritte -->
-        <div class="card">
+        <div class="card" style="padding-bottom:60px;position:relative">
           <div class="card-title">Onboarding-Schritte</div>
           <div id="agency-onboarding-steps"></div>
-          <div id="ob-step-form" style="display:flex;align-items:center;gap:8px;margin-top:10px" class="agency-only">
+          <div id="ob-step-form" style="display:flex;align-items:center;gap:8px;margin-top:24px;position:absolute;left:20px;right:20px;bottom:16px" class="agency-only">
             <input type="text" id="ob-new-step" placeholder="Neuen Schritt hinzufügen…" style="flex:1;margin:0">
-            <button class="btn-primary" onclick="addObStep()" style="margin-top:0.5cm">＋ Hinzufügen</button>
+            <button class="btn-primary" onclick="addObStep()">＋ Hinzufügen</button>
           </div>
         </div>
         <!-- Onboarding-Fragen (Verwaltung) -->
@@ -4441,6 +4441,19 @@ function ensureFixedSteps(){
     var moved=d.obSteps.splice(i2,1)[0];
     d.obSteps.splice(i3,0,moved);
   }
+  // Auto-Check: Fixed Steps abhaken wenn Daten vollständig
+  var strat = (d.strategy && d.strategy.plat) || [];
+  var plats = strat.length ? PLATFORMS.filter(function(p){ return strat.indexOf(p.label) !== -1; }) : PLATFORMS;
+  var sc = d.socialCreds || {};
+  var credsOk = plats.length > 0 && plats.every(function(p){
+    return sc[p.id] && sc[p.id].email && sc[p.id].pass;
+  });
+  var qs = d.questions || [];
+  var questOk = qs.length > 0 && qs.every(function(q,i){ return d.answers && d.answers[i] && d.answers[i].trim(); });
+  d.obSteps.forEach(function(step){
+    if(step.id === 'fixed-2') step.done = credsOk;
+    if(step.id === 'fixed-3') step.done = questOk;
+  });
 }
 
 function renderObPanel(){
