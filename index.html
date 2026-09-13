@@ -1252,7 +1252,7 @@ function exportMonthlyReport(){
   var body = '<div class="page-wrap">';
 
   // Titel oben
-  body += '<div style="text-align:center;font-size:11px;font-weight:600;color:#6b7280;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px">Social-Media Monatsreport</div>';
+  body += '<div style="text-align:right;font-size:22px;font-weight:800;color:#1A1D2E;letter-spacing:-.01em;margin-bottom:16px">Social-Media Monatsreport</div>';
 
   // Header
   body += '<div class="header" style="position:relative">'
@@ -1470,7 +1470,16 @@ function isPastDate(d){var n=normalizeDate(d);return n?n<getTodayISO():false;}
 function sortRows(rows){return rows.slice().sort(function(a,b){var da=normalizeDate(a.date)||'9999';var db=normalizeDate(b.date)||'9999';return da<db?-1:da>db?1:0;});}
 function getCustomerKeys(){return Object.keys(DATA);}
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function syncDropdowns(){var dd=document.getElementById('cust-dropdown');if(dd)dd.innerHTML=getCustomerKeys().map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');var shd=document.getElementById('sh-customer');if(shd)shd.innerHTML=getCustomerKeys().map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');var shmd=document.getElementById('sh-modal-customer');if(shmd)shmd.innerHTML=shd?shd.innerHTML:'';}
+function syncDropdowns(){
+  // Abgeschlossene Kunden aus allen Auswahlfeldern ausblenden
+  var activeKeys=getCustomerKeys().filter(function(k){return DATA[k]&&DATA[k].status!=='abgeschlossen';});
+  // Wenn aktueller Kunde abgeschlossen ist, trotzdem in Liste behalten (damit die aktuelle Auswahl gültig bleibt)
+  if(ACTIVE_CUSTOMER&&activeKeys.indexOf(ACTIVE_CUSTOMER)===-1&&DATA[ACTIVE_CUSTOMER])activeKeys.unshift(ACTIVE_CUSTOMER);
+  var opts=activeKeys.map(function(k){return'<option value="'+k+'"'+(k===ACTIVE_CUSTOMER?' selected':'')+'>'+DATA[k].name+'</option>';}).join('');
+  var dd=document.getElementById('cust-dropdown');if(dd)dd.innerHTML=opts;
+  var shd=document.getElementById('sh-customer');if(shd)shd.innerHTML=opts;
+  var shmd=document.getElementById('sh-modal-customer');if(shmd)shmd.innerHTML=opts;
+}
 function chk(checked,onclick){var cls='todo-chk'+(checked?' done':'');return'<div class="'+cls+'" onclick="'+onclick+'"></div>';}
 function showToast(msg){var t=document.getElementById('toast');var tm=document.getElementById('toast-msg');if(tm)tm.textContent=msg;if(t){t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3000);}}
 
@@ -2019,10 +2028,14 @@ function agencyOpenShoot(custId){
 function toggleDoneCustomers(){SHOW_DONE_CUSTOMERS=!SHOW_DONE_CUSTOMERS;renderAgencyOverview();}
 async function setCustomerStatus(k,status){
   DATA[k]._status=status;
+  // Synchron mit dem alten 'status'-Feld für Dropdown-Filter
+  DATA[k].status=(status==='done'?'abgeschlossen':'');
   var sb=getSB();
-  await sb.from('customers').update({status:status}).eq('id',k);
+  await sb.from('customers').update({status:DATA[k].status}).eq('id',k);
   renderAgencyOverview();
   renderCredList();
+  syncDropdowns();
+  updateTodoBadge();
 }
 async function renderAgencyOverview(){var kacheln=document.getElementById('kunden-kacheln');if(!kacheln)return;var today=getTodayISO();
   // Agentur-Todos aus lokalem DATA-Objekt (konsistent mit Todos-Seite)
@@ -3743,7 +3756,7 @@ function _renderTodoLists(open,done2,isAgency,clientOnly){
     (isAgency?'<span style="font-size:10px;color:var(--text3)">'+al+'</span>':'')+
     '</div></div>'+
     '<span class="priority-pill '+(isDone?'p-done':pCls(t.prio))+'">'+(isDone?'Erledigt':pLbl(t.prio))+'</span>'+
-    (isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px">'+(!isDone&&!t.isReset&&!t._autoKey?'<button class="btn-icon" onclick="startEdit('+i+',\''+custId+'\')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="deleteTodo('+i+',\''+custId+'\')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+
+    (isAgency?'<div style="display:flex;gap:2px;flex-shrink:0;margin-left:4px" onclick="event.stopPropagation()">'+(!isDone&&!t.isReset&&!t._autoKey?'<button class="btn-icon" onclick="event.stopPropagation();startEdit('+i+',\''+custId+'\')" title="Bearbeiten">✎</button>':'')+'<button class="btn-icon del" onclick="event.stopPropagation();deleteTodo('+i+',\''+custId+'\')" title="Löschen"><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 7 5 17 15 17 15 7"/><path d="M3 7h14M8 7V4h4v3"/></svg></button></div>':'')+
     '</div>';
   }
 
