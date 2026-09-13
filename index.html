@@ -3329,6 +3329,11 @@ function deleteTodo(idx,custId){
   pushUndo();
   var td=(custId&&DATA[custId]?DATA[custId]:cd());
   var t=td.todos[idx];
+  // Auto-Todo: dismissed-Marker setzen damit es nicht neu generiert wird
+  if(t&&t._autoKey){
+    if(!td._dismissedAutoTodos)td._dismissedAutoTodos={};
+    td._dismissedAutoTodos[t._autoKey]=Date.now();
+  }
   // Direkt aus DB löschen (funktioniert für alle Rollen inkl. Kunden)
   if(t&&t._id){
     getSB().from('todos').delete().eq('id',t._id).then(function(){});
@@ -6289,7 +6294,8 @@ function checkMissingCaptionAndLink(){
       if(!row.caption||!row.caption.trim()){
         var captKey='autocap|'+custId+'|'+date+'|'+title;
         var exists=(d.todos||[]).some(function(t){return t._autoKey===captKey;});
-        if(!exists){
+        var dismissed=d._dismissedAutoTodos&&d._dismissedAutoTodos[captKey];
+        if(!exists&&!dismissed){
           if(!d.todos)d.todos=[];
           d.todos.unshift({text:'Caption für „'+title+'“ fehlt noch',due:date,prio:'high',assign:'agency',done:false,createdAt:Date.now(),_autoKey:captKey});
         }
@@ -6298,7 +6304,8 @@ function checkMissingCaptionAndLink(){
       if(!row.link||!row.link.trim()){
         var linkKey='autolink|'+custId+'|'+date+'|'+title;
         var existsL=(d.todos||[]).some(function(t){return t._autoKey===linkKey;});
-        if(!existsL){
+        var dismissedL=d._dismissedAutoTodos&&d._dismissedAutoTodos[linkKey];
+        if(!existsL&&!dismissedL){
           if(!d.todos)d.todos=[];
           d.todos.unshift({text:'Drive-Link für „'+title+'“ fehlt noch',due:date,prio:'high',assign:'agency',done:false,createdAt:Date.now(),_autoKey:linkKey});
         }
@@ -6446,7 +6453,14 @@ function sbRowToData(cust,todos,shoots,analytics,content,ob,strat){
   base.answers=(ob&&ob.answers)||{};
   base.socialCreds=(ob&&ob.social_creds)||{instagram:{email:'',pass:''},facebook:{email:'',pass:''},linkedin:{email:'',pass:''},tiktok:{email:'',pass:''},youtube:{email:'',pass:''}};
   if(ob&&ob.ob_steps&&ob.ob_steps.length)base.obSteps=ob.ob_steps;
-  base.name=cust.name;base._custId=cust.id;base._slug=cust.slug;base._status=cust.status||'active';base.agencyNote=cust.agency_note||'';base.lastLogin=cust.last_login||null;
+  base.name=cust.name;base._custId=cust.id;base._slug=cust.slug;
+  // Status-Mapping: DB speichert 'abgeschlossen' oder 'active'/leer
+  // _status: intern ('active','paused','done'), status: für Dropdown-Filter ('abgeschlossen' oder '')
+  var rawStatus=cust.status||'';
+  if(rawStatus==='abgeschlossen'||rawStatus==='done'){base._status='done';base.status='abgeschlossen';}
+  else if(rawStatus==='paused'){base._status='paused';base.status='';}
+  else {base._status='active';base.status='';}
+  base.agencyNote=cust.agency_note||'';base.lastLogin=cust.last_login||null;
   return base;
 }
 async function loadAllCustomers(){
