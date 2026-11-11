@@ -1523,8 +1523,26 @@ function getContentSequence(n,ziel){
   return [];
 }
 function getStratArtOpts(ziel){return ART_OPTS.slice(0,6).filter(function(a){return !(ziel==='Bekanntheit'&&a==='Aktivierung');});}
+function getStratPieceCount(st){
+  var n=parseInt(st.pieceCount)||0;if(n)return n;
+  var vals=(st.freq||[]).map(function(x){var m=String(x&&x[1]!==undefined?x[1]:'').match(/^(\d+)\s*x\/Monat$/);return m?parseInt(m[1]):0;}).filter(function(v){return v>0;});
+  if(vals.length&&vals.every(function(v){return v===vals[0];}))return vals[0];
+  return 0;
+}
+function applyFreqToPlatforms(force){
+  var st=cd().strategy;var n=parseInt(st.pieceCount)||0;
+  if(!n){if(force)st.freq=[];return;}
+  st.freq=(st.plat||[]).map(function(p){return [p,n+'x/Monat'];});
+}
+function getStratFreqMap(st){
+  var f=st.spezFreq||{};
+  if(ART_OPTS.slice(0,6).some(function(a){return f[a]!==undefined;}))return f;
+  var m={};ART_OPTS.slice(0,6).forEach(function(a){m[a]=0;});
+  getContentSequence(getStratPieceCount(st),st.ziel==='Bekanntheit'?'Bekanntheit':'Kundengewinnung').forEach(function(a){m[a]++;});
+  return m;
+}
 function applyStratTemplate(){
-  var st=cd().strategy;var n=parseInt(st.pieceCount)||0;if(!n)return;
+  var st=cd().strategy;var n=getStratPieceCount(st);if(!n)return;
   var seq=getContentSequence(n,st.ziel==='Bekanntheit'?'Bekanntheit':'Kundengewinnung');
   if(!st.spezFreq)st.spezFreq={};
   ART_OPTS.slice(0,6).forEach(function(a){st.spezFreq[a]=0;});
@@ -3331,7 +3349,7 @@ function saveShoot(){
   var time=getVal('sh-modal-time','sh-time');
   var title=(getVal('sh-modal-title','sh-title')||'').trim();
   var location=(getVal('sh-modal-location','sh-location')||'').trim();
-  var ckey=getVal('sh-modal-customer','sh-customer');if(!title){alert('Bitte einen Titel angeben.');return;}var autoIdeas=[];var stratD=(DATA[ckey]&&DATA[ckey].strategy)?DATA[ckey].strategy:{};var spezF=stratD.spezFreq||{};getStratArtOpts(stratD.ziel==='Bekanntheit'?'Bekanntheit':'Kundengewinnung').forEach(function(opt){var n=(parseInt(spezF[opt])||0)*2;for(var ai=0;ai<n;ai++){autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});}});pushUndo();DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return (a.date||'9999-99-99').localeCompare(b.date||'9999-99-99');});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
+  var ckey=getVal('sh-modal-customer','sh-customer');if(!title){alert('Bitte einen Titel angeben.');return;}var autoIdeas=[];var stratD=(DATA[ckey]&&DATA[ckey].strategy)?DATA[ckey].strategy:{};var spezF=getStratFreqMap(stratD);getStratArtOpts(stratD.ziel==='Bekanntheit'?'Bekanntheit':'Kundengewinnung').forEach(function(opt){var n=(parseInt(spezF[opt])||0)*2;for(var ai=0;ai<n;ai++){autoIdeas.push({thema:'',done:false,spez:opt,desc:'',addedBy:'agency'});}});pushUndo();DATA[ckey].shoots.push({date:date,time:time,title:title,location:location,status:'plan',ideas:autoIdeas,targetPieces:autoIdeas.length||12});DATA[ckey].shoots.sort(function(a,b){return (a.date||'9999-99-99').localeCompare(b.date||'9999-99-99');});var sf=document.getElementById('shoot-add-form');if(sf)sf.style.display='none';var sb=document.getElementById('shoot-add-toggle-btn');if(sb)sb.textContent='+ Drehtermin';sbSaveAllShoots(ckey);if(ckey===ACTIVE_CUSTOMER){renderShootsList();buildCalendar();}renderAgencyOverview();}
 
 
 // ── SHOOT DESCRIPTION ──
@@ -5142,6 +5160,8 @@ function toggleStratEdit() {
     // Audience-Textarea manuell einlesen bevor renderStrategyPage sie überschreibt
     var ta = document.getElementById('strat-audience');
     if (ta) cd().strategy.audience = ta.value;
+    var _pc = getStratPieceCount(cd().strategy);
+    if (_pc > 0) { cd().strategy.pieceCount = _pc; applyFreqToPlatforms(); }
     scheduleSave();
   }
   renderStrategyPage();
@@ -5248,9 +5268,9 @@ function renderStrategyPage() {
   var spezEl=document.getElementById('strat-spez-container');
   if(spezEl){
     spezEl.innerHTML='';
-    var pCount=parseInt(s.pieceCount)||0;
+    var pCount=getStratPieceCount(s);
     var pZiel=(s.ziel==='Bekanntheit')?'Bekanntheit':'Kundengewinnung';
-    var spezFreq=s.spezFreq||{};
+    var spezFreq=getStratFreqMap(s);
     var spezOpts=getStratArtOpts(pZiel);
     var selSt='font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:3px 6px;background:var(--surface2);color:var(--text);font-family:inherit';
     function mkSLbl(t){var l=document.createElement('span');l.style.cssText='font-size:11px;color:var(--text2)';l.textContent=t;return l;}
@@ -5265,17 +5285,17 @@ function renderStrategyPage() {
       ctl.appendChild(zSel);
     }else{ctl.appendChild(mkSVal(pZiel));}
     ctl.appendChild(mkSLbl('Beiträge pro Monat'));
-    if(isEdit){
-      var nSel=document.createElement('select');nSel.style.cssText=selSt;
-      var o0=document.createElement('option');o0.value='0';o0.textContent='–';nSel.appendChild(o0);
-      for(var nn=4;nn<=12;nn++){var on=document.createElement('option');on.value=String(nn);on.textContent=String(nn);if(nn===pCount)on.selected=true;nSel.appendChild(on);}
-      nSel.addEventListener('change',function(){cd().strategy.pieceCount=parseInt(this.value)||0;applyStratTemplate();renderStrategyPage();scheduleSave();});
-      ctl.appendChild(nSel);
+    ctl.appendChild(mkSVal(pCount?String(pCount):'–'));
+    var cntNote=document.createElement('span');
+    cntNote.style.cssText='font-size:10px;color:var(--text3)';
+    cntNote.textContent=pCount?'(aus Frequenz)':'(bei Frequenz festlegen)';
+    ctl.appendChild(cntNote);
+    if(isEdit&&pCount){
       var tplHint=document.createElement('span');
       tplHint.style.cssText='font-size:10px;color:var(--text3)';
-      tplHint.textContent='füllt die Zahlen unten vor (danach änderbar)';
+      tplHint.textContent='· Ziel und Beiträge füllen die Zahlen unten vor (danach änderbar)';
       ctl.appendChild(tplHint);
-    }else{ctl.appendChild(mkSVal(pCount?String(pCount):'–'));}
+    }
     spezEl.appendChild(ctl);
     var sumMonth=0;
     spezOpts.forEach(function(opt){
@@ -5295,8 +5315,9 @@ function renderStrategyPage() {
         inp.value=spezFreq[opt]||0;
         inp.style.cssText='width:52px;font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:3px 6px;background:var(--surface2);color:var(--text);text-align:center';
         (function(o2){inp.addEventListener('change',function(){
-          if(!cd().strategy.spezFreq)cd().strategy.spezFreq={};
-          cd().strategy.spezFreq[o2]=parseInt(this.value)||0;
+          var stx=cd().strategy;
+          if(!ART_OPTS.slice(0,6).some(function(a2){return (stx.spezFreq||{})[a2]!==undefined;})){stx.spezFreq=Object.assign(stx.spezFreq||{},getStratFreqMap(stx));}
+          stx.spezFreq[o2]=parseInt(this.value)||0;
           renderStrategyPage();scheduleSave();
         });})(opt);
         row.appendChild(inp);
@@ -5423,55 +5444,28 @@ function renderStrategyPage() {
         sf.appendChild(hint);
       } else {
         cd().strategy.freq = (cd().strategy.freq || []).filter(function(f){return activePlats.indexOf(f[0])!==-1;});
-        activePlats.forEach(function(p) {
-          var fo = getFreqObj(p);
-          var row = document.createElement('div');
-          row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px';
-          // Platform label
-          var pl2 = document.createElement('span');
-          pl2.style.cssText = 'font-size:11px;color:var(--text2);width:86px;flex-shrink:0;font-weight:500';
-          pl2.textContent = p;
-          row.appendChild(pl2);
-          // Number input
-          var nInp = document.createElement('input');
-          nInp.type = 'number'; nInp.min = '1'; nInp.max = '99';
-          nInp.value = fo.n || '';
-          nInp.placeholder = '0';
-          nInp.style.cssText = 'width:52px;margin:0;font-size:11px;padding:5px 8px;text-align:center';
-          nInp.setAttribute('data-plat-n', p);
-          // Unit toggle buttons
-          var unitWrap = document.createElement('div');
-          unitWrap.style.cssText = 'display:flex;gap:0;border:1px solid var(--border2);border-radius:6px;overflow:hidden;flex-shrink:0';
-          ['Woche','Monat'].forEach(function(u) {
-            var btn = document.createElement('button');
-            btn.textContent = u;
-            btn.setAttribute('data-plat-u', p);
-            btn.setAttribute('data-unit', u);
-            btn.style.cssText = 'padding:4px 9px;font-size:10px;font-family:inherit;border:none;cursor:pointer;transition:all .15s;' + (fo.unit===u ? 'background:var(--accent);color:#fff;font-weight:600' : 'background:var(--surface2);color:var(--text2)');
-            btn.onclick = function() {
-              var plat = this.getAttribute('data-plat-u');
-              var unit = this.getAttribute('data-unit');
-              var nEl = document.querySelector('[data-plat-n="'+plat+'"]');
-              setFreqObj(plat, {n: nEl ? nEl.value : '', unit: unit});
-              renderStrategyPage();
-            };
-            unitWrap.appendChild(btn);
-          });
-          // x/ label
-          var xLbl = document.createElement('span');
-          xLbl.style.cssText = 'font-size:11px;color:var(--text3);flex-shrink:0';
-          xLbl.textContent = 'x/';
-          nInp.addEventListener('change', function() {
-            var plat = this.getAttribute('data-plat-n');
-            var uBtn = document.querySelector('[data-plat-u="'+plat+'"][style*="var(--accent)"]');
-            var unit = uBtn ? uBtn.getAttribute('data-unit') : 'Woche';
-            setFreqObj(plat, {n: this.value, unit: unit});
-          });
-          row.appendChild(nInp);
-          row.appendChild(xLbl);
-          row.appendChild(unitWrap);
-          sf.appendChild(row);
+        var fRow = document.createElement('div');
+        fRow.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+        var fLbl = document.createElement('span');
+        fLbl.style.cssText = 'font-size:11px;color:var(--text2);font-weight:500';
+        fLbl.textContent = 'Beiträge pro Monat';
+        var fSel = document.createElement('select');
+        fSel.style.cssText = 'font-size:11px;border:1px solid var(--border2);border-radius:4px;padding:4px 8px;background:var(--surface2);color:var(--text);font-family:inherit;margin:0';
+        var fCur = getStratPieceCount(s);
+        var fo0 = document.createElement('option'); fo0.value = '0'; fo0.textContent = '–'; fSel.appendChild(fo0);
+        for (var fn = 4; fn <= 12; fn++) { var fon = document.createElement('option'); fon.value = String(fn); fon.textContent = String(fn); if (fn === fCur) fon.selected = true; fSel.appendChild(fon); }
+        fSel.addEventListener('change', function() {
+          cd().strategy.pieceCount = parseInt(this.value) || 0;
+          applyFreqToPlatforms(true);
+          applyStratTemplate();
+          renderStrategyPage();
+          scheduleSave();
         });
+        var fHint = document.createElement('span');
+        fHint.style.cssText = 'font-size:10px;color:var(--text3)';
+        fHint.textContent = 'gilt für alle ausgewählten Plattformen (' + activePlats.join(', ') + ')';
+        fRow.appendChild(fLbl); fRow.appendChild(fSel); fRow.appendChild(fHint);
+        sf.appendChild(fRow);
       }
     } else {
       sf.innerHTML = (s.freq || []).map(function(f) {
@@ -6387,7 +6381,7 @@ function renderAnalyticsPage(){
     (s.freq||[]).forEach(function(f2){
       var badge=document.createElement('span');
       badge.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)';
-      badge.textContent=f2;fDiv.appendChild(badge);
+      badge.textContent=Array.isArray(f2)?f2[0]+': '+f2[1]:f2;fDiv.appendChild(badge);
     });
     if(!s.freq||!s.freq.length)fDiv.textContent='–';
     sgrid.appendChild(mkKachel('Frequenz',fDiv));
